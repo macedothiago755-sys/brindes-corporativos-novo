@@ -18,14 +18,34 @@ export default async function ProductsPage({
 }) {
   const { categoria, metodo } = await searchParams;
 
-  const products = await prisma.product.findMany({
-    where: {
-      ...(categoria ? { category: { slug: categoria } } : {}),
-      ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
-    },
-    include: { category: true },
-    orderBy: { createdAt: "desc" },
-  });
+  let categoryIds: string[] | undefined;
+  if (categoria) {
+    const category = await prisma.category.findUnique({
+      where: { slug: categoria },
+      include: { children: true },
+    });
+    if (category) {
+      categoryIds = category.children.length
+        ? [category.id, ...category.children.map((c) => c.id)]
+        : [category.id];
+    }
+  }
+
+  const [products, topCategories] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+        ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
+      },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.category.findMany({
+      where: { parentId: null },
+      include: { children: { orderBy: { name: "asc" } } },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <div className="container-premium py-16">
@@ -35,7 +55,7 @@ export default async function ProductsPage({
       </p>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <FilterSidebar />
+        <FilterSidebar categories={topCategories} />
 
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
           {products.map((product) => (

@@ -18,7 +18,8 @@ export function Footer() {
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li><Link href="/produtos?categoria=escritorio">Escritório</Link></li>
             <li><Link href="/produtos?categoria=tecnologia">Tecnologia</Link></li>
-            <li><Link href="/produtos?categoria=kits-corporativos">Kits Corporativos</Link></li>
+            <li><Link href="/produtos?categoria=kit-churrasco">Kit Churrasco</Link></li>
+            <li><Link href="/produtos?categoria=canecas">Canecas</Link></li>
             <li><Link href="/produtos?categoria=sustentaveis">Sustentáveis</Link></li>
           </ul>
         </div>
@@ -26,6 +27,7 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold">Empresa</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <li><Link href="/blog">Blog</Link></li>
             <li><Link href="/#diferenciais">Diferenciais</Link></li>
             <li><Link href="/#como-funciona">Como funciona</Link></li>
             <li><Link href="/admin/login">Acesso administrativo</Link></li>

@@ -6,11 +6,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const banners = [
+  { src: "/banners/banner-7-copa1-1920x600.jpg", alt: "Seleção de brindes para a Copa do Mundo" },
   { src: "/banners/banner-1-armband-1920x600.jpg", alt: "Braçadeira esportiva personalizada" },
   { src: "/banners/banner-2-bolsa-1920x600.jpg", alt: "Bolsa em tela PVC personalizada" },
   { src: "/banners/banner-3-garrafa-1920x600.jpg", alt: "Garrafa térmica 600ml personalizada" },
+  { src: "/banners/banner-6-churrasco-1920x600.jpg", alt: "Kit churrasco personalizado" },
   { src: "/banners/banner-4-squeeze-1920x600.jpg", alt: "Squeeze dobrável em TPU 500ml" },
+  { src: "/banners/banner-9-copa2-1920x600.jpg", alt: "Tudo para curtir a Copa do Mundo" },
   { src: "/banners/banner-5-caderno-1920x600.jpg", alt: "Caderno ecológico com caneta" },
+  { src: "/banners/banner-8-frasqueira-1920x600.jpg", alt: "Frasqueira plástica 10L" },
 ];
 
 export function BannerCarousel() {

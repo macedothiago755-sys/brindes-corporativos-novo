@@ -4,16 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type Option = { label: string; value: string };
-
-const categories: Option[] = [
-  { label: "Escritório", value: "escritorio" },
-  { label: "Tecnologia", value: "tecnologia" },
-  { label: "Utilidades", value: "utilidades" },
-  { label: "Eventos", value: "eventos" },
-  { label: "Kits Corporativos", value: "kits-corporativos" },
-  { label: "Sustentáveis", value: "sustentaveis" },
-  { label: "Premium", value: "premium" },
-];
+export type CategoryOption = { name: string; slug: string; children: { name: string; slug: string }[] };
 
 const methods: Option[] = [
   { label: "Gravação a laser", value: "GRAVACAO_LASER" },
@@ -23,7 +14,7 @@ const methods: Option[] = [
   { label: "Transfer", value: "TRANSFER" },
 ];
 
-export function FilterSidebar() {
+export function FilterSidebar({ categories }: { categories: CategoryOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -45,18 +36,35 @@ export function FilterSidebar() {
     <aside className="space-y-8">
       <div>
         <p className="text-sm font-semibold">Categoria</p>
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-3 flex max-h-[480px] flex-col gap-1 overflow-y-auto pr-2">
           {categories.map((c) => (
-            <button
-              key={c.value}
-              onClick={() => toggleParam("categoria", c.value)}
-              className={cn(
-                "rounded-md px-3 py-2 text-left text-sm hover:bg-muted",
-                activeCategory === c.value && "bg-foreground text-background"
+            <div key={c.slug}>
+              <button
+                onClick={() => toggleParam("categoria", c.slug)}
+                className={cn(
+                  "w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
+                  activeCategory === c.slug && "bg-foreground text-background"
+                )}
+              >
+                {c.name}
+              </button>
+              {c.children.length > 0 && (
+                <div className="ml-3 flex flex-col gap-1 border-l border-border pl-2">
+                  {c.children.map((child) => (
+                    <button
+                      key={child.slug}
+                      onClick={() => toggleParam("categoria", child.slug)}
+                      className={cn(
+                        "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
+                        activeCategory === child.slug && "bg-foreground text-background"
+                      )}
+                    >
+                      {child.name}
+                    </button>
+                  ))}
+                </div>
               )}
-            >
-              {c.label}
-            </button>
+            </div>
           ))}
         </div>
       </div>

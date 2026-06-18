@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/prisma";
 
-const categories = [
-  { name: "Escritório", slug: "escritorio" },
-  { name: "Tecnologia", slug: "tecnologia" },
-  { name: "Utilidades", slug: "utilidades" },
-  { name: "Eventos", slug: "eventos" },
-  { name: "Kits Corporativos", slug: "kits-corporativos" },
-  { name: "Sustentáveis", slug: "sustentaveis" },
-  { name: "Premium", slug: "premium" },
-];
+export async function CategoriesSection() {
+  const categories = await prisma.category.findMany({
+    where: { parentId: null },
+    orderBy: { name: "asc" },
+  });
 
-export function CategoriesSection() {
   return (
     <section className="container-premium py-20">
       <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Categorias principais</h2>
@@ -21,7 +17,7 @@ export function CategoriesSection() {
           <Link
             key={c.slug}
             href={`/produtos?categoria=${c.slug}`}
-            className="flex aspect-square flex-col items-center justify-center rounded-xl border border-border bg-muted text-center text-sm font-medium transition-colors hover:border-accent"
+            className="flex aspect-square flex-col items-center justify-center rounded-xl border border-border bg-muted p-2 text-center text-sm font-medium transition-colors hover:border-accent"
           >
             {c.name}
           </Link>
