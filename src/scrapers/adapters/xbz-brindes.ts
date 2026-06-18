@@ -27,11 +27,14 @@ export const xbzBrindesAdapter: SupplierAdapter = {
     // Página de detalhe do produto
     nameSelector: "p.produto-nome",
     codeSelector: "#item_referencia",
-    shortDescriptionSelector: ".caracas .desc:first-child .desc-sub",
-    longDescriptionSelector: ".caracas .desc:first-child .desc-sub",
+    shortDescriptionSelector: ".caracs .desc:first-child .desc-sub",
+    longDescriptionSelector: ".caracs .desc:first-child .desc-sub",
     mainImageSelector: ".detalhe-img img.media-object, .detalhe-img .js-imagemprincipal img",
-    galleryImageSelector: ".min_detalhe_img img.img_detalhe",
+    // Restrito a imagens dentro dos links de miniatura: o bloco "#__bt360"
+    // (imagem 360°, sem valor de catálogo) também fica dentro de
+    // ".min_detalhe_img" e usa a mesma classe "img_detalhe".
+    galleryImageSelector: ".min_detalhe_img > a > img.img_detalhe",
     // Cada bloco ".desc" (exceto o primeiro, que é a descrição) é um par "Atributo : Valor".
-    attributeRowSelector: ".caracas .desc:not(:first-child)",
+    attributeRowSelector: ".caracs .desc:not(:first-child)",
   },
 };
