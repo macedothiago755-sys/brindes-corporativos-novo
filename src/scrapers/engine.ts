@@ -94,6 +94,12 @@ function extractAttributes(
     dimensões: "dimensao",
     medidas: "dimensao",
     tamanho: "dimensao",
+    altura: "dimensao",
+    largura: "dimensao",
+    comprimento: "dimensao",
+    profundidade: "dimensao",
+    diametro: "dimensao",
+    diâmetro: "dimensao",
     peso: "peso",
     weight: "peso",
     capacidade: "capacidade",
@@ -118,15 +124,19 @@ function extractAttributes(
     if (!value) return;
 
     const matchedKey = Object.keys(keywordMap).find((k) => label.includes(k));
-    const fieldKey = matchedKey ? keywordMap[matchedKey] : label.replace(/\s+/g, "_");
+    const category = matchedKey ? keywordMap[matchedKey] : label.replace(/\s+/g, "_");
 
     let finalValue = value;
-    if (fieldKey === "cor") finalValue = normalizeColor(value);
-    if (fieldKey === "dimensao" || fieldKey === "peso" || fieldKey === "capacidade") {
+    if (category === "cor") finalValue = normalizeColor(value);
+    if (category === "dimensao" || category === "peso" || category === "capacidade") {
       finalValue = normalizeDimensions(value);
     }
 
-    result[fieldKey] = finalValue;
+    // Usa o rótulo original como chave (evita que múltiplas medidas, ex:
+    // "Altura"/"Largura"/"Diâmetro", se sobrescrevam por caírem na mesma
+    // categoria "dimensao").
+    const key = label.replace(/\s+/g, "_");
+    result[key] = finalValue;
   });
 
   return result;

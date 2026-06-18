@@ -1,5 +1,6 @@
 import type { SupplierAdapter } from "../types";
 import { exemploGenericoAdapter } from "./exemplo-generico";
+import { xbzBrindesAdapter } from "./xbz-brindes";
 
 /**
  * Registro central de adapters. Para adicionar um novo fornecedor:
@@ -8,6 +9,7 @@ import { exemploGenericoAdapter } from "./exemplo-generico";
  */
 export const supplierAdapters: Record<string, SupplierAdapter> = {
   [exemploGenericoAdapter.key]: exemploGenericoAdapter,
+  [xbzBrindesAdapter.key]: xbzBrindesAdapter,
 };
 
 export function getAdapter(key: string): SupplierAdapter | undefined {
