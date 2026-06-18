@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
       telefone: data.telefone,
       cidade: data.cidade,
       observacoes: data.observacoes,
+      objetivo: data.objetivo,
+      prazo: data.prazo,
       items: {
         create: [
           {

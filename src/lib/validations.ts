@@ -12,6 +12,8 @@ export const quoteSchema = z.object({
   telefone: z.string().min(8, "Telefone inválido"),
   cidade: z.string().optional(),
   observacoes: z.string().max(2000).optional(),
+  objetivo: z.string().optional(),
+  prazo: z.string().optional(),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;

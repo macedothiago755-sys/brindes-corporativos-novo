@@ -27,6 +27,21 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Brindes Corporativos",
+  url: "https://www.brindescorporativos.com.br",
+  description:
+    "Especialistas em brindes corporativos personalizados para empresas: catálogo inteligente, orçamento sob medida e atendimento dedicado.",
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "Vendas",
+    email: "comercial@brindescorporativos.com",
+    areaServed: "BR",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,6 +49,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: "window.dataLayer = window.dataLayer || [];" }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

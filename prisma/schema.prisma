@@ -68,6 +68,7 @@ model Product {
   features               String[]
   materials              String[]
   colors                 String[]
+  idealFor               String[]
   customizationMethods   CustomizationMethod[]
   images                  String[]
   minQty                 Int                   @default(50)
@@ -92,6 +93,8 @@ model Quote {
   telefone        String
   cidade          String?
   observacoes     String?
+  objetivo        String?
+  prazo           String?
   status          QuoteStatus  @default(NOVO)
   items           QuoteItem[]
   attachments     Attachment[]
