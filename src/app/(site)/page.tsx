@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { Hero } from "@/components/site/hero";
+import { BannerCarousel } from "@/components/site/banner-carousel";
+import { PromoGridSection } from "@/components/site/promo-grid";
 import { ProductCard } from "@/components/site/product-card";
 import {
   CategoriesSection,
@@ -21,8 +22,9 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
+      <BannerCarousel />
       <CategoriesSection />
+      <PromoGridSection />
 
       <section className="container-premium py-20">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Produtos em destaque</h2>
