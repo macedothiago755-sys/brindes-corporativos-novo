@@ -34,6 +34,7 @@ export default async function ProductsPage({
   const [products, topCategories] = await Promise.all([
     prisma.product.findMany({
       where: {
+        status: "ATIVO",
         ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
         ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
       },

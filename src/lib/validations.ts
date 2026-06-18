@@ -17,3 +17,41 @@ export const quoteSchema = z.object({
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
+
+const csvToArray = (value: unknown) =>
+  String(value ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+const optionalNumber = z.coerce.number().nonnegative().optional().or(z.literal("").transform(() => undefined));
+
+export const productSchema = z.object({
+  name: z.string().min(2, "Informe o nome do produto"),
+  sku: z.string().optional(),
+  supplierCode: z.string().optional(),
+  brand: z.string().optional(),
+  status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]),
+  categoryId: z.string().min(1, "Selecione uma categoria"),
+  description: z.string().min(10, "A descrição completa é obrigatória"),
+  shortDescription: z.string().optional(),
+  benefits: z.preprocess(csvToArray, z.array(z.string())),
+  features: z.preprocess(csvToArray, z.array(z.string())),
+  materials: z.preprocess(csvToArray, z.array(z.string())),
+  colors: z.preprocess(csvToArray, z.array(z.string())),
+  price: optionalNumber,
+  promoPrice: optionalNumber,
+  saleUnit: z.string().optional(),
+  minQty: z.coerce.number().int().min(1).default(50),
+  leadTimeDays: z.coerce.number().int().min(0).default(15),
+  shippingDays: optionalNumber,
+  dimensions: z.string().optional(),
+  printArea: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  images: z.array(z.string()).default([]),
+  attributeNames: z.array(z.string()).default([]),
+  attributeValues: z.array(z.string()).default([]),
+});
+
+export type ProductInput = z.infer<typeof productSchema>;

@@ -9,7 +9,14 @@ datasource db {
 
 enum Role {
   ADMIN
-  SALES
+  OPERADOR
+  VISUALIZADOR
+}
+
+enum ProductStatus {
+  ATIVO
+  RASCUNHO
+  INDISPONIVEL
 }
 
 enum QuoteStatus {
@@ -63,58 +70,85 @@ model Category {
 }
 
 model Post {
-  id            String   @id @default(cuid())
-  title         String
-  slug          String   @unique
-  excerpt       String
-  content       String
-  coverImage    String
-  tags          String[]
-  publishedAt   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String
+  coverImage  String
+  tags        String[]
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Product {
-  id                     String                @id @default(cuid())
-  name                   String
-  slug                   String                @unique
-  description            String
-  features               String[]
-  materials              String[]
-  colors                 String[]
-  idealFor               String[]
-  customizationMethods   CustomizationMethod[]
-  images                  String[]
-  minQty                 Int                   @default(50)
-  leadTimeDays           Int                   @default(15)
-  dimensions             String?
-  printArea              String?
-  sustainable            Boolean               @default(false)
-  premium                Boolean               @default(false)
-  featured               Boolean               @default(false)
-  categoryId             String
-  category               Category              @relation(fields: [categoryId], references: [id])
-  quoteItems             QuoteItem[]
-  createdAt              DateTime              @default(now())
-  updatedAt              DateTime              @updatedAt
+  id                   String                @id @default(cuid())
+  name                 String
+  slug                 String                @unique
+  sku                  String?               @unique
+  supplierCode         String?
+  brand                String?
+  status               ProductStatus         @default(RASCUNHO)
+  description          String
+  shortDescription     String?
+  benefits             String[]
+  features             String[]
+  materials            String[]
+  colors               String[]
+  idealFor             String[]
+  customizationMethods CustomizationMethod[]
+  images               String[]
+  price                Float?
+  promoPrice           Float?
+  saleUnit             String?               @default("unidade")
+  minQty               Int                   @default(50)
+  leadTimeDays         Int                   @default(15)
+  shippingDays         Int?
+  dimensions           String?
+  printArea            String?
+  metaTitle            String?
+  metaDescription      String?
+  sustainable          Boolean               @default(false)
+  premium              Boolean               @default(false)
+  featured             Boolean               @default(false)
+  categoryId           String
+  category             Category              @relation(fields: [categoryId], references: [id])
+  attributes           ProductAttribute[]
+  quoteItems           QuoteItem[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
+}
+
+model ProductAttribute {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  value     String
+  createdAt DateTime @default(now())
+
+  @@index([productId])
 }
 
 model Quote {
-  id              String       @id @default(cuid())
-  clienteNome     String
-  empresa         String
-  email           String
-  telefone        String
-  cidade          String?
-  observacoes     String?
-  objetivo        String?
-  prazo           String?
-  status          QuoteStatus  @default(NOVO)
-  items           QuoteItem[]
-  attachments     Attachment[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id          String       @id @default(cuid())
+  clienteNome String
+  empresa     String
+  email       String
+  telefone    String
+  cidade      String?
+  observacoes String?
+  objetivo    String?
+  prazo       String?
+  status      QuoteStatus  @default(NOVO)
+  items       QuoteItem[]
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model QuoteItem {
@@ -140,49 +174,49 @@ model Attachment {
 }
 
 model Supplier {
-  id          String       @id @default(cuid())
-  name        String
-  baseUrl     String
-  adapterKey  String
-  importJobs  ImportJob[]
-  createdAt   DateTime     @default(now())
+  id         String      @id @default(cuid())
+  name       String
+  baseUrl    String
+  adapterKey String
+  importJobs ImportJob[]
+  createdAt  DateTime    @default(now())
 }
 
 model ImportJob {
-  id                String            @id @default(cuid())
-  supplierId        String
-  supplier          Supplier          @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  categoryUrl       String
-  status            ImportJobStatus   @default(PENDENTE)
-  productsFound     Int               @default(0)
-  productsImported  Int               @default(0)
-  productsFailed    Int               @default(0)
-  startedAt         DateTime?
-  finishedAt        DateTime?
-  products          ImportedProduct[]
-  errors            ImportError[]
-  createdAt         DateTime          @default(now())
+  id               String            @id @default(cuid())
+  supplierId       String
+  supplier         Supplier          @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  categoryUrl      String
+  status           ImportJobStatus   @default(PENDENTE)
+  productsFound    Int               @default(0)
+  productsImported Int               @default(0)
+  productsFailed   Int               @default(0)
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  products         ImportedProduct[]
+  errors           ImportError[]
+  createdAt        DateTime          @default(now())
 }
 
 model ImportedProduct {
-  id              String                 @id @default(cuid())
-  importJobId     String
-  importJob       ImportJob              @relation(fields: [importJobId], references: [id], onDelete: Cascade)
-  sourceUrl       String
-  nome            String
-  codigo          String?
-  sku             String?
-  categoria       String?
-  marca           String?
-  descricaoCurta  String?
-  descricaoLonga  String?
-  descricaoIA     String?
-  dadosTecnicos   Json                   @default("{}")
-  imagemPrincipal String?
-  imagens         Json                   @default("[]")
-  status          ImportedProductStatus  @default(IMPORTADO)
+  id                String                @id @default(cuid())
+  importJobId       String
+  importJob         ImportJob             @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  sourceUrl         String
+  nome              String
+  codigo            String?
+  sku               String?
+  categoria         String?
+  marca             String?
+  descricaoCurta    String?
+  descricaoLonga    String?
+  descricaoIA       String?
+  dadosTecnicos     Json                  @default("{}")
+  imagemPrincipal   String?
+  imagens           Json                  @default("[]")
+  status            ImportedProductStatus @default(IMPORTADO)
   promotedProductId String?
-  createdAt       DateTime               @default(now())
+  createdAt         DateTime              @default(now())
 }
 
 model ImportError {
