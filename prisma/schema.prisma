@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SALES
+}
+
+enum QuoteStatus {
+  NOVO
+  EM_ANALISE
+  RESPONDIDO
+  FECHADO
+  PERDIDO
+}
+
+enum CustomizationMethod {
+  GRAVACAO_LASER
+  SILK_SCREEN
+  BORDADO
+  IMPRESSAO_UV
+  TRANSFER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id                     String                @id @default(cuid())
+  name                   String
+  slug                   String                @unique
+  description            String
+  features               String[]
+  materials              String[]
+  colors                 String[]
+  customizationMethods   CustomizationMethod[]
+  images                  String[]
+  minQty                 Int                   @default(50)
+  leadTimeDays           Int                   @default(15)
+  dimensions             String?
+  printArea              String?
+  sustainable            Boolean               @default(false)
+  premium                Boolean               @default(false)
+  featured               Boolean               @default(false)
+  categoryId             String
+  category               Category              @relation(fields: [categoryId], references: [id])
+  quoteItems             QuoteItem[]
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+}
+
+model Quote {
+  id              String       @id @default(cuid())
+  clienteNome     String
+  empresa         String
+  email           String
+  telefone        String
+  cidade          String?
+  observacoes     String?
+  status          QuoteStatus  @default(NOVO)
+  items           QuoteItem[]
+  attachments     Attachment[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model QuoteItem {
+  id             String                @id @default(cuid())
+  quoteId        String
+  quote          Quote                 @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product               @relation(fields: [productId], references: [id])
+  quantidade     Int
+  cores          String[]
+  personalizacao String[]
+  metodo         CustomizationMethod[]
+  createdAt      DateTime              @default(now())
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  url       String
+  filename  String
+  createdAt DateTime @default(now())
+}
