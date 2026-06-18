@@ -1,9 +1,12 @@
-import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { enhanceImportedProductDescription, promoteImportedProduct } from "@/lib/importer";
+import { auth } from "@/lib/auth";
+import { can } from "@/lib/permissions";
+import { matchCategory } from "@/lib/import/category-matcher";
 import { Button } from "@/components/ui/button";
 import { AutoRefresh } from "@/components/admin/auto-refresh";
+import { ImportedProductRow } from "@/components/admin/imported-product-row";
+import { enhanceImportedProduct, promoteImported, ignoreImportedProduct, restoreImportedProduct, updateImportedProduct } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +21,16 @@ const statusLabel: Record<string, string> = {
 export default async function ImportJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!can(role, "importer:run")) redirect("/admin");
+
   const [job, categories] = await Promise.all([
     prisma.importJob.findUnique({
       where: { id },
       include: {
         supplier: true,
+        requestedBy: true,
         products: { orderBy: { createdAt: "asc" } },
         errors: { orderBy: { createdAt: "desc" } },
       },
@@ -34,22 +42,6 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
 
   const running = job.status === "PENDENTE" || job.status === "EM_EXECUCAO";
 
-  async function enhance(formData: FormData) {
-    "use server";
-    const productId = String(formData.get("productId"));
-    await enhanceImportedProductDescription(productId);
-    revalidatePath(`/admin/importador/${id}`);
-  }
-
-  async function promote(formData: FormData) {
-    "use server";
-    const productId = String(formData.get("productId"));
-    const categoryId = String(formData.get("categoryId"));
-    if (!categoryId) return;
-    await promoteImportedProduct(productId, categoryId);
-    revalidatePath(`/admin/importador/${id}`);
-  }
-
   return (
     <div>
       {running && <AutoRefresh />}
@@ -60,6 +52,10 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
           <a href={job.categoryUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline">
             {job.categoryUrl}
           </a>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Importado em {job.createdAt.toLocaleString("pt-BR")}
+            {job.requestedBy && <> por {job.requestedBy.name}</>}
+          </p>
         </div>
         <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
           {statusLabel[job.status] ?? job.status}
@@ -97,61 +93,31 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
         <table className="w-full text-sm">
           <thead className="bg-muted text-left">
             <tr>
-              <th className="px-4 py-3">Produto</th>
+              <th className="px-4 py-3">Imagem</th>
+              <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">Código</th>
-              <th className="px-4 py-3">Descrição</th>
+              <th className="px-4 py-3">Categoria</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
             {job.products.map((product) => (
-              <tr key={product.id} className="border-t border-border align-top">
-                <td className="px-4 py-3 font-medium">
-                  <a href={product.sourceUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                    {product.nome}
-                  </a>
-                </td>
-                <td className="px-4 py-3">{product.codigo || "—"}</td>
-                <td className="max-w-[320px] px-4 py-3 text-muted-foreground">
-                  {product.descricaoIA ? (
-                    <span className="text-foreground">{product.descricaoIA}</span>
-                  ) : (
-                    product.descricaoCurta || product.descricaoLonga || "—"
-                  )}
-                </td>
-                <td className="px-4 py-3">{product.status}</td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-col gap-2">
-                    {!product.descricaoIA && (
-                      <form action={enhance}>
-                        <input type="hidden" name="productId" value={product.id} />
-                        <Button type="submit" variant="outline" size="sm">Melhorar descrição</Button>
-                      </form>
-                    )}
-                    {product.status !== "PROMOVIDO" && (
-                      <form action={promote} className="flex items-center gap-2">
-                        <input type="hidden" name="productId" value={product.id} />
-                        <select
-                          name="categoryId"
-                          required
-                          className="h-9 rounded-md border border-border bg-background px-2 text-xs"
-                        >
-                          <option value="">Categoria...</option>
-                          {categories.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                          ))}
-                        </select>
-                        <Button type="submit" size="sm">Promover</Button>
-                      </form>
-                    )}
-                  </div>
-                </td>
-              </tr>
+              <ImportedProductRow
+                key={product.id}
+                product={product}
+                categories={categories}
+                suggestedCategoryId={matchCategory(product.categoria, categories)?.id}
+                enhanceAction={enhanceImportedProduct.bind(null, product.id)}
+                promoteAction={promoteImported.bind(null, product.id)}
+                ignoreAction={ignoreImportedProduct.bind(null, product.id)}
+                restoreAction={restoreImportedProduct.bind(null, product.id)}
+                updateAction={updateImportedProduct.bind(null, product.id)}
+              />
             ))}
             {job.products.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                   {running ? "Varredura em andamento..." : "Nenhum produto importado."}
                 </td>
               </tr>

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     nome: p.nome,
     codigo: p.codigo ?? "",
     categoria: p.categoria ?? "",
+    preco: p.preco != null ? p.preco.toFixed(2) : "",
     descricao: p.descricaoIA || p.descricaoLonga || p.descricaoCurta || "",
     imagem: p.imagemPrincipal ?? "",
     atributos: Object.entries((p.dadosTecnicos as Record<string, string>) ?? {})

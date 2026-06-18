@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { startImportJob } from "@/lib/importer";
+import { auth } from "@/lib/auth";
+import { can } from "@/lib/permissions";
+import { enqueueImportJob } from "@/lib/import/queue";
 import { listAdapters } from "@/scrapers/adapters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +20,13 @@ const statusLabel: Record<string, string> = {
 };
 
 export default async function ImporterPage() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!can(role, "importer:run")) redirect("/admin");
+
   const [jobs, suppliers] = await Promise.all([
     prisma.importJob.findMany({
-      include: { supplier: true },
+      include: { supplier: true, requestedBy: true },
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
@@ -43,6 +49,13 @@ export default async function ImporterPage() {
   async function startImport(formData: FormData) {
     "use server";
 
+    const actionSession = await auth();
+    const actionRole = (actionSession?.user as { role?: string } | undefined)?.role;
+    if (!can(actionRole, "importer:run")) {
+      throw new Error("Você não tem permissão para executar esta ação.");
+    }
+    const requestedById = (actionSession?.user as { id?: string } | undefined)?.id;
+
     const categoryUrl = String(formData.get("categoryUrl") || "").trim();
     const adapterKey = String(formData.get("adapterKey") || "").trim();
     let supplierId = String(formData.get("supplierId") || "").trim();
@@ -61,11 +74,11 @@ export default async function ImporterPage() {
     if (!supplierId) return;
 
     const job = await prisma.importJob.create({
-      data: { supplierId, categoryUrl, status: "PENDENTE" },
+      data: { supplierId, categoryUrl, status: "PENDENTE", requestedById },
     });
 
     // Disparo em background — não bloqueia a resposta da página.
-    void startImportJob(job.id);
+    enqueueImportJob(job.id);
 
     redirect(`/admin/importador/${job.id}`);
   }
@@ -109,6 +122,7 @@ export default async function ImporterPage() {
                 <th className="px-4 py-3">Encontrados</th>
                 <th className="px-4 py-3">Importados</th>
                 <th className="px-4 py-3">Erros</th>
+                <th className="px-4 py-3">Solicitado por</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -125,6 +139,7 @@ export default async function ImporterPage() {
                   <td className="px-4 py-3">{job.productsFound}</td>
                   <td className="px-4 py-3">{job.productsImported}</td>
                   <td className="px-4 py-3">{job.productsFailed}</td>
+                  <td className="px-4 py-3">{job.requestedBy?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admin/importador/${job.id}`} className="text-sm font-medium text-accent hover:underline">
                       Ver detalhes
@@ -134,7 +149,7 @@ export default async function ImporterPage() {
               ))}
               {jobs.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     Nenhuma importação iniciada ainda.
                   </td>
                 </tr>

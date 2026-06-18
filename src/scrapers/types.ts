@@ -19,6 +19,8 @@ export interface SelectorMap {
   galleryImageSelector?: string;
   /** Seletor de uma linha de tabela/lista de características (ex: "Material: Inox"). */
   attributeRowSelector?: string;
+  /** Seletor do preço exibido na página de detalhe, se o fornecedor mostrar preço. */
+  priceSelector?: string;
 }
 
 export interface SupplierAdapter {
@@ -43,6 +45,7 @@ export interface ScrapedProduct {
   imagemPrincipal?: string;
   imagens: string[];
   dadosTecnicos: Record<string, string>;
+  preco?: number;
 }
 
 export interface ScrapeError {

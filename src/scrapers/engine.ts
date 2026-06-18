@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright";
 import * as cheerio from "cheerio";
 import type { SupplierAdapter, ScrapedProduct, ScrapeError } from "./types";
-import { cleanInline, cleanText, normalizeColor, normalizeDimensions, resolveUrl } from "./utils/clean";
+import { cleanInline, cleanText, normalizeColor, normalizeDimensions, parsePrice, resolveUrl } from "./utils/clean";
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -166,6 +166,7 @@ async function scrapeProductPage(
   const descricaoLonga = selectors.longDescriptionSelector
     ? cleanText($(selectors.longDescriptionSelector).first().html() ?? $(selectors.longDescriptionSelector).first().text())
     : undefined;
+  const preco = selectors.priceSelector ? parsePrice($(selectors.priceSelector).first().text()) : undefined;
 
   const imagemPrincipal = selectors.mainImageSelector
     ? resolveUrl(url, $(selectors.mainImageSelector).first().attr("src") ?? $(selectors.mainImageSelector).first().attr("data-src")) ?? undefined
@@ -197,6 +198,7 @@ async function scrapeProductPage(
     imagemPrincipal,
     imagens: Array.from(imagens),
     dadosTecnicos,
+    preco,
   };
 }
 

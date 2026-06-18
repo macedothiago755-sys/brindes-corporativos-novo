@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { runCrawl } from "@/scrapers/engine";
 import { getAdapter } from "@/scrapers/adapters";
-import { slugify } from "@/scrapers/utils/clean";
 import { enhanceDescription } from "@/scrapers/enhance-description";
+import { createScrapeProvider } from "@/lib/import/provider";
+import { findDuplicateImportedProduct } from "@/lib/import/dedupe";
+import { buildProductDraft } from "@/lib/import/product-mapper";
 
 /**
  * Dispara a varredura de uma categoria do fornecedor em background.
@@ -12,7 +13,7 @@ import { enhanceDescription } from "@/scrapers/enhance-description";
  * Observação para produção: em ambientes serverless (ex: Vercel) uma função
  * não roda indefinidamente em background após responder a requisição. Para
  * produção real, mover esta chamada para um worker dedicado (fila/cron) que
- * roda em um processo Node persistente.
+ * roda em um processo Node persistente — ver `src/lib/import/queue.ts`.
  */
 export async function startImportJob(jobId: string) {
   const job = await prisma.importJob.findUnique({ where: { id: jobId }, include: { supplier: true } });
@@ -35,31 +36,43 @@ export async function startImportJob(jobId: string) {
     data: { status: "EM_EXECUCAO", startedAt: new Date() },
   });
 
+  const provider = createScrapeProvider(adapter);
+
   try {
-    await runCrawl({
+    await provider.run({
       categoryUrl: job.categoryUrl,
-      adapter,
       onProgress: async (found) => {
         await prisma.importJob.update({ where: { id: jobId }, data: { productsFound: found } });
       },
       onProductScraped: async (product) => {
-        await prisma.importedProduct.create({
-          data: {
-            importJobId: jobId,
-            sourceUrl: product.sourceUrl,
-            nome: product.nome,
-            codigo: product.codigo,
-            sku: product.sku,
-            marca: product.marca,
-            categoria: product.categoria,
-            descricaoCurta: product.descricaoCurta,
-            descricaoLonga: product.descricaoLonga,
-            imagemPrincipal: product.imagemPrincipal,
-            imagens: product.imagens,
-            dadosTecnicos: product.dadosTecnicos,
-            status: "IMPORTADO",
-          },
+        const duplicate = await findDuplicateImportedProduct(job.supplierId, {
+          codigo: product.codigo,
+          sku: product.sku,
         });
+
+        const data = {
+          importJobId: jobId,
+          sourceUrl: product.sourceUrl,
+          nome: product.nome,
+          codigo: product.codigo,
+          sku: product.sku,
+          marca: product.marca,
+          categoria: product.categoria,
+          descricaoCurta: product.descricaoCurta,
+          descricaoLonga: product.descricaoLonga,
+          preco: product.preco,
+          imagemPrincipal: product.imagemPrincipal,
+          imagens: product.imagens,
+          dadosTecnicos: product.dadosTecnicos,
+          status: "IMPORTADO" as const,
+        };
+
+        if (duplicate) {
+          await prisma.importedProduct.update({ where: { id: duplicate.id }, data });
+        } else {
+          await prisma.importedProduct.create({ data });
+        }
+
         await prisma.importJob.update({
           where: { id: jobId },
           data: { productsImported: { increment: 1 } },
@@ -114,36 +127,13 @@ export async function enhanceImportedProductDescription(productId: string) {
   await prisma.importedProduct.update({ where: { id: productId }, data: { descricaoIA } });
 }
 
-/** Promove um produto importado para o catálogo interno (Product). Requer revisão humana antes de publicar. */
+/** Promove um produto importado para o catálogo interno (Product). Nasce como rascunho — requer revisão humana antes de publicar. */
 export async function promoteImportedProduct(productId: string, categoryId: string) {
   const product = await prisma.importedProduct.findUnique({ where: { id: productId } });
   if (!product) throw new Error("Produto importado não encontrado.");
 
-  const baseSlug = slugify(product.nome);
-  let slug = baseSlug;
-  let attempt = 1;
-  while (await prisma.product.findUnique({ where: { slug } })) {
-    slug = `${baseSlug}-${++attempt}`;
-  }
-
-  const dados = (product.dadosTecnicos as Record<string, string>) ?? {};
-  const imagens = (product.imagens as string[]) ?? [];
-
-  const created = await prisma.product.create({
-    data: {
-      name: product.nome,
-      slug,
-      description: product.descricaoIA || product.descricaoLonga || product.descricaoCurta || product.nome,
-      features: Object.entries(dados).map(([k, v]) => `${k}: ${v}`),
-      materials: dados.material ? [dados.material] : [],
-      colors: dados.cor ? [dados.cor] : [],
-      idealFor: [],
-      customizationMethods: [],
-      images: imagens.length ? imagens : product.imagemPrincipal ? [product.imagemPrincipal] : [],
-      dimensions: dados.dimensao,
-      categoryId,
-    },
-  });
+  const draft = await buildProductDraft(product, categoryId);
+  const created = await prisma.product.create({ data: draft });
 
   await prisma.importedProduct.update({
     where: { id: productId },

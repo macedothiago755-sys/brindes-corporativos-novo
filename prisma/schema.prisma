@@ -51,12 +51,13 @@ enum ImportedProductStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
+  id         String      @id @default(cuid())
+  name       String
+  email      String      @unique
+  password   String
+  role       Role        @default(ADMIN)
+  createdAt  DateTime    @default(now())
+  importJobs ImportJob[]
 }
 
 model Category {
@@ -193,9 +194,13 @@ model ImportJob {
   productsFailed   Int               @default(0)
   startedAt        DateTime?
   finishedAt       DateTime?
+  requestedById    String?
+  requestedBy      User?             @relation(fields: [requestedById], references: [id])
   products         ImportedProduct[]
   errors           ImportError[]
   createdAt        DateTime          @default(now())
+
+  @@index([requestedById])
 }
 
 model ImportedProduct {
@@ -211,12 +216,15 @@ model ImportedProduct {
   descricaoCurta    String?
   descricaoLonga    String?
   descricaoIA       String?
+  preco             Float?
   dadosTecnicos     Json                  @default("{}")
   imagemPrincipal   String?
   imagens           Json                  @default("[]")
   status            ImportedProductStatus @default(IMPORTADO)
   promotedProductId String?
   createdAt         DateTime              @default(now())
+
+  @@index([codigo])
 }
 
 model ImportError {

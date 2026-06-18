@@ -27,5 +27,7 @@ export const exemploGenericoAdapter: SupplierAdapter = {
     mainImageSelector: ".product-gallery img.main",
     galleryImageSelector: ".product-gallery img.thumb",
     attributeRowSelector: ".product-attributes tr, .product-attributes li",
+    // Opcional: só preencha se o fornecedor exibir preço público na página do produto.
+    priceSelector: ".product-price",
   },
 };

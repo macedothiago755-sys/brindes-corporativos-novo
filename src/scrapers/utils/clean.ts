@@ -92,6 +92,30 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+export function parsePrice(input: string | null | undefined): number | undefined {
+  if (!input) return undefined;
+  const match = cleanInline(input).match(/[\d.,]+/);
+  if (!match) return undefined;
+
+  let raw = match[0];
+  const hasComma = raw.includes(",");
+  const hasDot = raw.includes(".");
+
+  if (hasComma && hasDot) {
+    raw = raw.replace(/\./g, "").replace(",", ".");
+  } else if (hasComma) {
+    raw = raw.replace(",", ".");
+  } else if (hasDot) {
+    const parts = raw.split(".");
+    if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+      raw = raw.replace(/\./g, "");
+    }
+  }
+
+  const value = Number.parseFloat(raw);
+  return Number.isFinite(value) ? value : undefined;
+}
+
 export function resolveUrl(base: string, maybeRelative: string | null | undefined): string | null {
   if (!maybeRelative) return null;
   try {

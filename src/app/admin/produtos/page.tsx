@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Pencil, Copy, Trash2, Power, Plus } from "lucide-react";
+import { Pencil, Copy, Trash2, Power, Plus, Import } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -76,6 +76,7 @@ export default async function AdminProductsPage({
   const role = (session?.user as { role?: string } | undefined)?.role;
   const canEdit = can(role, "products:edit");
   const canDelete = can(role, "products:delete");
+  const canImport = can(role, "importer:run");
 
   const [products, categories] = await Promise.all([
     getProducts({ ...params, dir }),
@@ -192,13 +193,22 @@ export default async function AdminProductsPage({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Produtos</h1>
-        {canEdit && (
-          <Link href="/admin/produtos/novo">
-            <Button>
-              <Plus className="h-4 w-4" /> Novo produto
-            </Button>
-          </Link>
-        )}
+        <div className="flex gap-2">
+          {canImport && (
+            <Link href="/admin/importador">
+              <Button variant="outline">
+                <Import className="h-4 w-4" /> Importar produtos
+              </Button>
+            </Link>
+          )}
+          {canEdit && (
+            <Link href="/admin/produtos/novo">
+              <Button>
+                <Plus className="h-4 w-4" /> Novo produto
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="mt-6">
