@@ -137,6 +137,10 @@ function extractAttributes(
     // categoria "dimensao").
     const key = label.replace(/\s+/g, "_");
     result[key] = finalValue;
+    // Também grava sob a chave normalizada (ex: "cor"), já que o mapper de
+    // importação lê chaves fixas como "cor" e "material" e o rótulo
+    // original na página do fornecedor pode vir como "Cores", "Color" etc.
+    if (matchedKey && category !== key) result[category] = finalValue;
   });
 
   return result;
