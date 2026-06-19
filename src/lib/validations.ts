@@ -18,6 +18,31 @@ export const quoteSchema = z.object({
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
 
+const kitQuoteItemSchema = z.object({
+  productId: z.string().min(1),
+  quantidade: z.coerce.number().int().min(1).max(1_000_000),
+  cores: z.array(z.string()).default([]),
+  personalizacao: z.array(z.string()).default([]),
+  metodo: z.array(z.string()).default([]),
+});
+
+export const kitQuoteSchema = z.object({
+  kitId: z.string().optional(),
+  quantidadePessoas: z.coerce.number().int().min(1).optional(),
+  orcamentoPorPessoa: z.coerce.number().positive().optional(),
+  items: z.array(kitQuoteItemSchema).min(1, "Inclua ao menos um produto no kit"),
+  clienteNome: z.string().min(2, "Informe seu nome"),
+  empresa: z.string().min(2, "Informe sua empresa"),
+  email: z.string().email("E-mail inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
+  cidade: z.string().optional(),
+  observacoes: z.string().max(2000).optional(),
+  objetivo: z.string().optional(),
+  prazo: z.string().optional(),
+});
+
+export type KitQuoteInput = z.infer<typeof kitQuoteSchema>;
+
 const csvToArray = (value: unknown) =>
   String(value ?? "")
     .split(",")

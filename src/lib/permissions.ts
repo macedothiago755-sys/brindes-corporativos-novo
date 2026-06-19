@@ -9,7 +9,9 @@ export type Permission =
   | "quotes:edit"
   | "customers:edit"
   | "importer:run"
-  | "settings:edit";
+  | "settings:edit"
+  | "kits:edit"
+  | "content:edit";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: [
@@ -22,8 +24,10 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "customers:edit",
     "importer:run",
     "settings:edit",
+    "kits:edit",
+    "content:edit",
   ],
-  OPERADOR: ["products:view", "quotes:view", "quotes:edit", "customers:edit"],
+  OPERADOR: ["products:view", "quotes:view", "quotes:edit", "customers:edit", "kits:edit"],
   VISUALIZADOR: ["products:view", "quotes:view"],
 };
 
