@@ -20,6 +20,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import unzipper from "unzipper";
 import { prisma } from "@/lib/prisma";
+import { extractColorsFromText } from "@/scrapers/utils/clean";
 
 const IMAGE_EXT = /\.(jpe?g|png|webp)$/i;
 
@@ -70,11 +71,13 @@ async function main() {
 
     const destDir = path.join(process.cwd(), "public", "products", codigo);
     const urls: string[] = [];
+    const colorsFromFilenames = new Set<string>();
 
     for (const file of files.sort((a, b) => a.path.localeCompare(b.path))) {
       const filename = sanitizeSegment(file.path.split("/").filter(Boolean).pop()!);
       const url = `/products/${codigo}/${filename}`;
       urls.push(url);
+      for (const color of extractColorsFromText(filename)) colorsFromFilenames.add(color);
 
       if (!dryRun) {
         await mkdir(destDir, { recursive: true });
@@ -86,9 +89,13 @@ async function main() {
     summary.totalImages += urls.length;
 
     if (product) {
-      console.log(`[Product] ${codigo} -> ${product.name} (${urls.length} imagens)`);
+      // Une com as cores já cadastradas/ajustadas no admin em vez de
+      // sobrescrever — o nome do arquivo só serve para preencher o que
+      // ainda não tinha sido identificado.
+      const colors = Array.from(new Set([...product.colors, ...colorsFromFilenames]));
+      console.log(`[Product] ${codigo} -> ${product.name} (${urls.length} imagens, cores: ${colors.join(", ") || "—"})`);
       if (!dryRun) {
-        await prisma.product.update({ where: { id: product.id }, data: { images: urls } });
+        await prisma.product.update({ where: { id: product.id }, data: { images: urls, colors } });
       }
       summary.productsUpdated++;
     } else if (importedProduct) {

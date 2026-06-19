@@ -58,7 +58,43 @@ const COLOR_MAP: Record<string, string> = {
   brown: "Marrom",
   natural: "Natural",
   transparente: "Transparente",
+  bege: "Bege",
+  beige: "Bege",
+  creme: "Creme",
+  turquesa: "Turquesa",
+  vinho: "Vinho",
+  nude: "Nude",
+  salmao: "Salmão",
+  salmão: "Salmão",
 };
+
+const COLOR_MODIFIERS: Record<string, string> = {
+  claro: "Claro",
+  escuro: "Escuro",
+};
+
+/**
+ * Extrai nomes de cor de um texto livre (ex: nome de arquivo de imagem como
+ * "Squeeze-1Litro-AZUL-ESCURO-22372.jpg"), reconhecendo modificadores como
+ * "claro"/"escuro" (ex: "Azul Escuro"). Usado como fallback quando a página
+ * do fornecedor não lista cores como atributo de texto.
+ */
+export function extractColorsFromText(input: string): string[] {
+  const tokens = input
+    .replace(/\.[a-z0-9]+$/i, "")
+    .split(/[-_\s]+/)
+    .map((t) => t.toLowerCase());
+
+  const found: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const base = COLOR_MAP[tokens[i]];
+    if (!base) continue;
+    const modifier = tokens[i + 1] ? COLOR_MODIFIERS[tokens[i + 1]] : undefined;
+    found.push(modifier ? `${base} ${modifier}` : base);
+    if (modifier) i++;
+  }
+  return Array.from(new Set(found));
+}
 
 const COLOR_SPLIT_REGEX = /\s*(?:,|\/|;|\be\b)\s*/i;
 
