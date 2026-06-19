@@ -118,6 +118,7 @@ model Product {
   category             Category              @relation(fields: [categoryId], references: [id])
   attributes           ProductAttribute[]
   quoteItems           QuoteItem[]
+  views                ProductView[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -134,6 +135,16 @@ model ProductAttribute {
   createdAt DateTime @default(now())
 
   @@index([productId])
+}
+
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
 }
 
 model Quote {

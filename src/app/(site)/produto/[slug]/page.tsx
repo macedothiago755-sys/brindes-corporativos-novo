@@ -35,6 +35,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProduct(slug);
   if (!product || product.status !== "ATIVO") notFound();
 
+  await prisma.productView.create({ data: { productId: product.id } });
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",

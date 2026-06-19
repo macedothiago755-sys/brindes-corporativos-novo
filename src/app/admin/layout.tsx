@@ -27,6 +27,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin" className="rounded-md px-3 py-2 hover:bg-background">Dashboard</Link>
           <Link href="/admin/orcamentos" className="rounded-md px-3 py-2 hover:bg-background">Orçamentos</Link>
           <Link href="/admin/produtos" className="rounded-md px-3 py-2 hover:bg-background">Produtos</Link>
+          {can(role, "products:view") && (
+            <Link href="/admin/analytics" className="rounded-md px-3 py-2 hover:bg-background">Analytics</Link>
+          )}
           {can(role, "categories:edit") && (
             <Link
               href="/admin/categorias"
