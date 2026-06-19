@@ -11,6 +11,7 @@ export type ProductCardData = {
   minQty: number;
   premium: boolean;
   sustainable: boolean;
+  tags?: string[];
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -28,6 +29,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <div className="absolute left-3 top-3 flex gap-2">
             {product.premium && <Badge variant="accent">Premium</Badge>}
             {product.sustainable && <Badge>Sustentável</Badge>}
+            {product.tags?.slice(0, 1).map((tag) => (
+              <Badge key={tag} variant="outline" className="bg-background/80 capitalize">
+                {tag}
+              </Badge>
+            ))}
           </div>
         </div>
         <div className="p-5">

@@ -14,9 +14,9 @@ export const dynamic = "force-dynamic";
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string; metodo?: string }>;
+  searchParams: Promise<{ categoria?: string; metodo?: string; tag?: string }>;
 }) {
-  const { categoria, metodo } = await searchParams;
+  const { categoria, metodo, tag } = await searchParams;
 
   let categoryIds: string[] | undefined;
   if (categoria) {
@@ -37,6 +37,7 @@ export default async function ProductsPage({
         status: "ATIVO",
         ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
         ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
+        ...(tag ? { tags: { has: tag } } : {}),
       },
       include: { category: true },
       orderBy: { createdAt: "desc" },

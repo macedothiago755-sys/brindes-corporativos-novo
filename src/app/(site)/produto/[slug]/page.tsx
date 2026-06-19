@@ -59,9 +59,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="text-sm uppercase tracking-wide text-muted-foreground">{product.category.name}</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{product.name}</h1>
 
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {product.premium && <Badge variant="accent">Premium</Badge>}
             {product.sustainable && <Badge>Sustentável</Badge>}
+            {product.tags.map((tag) => (
+              <Badge key={tag} variant="outline" className="capitalize">
+                {tag}
+              </Badge>
+            ))}
           </div>
 
           <p className="mt-6 text-muted-foreground">{product.description}</p>

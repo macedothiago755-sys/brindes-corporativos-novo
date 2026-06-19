@@ -14,6 +14,15 @@ const methods: Option[] = [
   { label: "Transfer", value: "TRANSFER" },
 ];
 
+const tags: Option[] = [
+  { label: "Lançamento", value: "lançamento" },
+  { label: "Promoção", value: "promoção" },
+  { label: "Mais vendido", value: "mais vendido" },
+  { label: "Brinde", value: "brinde" },
+  { label: "Corporativo", value: "corporativo" },
+  { label: "Personalizado", value: "personalizado" },
+];
+
 export function FilterSidebar({ categories }: { categories: CategoryOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,6 +40,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
 
   const activeCategory = searchParams.get("categoria");
   const activeMethod = searchParams.get("metodo");
+  const activeTag = searchParams.get("tag");
 
   return (
     <aside className="space-y-8">
@@ -87,7 +97,25 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
         </div>
       </div>
 
-      {(activeCategory || activeMethod) && (
+      <div>
+        <p className="text-sm font-semibold">Tags</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => toggleParam("tag", t.value)}
+              className={cn(
+                "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted",
+                activeTag === t.value && "bg-foreground text-background"
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {(activeCategory || activeMethod || activeTag) && (
         <button onClick={() => router.push("/produtos")} className="text-sm text-accent underline">
           Limpar filtros
         </button>

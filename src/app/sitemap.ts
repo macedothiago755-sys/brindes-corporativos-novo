@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { VITRINES } from "@/lib/vitrines";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...posts.map((p) => ({
       url: `${base}/blog/${p.slug}`,
       lastModified: p.updatedAt,
+      priority: 0.6,
+    })),
+    ...VITRINES.map((v) => ({
+      url: `${base}/vitrine/${v.slug}`,
+      lastModified: new Date(),
       priority: 0.6,
     })),
   ];
