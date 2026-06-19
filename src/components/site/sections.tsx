@@ -1,7 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+
+const categoryImages = [
+  "/banners/banner-2-bolsa-1014x535.jpg",
+  "/banners/banner-3-garrafa-1014x535.jpg",
+  "/banners/banner-4-squeeze-1014x535.jpg",
+  "/banners/banner-5-caderno-1014x535.jpg",
+  "/banners/banner-7-copa1-1014x535.jpg",
+  "/banners/banner-8-frasqueira-1014x535.jpg",
+  "/banners/banner-9-copa2-1014x535.jpg",
+];
 
 export async function CategoriesSection() {
   const categories = await prisma.category.findMany({
@@ -13,13 +24,21 @@ export async function CategoriesSection() {
     <section className="container-premium py-20">
       <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Categorias principais</h2>
       <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-        {categories.map((c) => (
+        {categories.map((c, i) => (
           <Link
             key={c.slug}
             href={`/produtos?categoria=${c.slug}`}
-            className="flex aspect-square flex-col items-center justify-center rounded-xl border border-border bg-muted p-2 text-center text-sm font-medium transition-colors hover:border-accent"
+            className="group relative aspect-square overflow-hidden rounded-xl border border-border transition-colors hover:border-accent"
           >
-            {c.name}
+            <Image
+              src={categoryImages[i % categoryImages.length]}
+              alt={c.name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 33vw, 15vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+            <span className="absolute inset-x-2 bottom-2 text-center text-sm font-medium text-white">{c.name}</span>
           </Link>
         ))}
       </div>
@@ -131,7 +150,7 @@ export function FinalCtaSection() {
       <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
         Fale com nosso time comercial e receba uma proposta personalizada para o seu projeto.
       </p>
-      <Button asChild size="lg" className="mt-8">
+      <Button asChild size="lg" variant="gradient" className="mt-8">
         <Link href="/produtos">Solicitar orçamento</Link>
       </Button>
     </section>

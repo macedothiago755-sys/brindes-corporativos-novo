@@ -1,21 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --muted: #f5f4f2;
-  --muted-foreground: #6b6b6b;
-  --border: #e7e5e2;
-  --accent: #b08d57;
+  --background: #fafaf8;
+  --foreground: #111111;
+  --muted: #f3f1ec;
+  --muted-foreground: #5f6368;
+  --border: #e8e5de;
+  --accent: #7b2cbf;
   --accent-foreground: #ffffff;
-  --primary: #0a0a0a;
+  --primary: #111111;
   --primary-foreground: #ffffff;
   --card: #ffffff;
   --radius: 0.5rem;
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
-  --success: #1f7a4d;
+  --success: #16a34a;
   --success-foreground: #ffffff;
+
+  /* Identidade Paint Colors */
+  --brand-purple: #7b2cbf;
+  --brand-magenta: #d4148e;
+  --brand-blue: #2563eb;
+  --brand-green: #16a34a;
+  --brand-yellow: #facc15;
+  --gradient-brand: linear-gradient(90deg, #7b2cbf, #d4148e, #2563eb);
 }
 
 @theme inline {
@@ -33,8 +41,17 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-magenta: var(--brand-magenta);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-green: var(--brand-green);
+  --color-brand-yellow: var(--brand-yellow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+.bg-gradient-brand {
+  background-image: var(--gradient-brand);
 }
 
 body {

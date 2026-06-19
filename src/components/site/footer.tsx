@@ -1,13 +1,15 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
     <footer id="contato" className="border-t border-border bg-muted">
       <div className="container-premium grid gap-10 py-16 lg:grid-cols-4">
         <div>
-          <p className="text-xl font-semibold tracking-tight">
-            BRINDES<span className="text-accent">.</span>
-          </p>
+          <div className="flex items-center gap-2">
+            <Image src="/logo-paint-colors.png" alt="Paint Colors Company" width={32} height={32} className="h-8 w-8" />
+            <p className="text-lg font-semibold tracking-tight">Paint Colors</p>
+          </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             Brindes corporativos personalizados para empresas que querem criar experiências memoráveis.
           </p>

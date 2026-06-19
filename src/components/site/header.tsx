@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { href: "/produtos", label: "Catálogo" },
-  { href: "/vitrine/novidades", label: "Novidades" },
-  { href: "/vitrine/mais-vendidos", label: "Mais vendidos" },
-  { href: "/blog", label: "Blog" },
-  { href: "/#como-funciona", label: "Como funciona" },
-  { href: "/#diferenciais", label: "Diferenciais" },
+  { href: "/produtos", label: "Produtos" },
+  { href: "/vitrine/mais-vendidos", label: "Soluções" },
+  { href: "/blog", label: "Inspirações" },
+  { href: "/#diferenciais", label: "Sobre nós" },
   { href: "/#contato", label: "Contato" },
 ];
 
@@ -21,8 +20,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="container-premium flex h-20 items-center justify-between">
-        <Link href="/" className="text-xl font-semibold tracking-tight">
-          BRINDES<span className="text-accent">.</span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo-paint-colors.png" alt="Paint Colors Company" width={40} height={40} className="h-10 w-10" priority />
+          <span className="hidden text-lg font-semibold tracking-tight sm:inline">Paint Colors</span>
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
@@ -34,7 +34,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <Button asChild>
+          <Button asChild variant="gradient">
             <Link href="/produtos">Solicitar orçamento</Link>
           </Button>
         </div>
@@ -52,7 +52,7 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Button asChild size="lg" className="mt-2">
+            <Button asChild size="lg" variant="gradient" className="mt-2">
               <Link href="/produtos">Solicitar orçamento</Link>
             </Button>
           </nav>

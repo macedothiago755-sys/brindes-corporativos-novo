@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Check, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { trackEvent } from "@/lib/analytics";
 
 const microInfo = ["Orçamento rápido", "Produção personalizada", "Atendimento especializado"];
 
@@ -23,11 +22,10 @@ export function Hero() {
             Especialistas em soluções corporativas personalizadas
           </p>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-[3.4rem]">
-            Transforme sua marca em uma experiência memorável
+            Brindes corporativos que transformam marcas em experiências
           </h1>
           <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-            Desenvolvemos brindes corporativos personalizados que fortalecem o relacionamento da sua empresa
-            com clientes, colaboradores e parceiros — do briefing à entrega.
+            Personalizamos produtos que aproximam empresas, clientes e equipes.
           </p>
 
           <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-foreground/80">
@@ -40,22 +38,11 @@ export function Hero() {
           </ul>
 
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button asChild size="lg">
-              <Link href="/produtos">Montar meu orçamento</Link>
+            <Button asChild size="lg" variant="gradient">
+              <Link href="/produtos">Montar meu kit personalizado</Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              onClick={() => trackEvent("whatsapp_click", { source: "hero_secondary_cta" })}
-            >
-              <a
-                href="https://wa.me/5511400000000?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20com%20um%20especialista%20em%20brindes%20corporativos."
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Falar com especialista
-              </a>
+            <Button asChild size="lg" variant="outline-accent">
+              <Link href="/produtos">Ver catálogo</Link>
             </Button>
           </div>
 
