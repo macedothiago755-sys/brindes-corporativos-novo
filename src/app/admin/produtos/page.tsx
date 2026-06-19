@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Pencil, Copy, Trash2, Power, Plus, Import } from "lucide-react";
+import { Pencil, Copy, Trash2, Power, Plus, Import, HeartPulse } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import { ProductsBulkTable } from "@/components/admin/products-bulk-table";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
-import { deleteProduct, duplicateProduct, toggleProductStatus } from "./actions";
+import { deleteProduct, duplicateProduct, toggleProductStatus, bulkUpdateProducts } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +42,22 @@ function getProducts(params: {
   status?: string;
   sort?: string;
   dir?: "asc" | "desc";
+  issue?: string;
 }) {
-  const { q, categoryId, status, sort, dir } = params;
+  const { q, categoryId, status, sort, dir, issue } = params;
   const sortField = sort && SORTABLE_FIELDS[sort] ? sort : "createdAt";
   const sortDir = dir === "asc" ? "asc" : "desc";
+
+  const issueWhere =
+    issue === "sem-imagem"
+      ? { images: { isEmpty: true } }
+      : issue === "sem-descricao"
+      ? { shortDescription: null }
+      : issue === "sem-sku"
+      ? { sku: null }
+      : issue === "poucas-informacoes"
+      ? { benefits: { isEmpty: true }, features: { isEmpty: true } }
+      : {};
 
   return prisma.product.findMany({
     where: {
@@ -58,6 +71,7 @@ function getProducts(params: {
         : {}),
       ...(categoryId ? { categoryId } : {}),
       ...(status ? { status: status as "ATIVO" | "RASCUNHO" | "INDISPONIVEL" } : {}),
+      ...issueWhere,
     },
     include: { category: true },
     orderBy: { [sortField]: sortDir },
@@ -67,7 +81,7 @@ function getProducts(params: {
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; categoryId?: string; status?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{ q?: string; categoryId?: string; status?: string; sort?: string; dir?: string; issue?: string }>;
 }) {
   const params = await searchParams;
   const dir = params.dir === "asc" ? "asc" : "desc";
@@ -194,6 +208,13 @@ export default async function AdminProductsPage({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Produtos</h1>
         <div className="flex gap-2">
+          {canEdit && (
+            <Link href="/admin/produtos/saude">
+              <Button variant="outline">
+                <HeartPulse className="h-4 w-4" /> Saúde do catálogo
+              </Button>
+            </Link>
+          )}
           {canImport && (
             <Link href="/admin/importador">
               <Button variant="outline">
@@ -234,15 +255,29 @@ export default async function AdminProductsPage({
       </div>
 
       <div className="mt-6">
-        <DataTable
-          columns={columns}
-          rows={products}
-          getRowId={(p) => p.id}
-          sort={params.sort}
-          dir={dir}
-          buildSortHref={buildSortHref}
-          emptyState="Nenhum produto encontrado."
-        />
+        {canEdit ? (
+          <ProductsBulkTable
+            columns={columns}
+            rows={products}
+            categories={categories}
+            getRowId={(p) => p.id}
+            sort={params.sort}
+            dir={dir}
+            buildSortHref={buildSortHref}
+            emptyState="Nenhum produto encontrado."
+            bulkUpdateAction={bulkUpdateProducts}
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            rows={products}
+            getRowId={(p) => p.id}
+            sort={params.sort}
+            dir={dir}
+            buildSortHref={buildSortHref}
+            emptyState="Nenhum produto encontrado."
+          />
+        )}
       </div>
     </div>
   );

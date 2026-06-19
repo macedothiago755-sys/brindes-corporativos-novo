@@ -97,6 +97,7 @@ model Product {
   features             String[]
   materials            String[]
   colors               String[]
+  tags                 String[]              @default([])
   idealFor             String[]
   customizationMethods CustomizationMethod[]
   images               String[]

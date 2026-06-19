@@ -39,6 +39,7 @@ export const productSchema = z.object({
   features: z.preprocess(csvToArray, z.array(z.string())),
   materials: z.preprocess(csvToArray, z.array(z.string())),
   colors: z.preprocess(csvToArray, z.array(z.string())),
+  tags: z.preprocess(csvToArray, z.array(z.string())),
   price: optionalNumber,
   promoPrice: optionalNumber,
   saleUnit: z.string().optional(),

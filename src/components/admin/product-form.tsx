@@ -33,6 +33,7 @@ export interface ProductFormValues {
   features?: string[];
   materials?: string[];
   colors?: string[];
+  tags?: string[];
   price?: number | null;
   promoPrice?: number | null;
   saleUnit?: string | null;
@@ -169,6 +170,16 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
             <div>
               <Label htmlFor="colors">Cores (separadas por vírgula)</Label>
               <Input id="colors" name="colors" defaultValue={defaultValues.colors?.join(", ") ?? ""} className="mt-2" />
+            </div>
+            <div>
+              <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+              <Input
+                id="tags"
+                name="tags"
+                placeholder="lançamento, promoção, mais vendido"
+                defaultValue={defaultValues.tags?.join(", ") ?? ""}
+                className="mt-2"
+              />
             </div>
           </div>
         </CardContent>

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { productSchema } from "@/lib/validations";
+import { enhanceDescription } from "@/scrapers/enhance-description";
 
 function slugify(value: string) {
   return value
@@ -39,6 +40,7 @@ function parseProductForm(formData: FormData) {
     features: formData.get("features"),
     materials: formData.get("materials"),
     colors: formData.get("colors"),
+    tags: formData.get("tags"),
     price: formData.get("price") || "",
     promoPrice: formData.get("promoPrice") || "",
     saleUnit: formData.get("saleUnit") || undefined,
@@ -75,6 +77,7 @@ export async function createProduct(formData: FormData) {
       features: data.features,
       materials: data.materials,
       colors: data.colors,
+      tags: data.tags,
       price: data.price ?? null,
       promoPrice: data.promoPrice ?? null,
       saleUnit: data.saleUnit || "unidade",
@@ -120,6 +123,7 @@ export async function updateProduct(id: string, formData: FormData) {
         features: data.features,
         materials: data.materials,
         colors: data.colors,
+        tags: data.tags,
         price: data.price ?? null,
         promoPrice: data.promoPrice ?? null,
         saleUnit: data.saleUnit || "unidade",
@@ -184,6 +188,7 @@ export async function duplicateProduct(formData: FormData) {
       features: original.features,
       materials: original.materials,
       colors: original.colors,
+      tags: original.tags,
       idealFor: original.idealFor,
       customizationMethods: original.customizationMethods,
       images: original.images,
@@ -202,6 +207,74 @@ export async function duplicateProduct(formData: FormData) {
   });
 
   revalidatePath("/admin/produtos");
+}
+
+export async function bulkUpdateProducts(formData: FormData) {
+  await requirePermission("products:edit");
+  const ids = formData.getAll("productId").map(String).filter(Boolean);
+  if (ids.length === 0) return;
+
+  const categoryId = String(formData.get("categoryId") || "").trim();
+  const brand = String(formData.get("brand") || "").trim();
+  const status = String(formData.get("status") || "").trim();
+  const addTags = String(formData.get("addTags") || "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const removeTags = String(formData.get("removeTags") || "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const data: { categoryId?: string; brand?: string; status?: "ATIVO" | "RASCUNHO" | "INDISPONIVEL" } = {};
+  if (categoryId) data.categoryId = categoryId;
+  if (brand) data.brand = brand;
+  if (status === "ATIVO" || status === "RASCUNHO" || status === "INDISPONIVEL") data.status = status;
+
+  if (Object.keys(data).length > 0) {
+    await prisma.product.updateMany({ where: { id: { in: ids } }, data });
+  }
+
+  for (const tag of addTags) {
+    await prisma.product.updateMany({ where: { id: { in: ids } }, data: { tags: { push: tag } } });
+  }
+
+  if (removeTags.length > 0) {
+    const products = await prisma.product.findMany({ where: { id: { in: ids } }, select: { id: true, tags: true } });
+    await Promise.all(
+      products.map((p) =>
+        prisma.product.update({
+          where: { id: p.id },
+          data: { tags: p.tags.filter((t) => !removeTags.includes(t)) },
+        })
+      )
+    );
+  }
+
+  revalidatePath("/admin/produtos");
+}
+
+export async function generateMissingDescriptions() {
+  await requirePermission("products:edit");
+
+  const products = await prisma.product.findMany({
+    where: { shortDescription: null },
+    include: { attributes: true },
+    take: 20,
+  });
+
+  for (const product of products) {
+    const dadosTecnicos = Object.fromEntries(product.attributes.map((a) => [a.name, a.value]));
+    const text = await enhanceDescription({
+      nome: product.name,
+      descricaoLonga: product.description,
+      dadosTecnicos,
+    });
+    await prisma.product.update({ where: { id: product.id }, data: { shortDescription: text } });
+  }
+
+  revalidatePath("/admin/produtos");
+  revalidatePath("/admin/produtos/saude");
 }
 
 export async function toggleProductStatus(formData: FormData) {
