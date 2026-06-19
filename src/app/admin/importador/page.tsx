@@ -39,10 +39,11 @@ export default async function ImporterPage() {
     (acc, job) => {
       acc.found += job.productsFound;
       acc.imported += job.productsImported;
+      acc.skipped += job.productsSkipped;
       acc.failed += job.productsFailed;
       return acc;
     },
-    { found: 0, imported: 0, failed: 0 }
+    { found: 0, imported: 0, skipped: 0, failed: 0 }
   );
   const lastSync = jobs.find((j) => j.finishedAt)?.finishedAt;
 
@@ -90,7 +91,7 @@ export default async function ImporterPage() {
         Importe catálogos de fornecedores sem CSV/API via varredura automática de páginas de categoria.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Produtos encontrados</p>
           <p className="mt-1 text-2xl font-semibold">{totals.found}</p>
@@ -98,6 +99,10 @@ export default async function ImporterPage() {
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Produtos importados</p>
           <p className="mt-1 text-2xl font-semibold text-success">{totals.imported}</p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">Já cadastrados</p>
+          <p className="mt-1 text-2xl font-semibold">{totals.skipped}</p>
         </div>
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Erros</p>
@@ -121,6 +126,7 @@ export default async function ImporterPage() {
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Encontrados</th>
                 <th className="px-4 py-3">Importados</th>
+                <th className="px-4 py-3">Já cadastrados</th>
                 <th className="px-4 py-3">Erros</th>
                 <th className="px-4 py-3">Solicitado por</th>
                 <th className="px-4 py-3"></th>
@@ -138,6 +144,7 @@ export default async function ImporterPage() {
                   <td className="px-4 py-3">{statusLabel[job.status] ?? job.status}</td>
                   <td className="px-4 py-3">{job.productsFound}</td>
                   <td className="px-4 py-3">{job.productsImported}</td>
+                  <td className="px-4 py-3">{job.productsSkipped}</td>
                   <td className="px-4 py-3">{job.productsFailed}</td>
                   <td className="px-4 py-3">{job.requestedBy?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-right">
@@ -149,7 +156,7 @@ export default async function ImporterPage() {
               ))}
               {jobs.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
                     Nenhuma importação iniciada ainda.
                   </td>
                 </tr>

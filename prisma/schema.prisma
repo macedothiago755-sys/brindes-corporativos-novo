@@ -151,6 +151,7 @@ model Product {
 
   @@index([status])
   @@index([categoryId])
+  @@index([supplierCode])
 }
 
 model Solution {
@@ -308,6 +309,7 @@ model ImportJob {
   status           ImportJobStatus   @default(PENDENTE)
   productsFound    Int               @default(0)
   productsImported Int               @default(0)
+  productsSkipped  Int               @default(0)
   productsFailed   Int               @default(0)
   startedAt        DateTime?
   finishedAt       DateTime?

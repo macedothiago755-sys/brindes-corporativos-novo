@@ -69,7 +69,7 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
         </span>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Encontrados</p>
           <p className="mt-1 text-xl font-semibold">{job.productsFound}</p>
@@ -77,6 +77,10 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Importados</p>
           <p className="mt-1 text-xl font-semibold text-success">{job.productsImported}</p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">Já cadastrados</p>
+          <p className="mt-1 text-xl font-semibold">{job.productsSkipped}</p>
         </div>
         <div className="rounded-xl border border-border p-4">
           <p className="text-xs text-muted-foreground">Erros</p>

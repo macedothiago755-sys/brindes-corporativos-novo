@@ -45,6 +45,20 @@ export async function startImportJob(jobId: string) {
         await prisma.importJob.update({ where: { id: jobId }, data: { productsFound: found } });
       },
       onProductScraped: async (product) => {
+        // Produto já promovido ao catálogo (cadastrado/ajustado pelo admin):
+        // não recria na fila de revisão nem sobrescreve dados já editados.
+        const alreadyRegistered = product.codigo
+          ? await prisma.product.findFirst({ where: { supplierCode: product.codigo } })
+          : null;
+
+        if (alreadyRegistered) {
+          await prisma.importJob.update({
+            where: { id: jobId },
+            data: { productsSkipped: { increment: 1 } },
+          });
+          return;
+        }
+
         const duplicate = await findDuplicateImportedProduct(job.supplierId, {
           codigo: product.codigo,
           sku: product.sku,
