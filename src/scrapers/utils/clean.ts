@@ -60,9 +60,15 @@ const COLOR_MAP: Record<string, string> = {
   transparente: "Transparente",
 };
 
+const COLOR_SPLIT_REGEX = /\s*(?:,|\/|;|\be\b)\s*/i;
+
 export function normalizeColor(input: string): string {
-  const key = cleanInline(input).toLowerCase();
-  return COLOR_MAP[key] ?? cleanInline(input).replace(/\b\w/g, (c) => c.toUpperCase());
+  return cleanInline(input)
+    .split(COLOR_SPLIT_REGEX)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => COLOR_MAP[part.toLowerCase()] ?? part.replace(/\b\w/g, (c) => c.toUpperCase()))
+    .join(", ");
 }
 
 export function normalizeUnit(input: string): string {

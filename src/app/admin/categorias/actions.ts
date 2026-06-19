@@ -1,0 +1,71 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { can } from "@/lib/permissions";
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+async function requirePermission() {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!can(role, "categories:edit")) {
+    throw new Error("Você não tem permissão para executar esta ação.");
+  }
+}
+
+export async function createCategory(formData: FormData) {
+  await requirePermission();
+
+  const name = String(formData.get("name") || "").trim();
+  const parentId = String(formData.get("parentId") || "").trim() || null;
+  if (!name) return;
+
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  let suffix = 1;
+  while (await prisma.category.findUnique({ where: { slug } })) {
+    suffix += 1;
+    slug = `${baseSlug}-${suffix}`;
+  }
+
+  await prisma.category.create({ data: { name, slug, parentId } });
+  revalidatePath("/admin/categorias");
+}
+
+export async function updateCategory(categoryId: string, formData: FormData) {
+  await requirePermission();
+
+  const name = String(formData.get("name") || "").trim();
+  const parentId = String(formData.get("parentId") || "").trim() || null;
+  if (!name || parentId === categoryId) return;
+
+  await prisma.category.update({ where: { id: categoryId }, data: { name, parentId } });
+  revalidatePath("/admin/categorias");
+}
+
+export async function deleteCategory(formData: FormData) {
+  await requirePermission();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+
+  const [childCount, productCount] = await Promise.all([
+    prisma.category.count({ where: { parentId: id } }),
+    prisma.product.count({ where: { categoryId: id } }),
+  ]);
+
+  if (childCount > 0 || productCount > 0) {
+    throw new Error("Não é possível excluir uma categoria com subcategorias ou produtos vinculados.");
+  }
+
+  await prisma.category.delete({ where: { id } });
+  revalidatePath("/admin/categorias");
+}

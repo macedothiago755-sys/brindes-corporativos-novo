@@ -41,7 +41,12 @@ export async function buildProductDraft(product: ImportedProduct, categoryId: st
     shortDescription: product.descricaoCurta ?? undefined,
     features: Object.entries(dados).map(([k, v]) => `${k}: ${v}`),
     materials: dados.material ? [dados.material] : [],
-    colors: dados.cor ? [dados.cor] : [],
+    colors: dados.cor
+      ? dados.cor
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean)
+      : [],
     idealFor: [],
     customizationMethods: [],
     images: imagens.length ? imagens : product.imagemPrincipal ? [product.imagemPrincipal] : [],

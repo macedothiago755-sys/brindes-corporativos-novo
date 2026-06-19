@@ -5,8 +5,15 @@ import { can } from "@/lib/permissions";
 import { matchCategory } from "@/lib/import/category-matcher";
 import { Button } from "@/components/ui/button";
 import { AutoRefresh } from "@/components/admin/auto-refresh";
-import { ImportedProductRow } from "@/components/admin/imported-product-row";
-import { enhanceImportedProduct, promoteImported, ignoreImportedProduct, restoreImportedProduct, updateImportedProduct } from "./actions";
+import { ImportedProductsTable } from "@/components/admin/imported-products-table";
+import {
+  enhanceImportedProduct,
+  promoteImported,
+  promoteImportedBulk,
+  ignoreImportedProduct,
+  restoreImportedProduct,
+  updateImportedProduct,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -89,41 +96,21 @@ export default async function ImportJobPage({ params }: { params: Promise<{ id: 
         </a>
       </div>
 
-      <div className="mt-10 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted text-left">
-            <tr>
-              <th className="px-4 py-3">Imagem</th>
-              <th className="px-4 py-3">Nome</th>
-              <th className="px-4 py-3">Código</th>
-              <th className="px-4 py-3">Categoria</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {job.products.map((product) => (
-              <ImportedProductRow
-                key={product.id}
-                product={product}
-                categories={categories}
-                suggestedCategoryId={matchCategory(product.categoria, categories)?.id}
-                enhanceAction={enhanceImportedProduct.bind(null, product.id)}
-                promoteAction={promoteImported.bind(null, product.id)}
-                ignoreAction={ignoreImportedProduct.bind(null, product.id)}
-                restoreAction={restoreImportedProduct.bind(null, product.id)}
-                updateAction={updateImportedProduct.bind(null, product.id)}
-              />
-            ))}
-            {job.products.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                  {running ? "Varredura em andamento..." : "Nenhum produto importado."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-10">
+        <ImportedProductsTable
+          products={job.products.map((product) => ({
+            ...product,
+            suggestedCategoryId: matchCategory(product.categoria, categories)?.id,
+          }))}
+          categories={categories}
+          emptyState={running ? "Varredura em andamento..." : "Nenhum produto importado."}
+          enhanceAction={enhanceImportedProduct}
+          promoteAction={promoteImported}
+          ignoreAction={ignoreImportedProduct}
+          restoreAction={restoreImportedProduct}
+          updateAction={updateImportedProduct}
+          bulkPromoteAction={promoteImportedBulk}
+        />
       </div>
 
       {job.errors.length > 0 && (

@@ -22,6 +22,7 @@ interface ImportedProductRowProduct {
   preco: number | null;
   imagemPrincipal: string | null;
   status: string;
+  dadosTecnicos: unknown;
 }
 
 interface CategoryOption {
@@ -49,6 +50,9 @@ interface ImportedProductRowProps {
   product: ImportedProductRowProduct;
   categories: CategoryOption[];
   suggestedCategoryId?: string;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelected?: () => void;
   enhanceAction: () => void | Promise<void>;
   promoteAction: (formData: FormData) => void | Promise<void>;
   ignoreAction: () => void | Promise<void>;
@@ -60,6 +64,9 @@ export function ImportedProductRow({
   product,
   categories,
   suggestedCategoryId,
+  selectable = false,
+  selected = false,
+  onToggleSelected,
   enhanceAction,
   promoteAction,
   ignoreAction,
@@ -68,10 +75,13 @@ export function ImportedProductRow({
 }: ImportedProductRowProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
+  const cores = ((product.dadosTecnicos as Record<string, string> | null) ?? {}).cor;
+  const colorCount = cores ? cores.split(",").map((c) => c.trim()).filter(Boolean).length : 0;
+
   if (mode === "edit") {
     return (
       <tr className="border-t border-border bg-muted/40">
-        <td colSpan={6} className="px-4 py-4">
+        <td colSpan={7} className="px-4 py-4">
           <form
             action={async (formData) => {
               await updateAction(formData);
@@ -138,6 +148,16 @@ export function ImportedProductRow({
   return (
     <tr className="border-t border-border align-top">
       <td className="px-4 py-3">
+        {selectable && (
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelected}
+            aria-label={`Selecionar ${product.nome}`}
+          />
+        )}
+      </td>
+      <td className="px-4 py-3">
         <div className="relative h-12 w-12 overflow-hidden rounded-md border border-border bg-muted">
           {product.imagemPrincipal && (
             <Image src={product.imagemPrincipal} alt={product.nome} fill className="object-cover" unoptimized />
@@ -151,9 +171,12 @@ export function ImportedProductRow({
         <p className="mt-1 max-w-[260px] truncate text-xs text-muted-foreground">
           {product.descricaoIA || product.descricaoCurta || product.descricaoLonga || "—"}
         </p>
-        {product.preco != null && (
-          <p className="mt-1 text-xs font-medium text-muted-foreground">{priceFormatter.format(product.preco)}</p>
-        )}
+        <div className="mt-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          {product.preco != null && <span>{priceFormatter.format(product.preco)}</span>}
+          {colorCount > 0 && (
+            <span>{colorCount} {colorCount === 1 ? "cor disponível" : "cores disponíveis"}</span>
+          )}
+        </div>
       </td>
       <td className="px-4 py-3">{product.codigo || product.sku || "—"}</td>
       <td className="px-4 py-3">{product.categoria || "—"}</td>

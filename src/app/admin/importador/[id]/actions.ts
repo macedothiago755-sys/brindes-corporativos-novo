@@ -28,6 +28,19 @@ export async function promoteImported(productId: string, formData: FormData) {
   revalidatePath("/admin/importador/[id]", "page");
 }
 
+export async function promoteImportedBulk(formData: FormData) {
+  await requirePermission();
+  const categoryId = String(formData.get("categoryId") || "").trim();
+  const ids = formData.getAll("productId").map(String).filter(Boolean);
+  if (!categoryId || ids.length === 0) return;
+
+  for (const id of ids) {
+    await promoteImportedProduct(id, categoryId);
+  }
+
+  revalidatePath("/admin/importador/[id]", "page");
+}
+
 export async function ignoreImportedProduct(productId: string) {
   await requirePermission();
   await prisma.importedProduct.update({ where: { id: productId }, data: { status: "IGNORADO" } });
