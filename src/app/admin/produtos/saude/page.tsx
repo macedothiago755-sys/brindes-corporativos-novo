@@ -3,12 +3,13 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { productQualityScore } from "@/lib/product-quality";
 import { generateMissingDescriptions } from "../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogHealthPage() {
-  const [total, semImagem, semDescricao, semSku, poucasInfo, duplicados] = await Promise.all([
+  const [total, semImagem, semDescricao, semSku, poucasInfo, duplicados, allProducts] = await Promise.all([
     prisma.product.count(),
     prisma.product.count({ where: { images: { isEmpty: true } } }),
     prisma.product.count({ where: { shortDescription: null } }),
@@ -19,7 +20,16 @@ export default async function CatalogHealthPage() {
       _count: true,
       having: { name: { _count: { gt: 1 } } },
     }),
+    prisma.product.findMany({
+      select: { id: true, name: true, images: true, shortDescription: true, categoryId: true },
+    }),
   ]);
+
+  const attentionList = allProducts
+    .map((p) => ({ ...p, score: productQualityScore(p) }))
+    .filter((p) => p.score < 100)
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 20);
 
   const duplicateCount = duplicados.reduce((sum, d) => sum + d._count, 0);
   const issues = semImagem + semDescricao + semSku + poucasInfo + duplicateCount;
@@ -75,6 +85,30 @@ export default async function CatalogHealthPage() {
               <Sparkles className="h-4 w-4" /> Gerar descrição automática (até 20 produtos sem descrição)
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Produtos que precisam de atenção</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {attentionList.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Todos os produtos estão com 100% de completude.</p>
+          ) : (
+            <div className="space-y-2">
+              {attentionList.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/admin/produtos/${p.id}`}
+                  className="flex items-center justify-between rounded-md border border-border px-4 py-2 text-sm hover:border-foreground/30"
+                >
+                  <span>{p.name}</span>
+                  <span className="font-medium text-muted-foreground">{p.score}% completo</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

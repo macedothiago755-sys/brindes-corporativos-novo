@@ -46,7 +46,20 @@ export interface ProductFormValues {
   metaDescription?: string | null;
   images?: string[];
   attributes?: AttributeRow[];
+  objectives?: string[];
+  profile?: string | null;
+  priceTier?: string | null;
+  margin?: number | null;
+  popularityScore?: number;
 }
+
+const objectiveOptions = [
+  { value: "ONBOARDING", label: "Onboarding" },
+  { value: "EVENTO", label: "Evento corporativo" },
+  { value: "CLIENTE_VIP", label: "Presente cliente VIP" },
+  { value: "FEIRA", label: "Feira/exposição" },
+  { value: "PREMIACAO", label: "Premiação" },
+];
 
 interface ProductFormProps {
   action: (formData: FormData) => void;
@@ -221,6 +234,66 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
           <div>
             <Label htmlFor="printArea">Área de personalização</Label>
             <Input id="printArea" name="printArea" defaultValue={defaultValues.printArea ?? ""} className="mt-2" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Inteligência do catálogo</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Label>Objetivos compatíveis</Label>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {objectiveOptions.map((o) => (
+                <label key={o.value} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="objectives"
+                    value={o.value}
+                    defaultChecked={defaultValues.objectives?.includes(o.value)}
+                  />
+                  {o.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="profile">Perfil</Label>
+            <select
+              id="profile"
+              name="profile"
+              defaultValue={defaultValues.profile ?? ""}
+              className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
+            >
+              <option value="">Não definido</option>
+              <option value="ECONOMICO">Econômico</option>
+              <option value="INTERMEDIARIO">Intermediário</option>
+              <option value="PREMIUM">Premium</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="priceTier">Faixa de preço</Label>
+            <select
+              id="priceTier"
+              name="priceTier"
+              defaultValue={defaultValues.priceTier ?? ""}
+              className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
+            >
+              <option value="">Não definido</option>
+              <option value="ENTRADA">Entrada</option>
+              <option value="MEDIO">Médio</option>
+              <option value="ALTO">Alto</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="margin">Margem (%)</Label>
+            <Input id="margin" name="margin" type="number" step="0.01" defaultValue={defaultValues.margin ?? ""} className="mt-2" />
+          </div>
+          <div>
+            <Label htmlFor="popularityScore">Popularidade</Label>
+            <Input id="popularityScore" name="popularityScore" type="number" defaultValue={defaultValues.popularityScore ?? 0} className="mt-2" />
           </div>
         </CardContent>
       </Card>

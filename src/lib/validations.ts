@@ -78,6 +78,11 @@ export const productSchema = z.object({
   images: z.array(z.string()).default([]),
   attributeNames: z.array(z.string()).default([]),
   attributeValues: z.array(z.string()).default([]),
+  objectives: z.array(z.enum(["ONBOARDING", "EVENTO", "CLIENTE_VIP", "FEIRA", "PREMIACAO"])).default([]),
+  profile: z.enum(["ECONOMICO", "INTERMEDIARIO", "PREMIUM"]).optional(),
+  priceTier: z.enum(["ENTRADA", "MEDIO", "ALTO"]).optional(),
+  margin: optionalNumber,
+  popularityScore: z.coerce.number().int().min(0).default(0),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

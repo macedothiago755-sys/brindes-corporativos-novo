@@ -55,6 +55,11 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
             metaDescription: product.metaDescription,
             images: product.images,
             attributes: product.attributes.map((a) => ({ name: a.name, value: a.value })),
+            objectives: product.objectives,
+            profile: product.profile,
+            priceTier: product.priceTier,
+            margin: product.margin,
+            popularityScore: product.popularityScore,
           }}
         />
       </div>

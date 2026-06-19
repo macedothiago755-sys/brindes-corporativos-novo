@@ -54,6 +54,11 @@ function parseProductForm(formData: FormData) {
     images: formData.getAll("images").map(String),
     attributeNames: formData.getAll("attributeName").map(String),
     attributeValues: formData.getAll("attributeValue").map(String),
+    objectives: formData.getAll("objectives").map(String),
+    profile: formData.get("profile") || undefined,
+    priceTier: formData.get("priceTier") || undefined,
+    margin: formData.get("margin") || "",
+    popularityScore: formData.get("popularityScore") || 0,
   });
 }
 
@@ -90,6 +95,11 @@ export async function createProduct(formData: FormData) {
       metaDescription: data.metaDescription || null,
       images: data.images.length > 0 ? data.images : ["/products/placeholder-1.svg"],
       customizationMethods: [],
+      objectives: data.objectives,
+      profile: data.profile ?? null,
+      priceTier: data.priceTier ?? null,
+      margin: data.margin ?? null,
+      popularityScore: data.popularityScore,
       attributes: {
         create: data.attributeNames
           .map((name, i) => ({ name, value: data.attributeValues[i] ?? "" }))
@@ -135,6 +145,11 @@ export async function updateProduct(id: string, formData: FormData) {
         metaTitle: data.metaTitle || null,
         metaDescription: data.metaDescription || null,
         images: data.images.length > 0 ? data.images : ["/products/placeholder-1.svg"],
+        objectives: data.objectives,
+        profile: data.profile ?? null,
+        priceTier: data.priceTier ?? null,
+        margin: data.margin ?? null,
+        popularityScore: data.popularityScore,
         attributes: {
           create: data.attributeNames
             .map((name, i) => ({ name, value: data.attributeValues[i] ?? "" }))
