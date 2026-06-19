@@ -236,6 +236,9 @@ export default async function AdminProductsPage({
               <Link href={`/admin/produtos/exportar?${exportQuery}`}>
                 <Button variant="outline">PDF</Button>
               </Link>
+              <Link href="/admin/produtos/catalogo">
+                <Button variant="outline">Catálogo comercial</Button>
+              </Link>
             </>
           )}
           {canImport && (

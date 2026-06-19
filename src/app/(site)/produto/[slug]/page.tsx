@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Palette, Users, Factory } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
+
+const b2bHighlights = [
+  { icon: Palette, label: "Personalização com sua marca" },
+  { icon: Users, label: "Ideal para eventos corporativos" },
+  { icon: Factory, label: "Produção em alta escala" },
+];
 
 const methodLabels: Record<string, string> = {
   GRAVACAO_LASER: "Gravação a laser",
@@ -72,6 +79,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <p className="mt-6 text-muted-foreground">{product.description}</p>
+
+          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-foreground/80">
+            {b2bHighlights.map((h) => (
+              <li key={h.label} className="flex items-center gap-2">
+                <h.icon className="h-4 w-4 text-accent" />
+                {h.label}
+              </li>
+            ))}
+          </ul>
 
           <dl className="mt-8 grid grid-cols-2 gap-4 border-t border-border pt-6 text-sm">
             <div>

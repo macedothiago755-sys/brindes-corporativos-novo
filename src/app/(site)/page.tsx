@@ -6,6 +6,7 @@ import { PromoGridSection } from "@/components/site/promo-grid";
 import { ProductCard } from "@/components/site/product-card";
 import {
   CategoriesSection,
+  SolutionsSection,
   DifferentiatorsSection,
   HowItWorksSection,
   ClientsSection,
@@ -28,6 +29,7 @@ export default async function HomePage() {
       <TrustStats />
       <BannerCarousel />
       <CategoriesSection />
+      <SolutionsSection />
       <PromoGridSection />
 
       <section className="container-premium py-20">

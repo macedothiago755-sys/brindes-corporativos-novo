@@ -46,6 +46,47 @@ export async function CategoriesSection() {
   );
 }
 
+export async function SolutionsSection() {
+  const solutions = await prisma.solution.findMany({ orderBy: { order: "asc" } });
+  if (solutions.length === 0) return null;
+
+  return (
+    <section className="border-t border-border bg-muted py-20">
+      <div className="container-premium">
+        <p className="text-sm font-medium uppercase tracking-widest text-accent">Soluções por objetivo</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Empresas não compram apenas produtos. Elas compram soluções.
+        </h2>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {solutions.map((s) => (
+            <Link
+              key={s.slug}
+              href={`/solucoes/${s.slug}`}
+              className="group overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg"
+            >
+              <div className="relative aspect-[4/3] bg-muted">
+                {s.image && (
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                )}
+              </div>
+              <div className="p-5">
+                <p className="font-medium">{s.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{s.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const differentiators = [
   { icon: Factory, title: "Escala industrial", desc: "Estrutura preparada para grandes volumes e prazos apertados." },
   { icon: ShieldCheck, title: "Qualidade garantida", desc: "Controle rigoroso em cada etapa da produção e personalização." },
@@ -73,10 +114,10 @@ export function DifferentiatorsSection() {
 }
 
 const steps = [
-  { step: "01", title: "Escolha o produto", desc: "Navegue pelo catálogo inteligente e selecione o brinde ideal." },
-  { step: "02", title: "Configure os detalhes", desc: "Informe quantidade, cores e tipo de personalização desejada." },
-  { step: "03", title: "Solicite o orçamento", desc: "Envie sua solicitação com poucos cliques, sem complicação." },
-  { step: "04", title: "Fale com nosso time", desc: "Nossa equipe comercial entra em contato com a proposta ideal." },
+  { step: "01", title: "Escolha seus produtos", desc: "Navegue pelo catálogo ou monte um kit personalizado para seu objetivo." },
+  { step: "02", title: "Envie sua identidade visual", desc: "Compartilhe logotipo e diretrizes de marca para a personalização." },
+  { step: "03", title: "Aprovação da arte", desc: "Validamos a arte final com você antes de iniciar a produção." },
+  { step: "04", title: "Produção e entrega", desc: "Produzimos em escala e entregamos no prazo combinado." },
 ];
 
 export function HowItWorksSection() {
@@ -96,8 +137,11 @@ export function HowItWorksSection() {
   );
 }
 
-export function ClientsSection() {
-  const clients = ["Empresa A", "Empresa B", "Empresa C", "Empresa D", "Empresa E", "Empresa F"];
+const fallbackClients = ["Empresa A", "Empresa B", "Empresa C", "Empresa D", "Empresa E", "Empresa F"];
+
+export async function ClientsSection() {
+  const clients = await prisma.clientLogo.findMany({ orderBy: { order: "asc" } });
+
   return (
     <section className="border-t border-border py-16">
       <div className="container-premium">
@@ -105,31 +149,40 @@ export function ClientsSection() {
           Empresas que confiam na nossa estrutura
         </p>
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-          {clients.map((c) => (
-            <div key={c} className="flex h-16 items-center justify-center rounded-md border border-border text-xs font-medium text-muted-foreground">
-              {c}
-            </div>
-          ))}
+          {clients.length > 0
+            ? clients.map((c) => (
+                <div key={c.id} className="relative flex h-16 items-center justify-center rounded-md border border-border p-2">
+                  <Image src={c.logoUrl} alt={c.name} fill className="object-contain p-2" sizes="200px" />
+                </div>
+              ))
+            : fallbackClients.map((c) => (
+                <div key={c} className="flex h-16 items-center justify-center rounded-md border border-border text-xs font-medium text-muted-foreground">
+                  {c}
+                </div>
+              ))}
         </div>
       </div>
     </section>
   );
 }
 
-const testimonials = [
-  { quote: "O processo de orçamento foi rápido e o atendimento muito próximo. Os brindes chegaram impecáveis.", name: "Diretora de Marketing", company: "Grupo Industrial" },
-  { quote: "Conseguimos personalizar exatamente como precisávamos para o evento institucional.", name: "Gerente de RH", company: "Holding Corporativa" },
-  { quote: "Qualidade muito acima do que esperávamos para um brinde corporativo.", name: "Coordenador de Eventos", company: "Rede Nacional" },
+const fallbackTestimonials = [
+  { id: "1", quote: "O processo de orçamento foi rápido e o atendimento muito próximo. Os brindes chegaram impecáveis.", name: "Diretora de Marketing", company: "Grupo Industrial" },
+  { id: "2", quote: "Conseguimos personalizar exatamente como precisávamos para o evento institucional.", name: "Gerente de RH", company: "Holding Corporativa" },
+  { id: "3", quote: "Qualidade muito acima do que esperávamos para um brinde corporativo.", name: "Coordenador de Eventos", company: "Rede Nacional" },
 ];
 
-export function TestimonialsSection() {
+export async function TestimonialsSection() {
+  const dbTestimonials = await prisma.testimonial.findMany({ orderBy: { order: "asc" } });
+  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : fallbackTestimonials;
+
   return (
     <section className="bg-muted py-20">
       <div className="container-premium">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Depoimentos</h2>
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
           {testimonials.map((t) => (
-            <div key={t.name} className="rounded-xl border border-border bg-background p-6">
+            <div key={t.id} className="rounded-xl border border-border bg-background p-6">
               <p className="text-sm text-foreground/90">&ldquo;{t.quote}&rdquo;</p>
               <p className="mt-4 text-sm font-medium">{t.name}</p>
               <p className="text-xs text-muted-foreground">{t.company}</p>

@@ -34,6 +34,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {can(role, "kits:edit") && (
             <Link href="/admin/kits" className="rounded-md px-3 py-2 hover:bg-white/10">Kits personalizados</Link>
           )}
+          {can(role, "content:edit") && (
+            <Link href="/admin/solucoes" className="rounded-md px-3 py-2 hover:bg-white/10">Soluções</Link>
+          )}
+          {can(role, "content:edit") && (
+            <Link href="/admin/conteudo" className="rounded-md px-3 py-2 hover:bg-white/10">Prova social</Link>
+          )}
           {can(role, "products:view") && (
             <Link href="/admin/analytics" className="rounded-md px-3 py-2 hover:bg-white/10">Analytics</Link>
           )}
