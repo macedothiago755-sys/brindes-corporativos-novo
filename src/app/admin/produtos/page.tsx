@@ -7,7 +7,7 @@ import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type Column } from "@/components/admin/data-table";
-import { ProductsBulkTable } from "@/components/admin/products-bulk-table";
+import { SelectionProvider, SelectAllCheckbox, RowCheckbox, BulkActionBar } from "@/components/admin/bulk-selection";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { deleteProduct, duplicateProduct, toggleProductStatus, bulkUpdateProducts } from "./actions";
@@ -117,7 +117,7 @@ export default async function AdminProductsPage({
     return `/admin/produtos?${sp.toString()}`;
   }
 
-  const columns: Column<ProductRow>[] = [
+  const baseColumns: Column<ProductRow>[] = [
     {
       key: "image",
       header: "",
@@ -213,6 +213,18 @@ export default async function AdminProductsPage({
     },
   ];
 
+  const columns: Column<ProductRow>[] = canEdit
+    ? [
+        {
+          key: "__select",
+          header: <SelectAllCheckbox />,
+          className: "w-10",
+          render: (p) => <RowCheckbox id={p.id} />,
+        },
+        ...baseColumns,
+      ]
+    : baseColumns;
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -282,17 +294,18 @@ export default async function AdminProductsPage({
 
       <div className="mt-6">
         {canEdit ? (
-          <ProductsBulkTable
-            columns={columns}
-            rows={products}
-            categories={categories}
-            getRowId={(p) => p.id}
-            sort={params.sort}
-            dir={dir}
-            buildSortHref={buildSortHref}
-            emptyState="Nenhum produto encontrado."
-            bulkUpdateAction={bulkUpdateProducts}
-          />
+          <SelectionProvider ids={products.map((p) => p.id)}>
+            <BulkActionBar categories={categories} bulkUpdateAction={bulkUpdateProducts} />
+            <DataTable
+              columns={columns}
+              rows={products}
+              getRowId={(p) => p.id}
+              sort={params.sort}
+              dir={dir}
+              buildSortHref={buildSortHref}
+              emptyState="Nenhum produto encontrado."
+            />
+          </SelectionProvider>
         ) : (
           <DataTable
             columns={columns}
