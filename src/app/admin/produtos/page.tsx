@@ -97,6 +97,16 @@ export default async function AdminProductsPage({
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
 
+  function buildExportQuery() {
+    const sp = new URLSearchParams();
+    if (params.q) sp.set("q", params.q);
+    if (params.categoryId) sp.set("categoryId", params.categoryId);
+    if (params.status) sp.set("status", params.status);
+    if (params.issue) sp.set("issue", params.issue);
+    return sp.toString();
+  }
+  const exportQuery = buildExportQuery();
+
   function buildSortHref(key: string, nextDir: "asc" | "desc") {
     const sp = new URLSearchParams();
     if (params.q) sp.set("q", params.q);
@@ -207,13 +217,26 @@ export default async function AdminProductsPage({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Produtos</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {canEdit && (
             <Link href="/admin/produtos/saude">
               <Button variant="outline">
                 <HeartPulse className="h-4 w-4" /> Saúde do catálogo
               </Button>
             </Link>
+          )}
+          {canEdit && (
+            <>
+              <a href={`/api/admin/produtos/export?format=csv&${exportQuery}`}>
+                <Button variant="outline">CSV</Button>
+              </a>
+              <a href={`/api/admin/produtos/export?format=xlsx&${exportQuery}`}>
+                <Button variant="outline">Excel</Button>
+              </a>
+              <Link href={`/admin/produtos/exportar?${exportQuery}`}>
+                <Button variant="outline">PDF</Button>
+              </Link>
+            </>
           )}
           {canImport && (
             <Link href="/admin/importador">

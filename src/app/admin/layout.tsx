@@ -3,6 +3,7 @@ import { auth, signOut } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
+import { GlobalSearch } from "@/components/admin/global-search";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -15,11 +16,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-64 flex-col border-r border-border bg-muted p-6 lg:flex">
+      <aside className="hidden w-64 flex-col border-r border-border bg-muted p-6 lg:flex print:hidden">
         <p className="text-lg font-semibold">
           BRINDES<span className="text-accent">.</span> Admin
         </p>
-        <nav className="mt-8 flex flex-col gap-2 text-sm">
+        <div className="mt-6">
+          <GlobalSearch />
+        </div>
+        <nav className="mt-6 flex flex-col gap-2 text-sm">
           <Link href="/admin" className="rounded-md px-3 py-2 hover:bg-background">Dashboard</Link>
           <Link href="/admin/orcamentos" className="rounded-md px-3 py-2 hover:bg-background">Orçamentos</Link>
           <Link href="/admin/produtos" className="rounded-md px-3 py-2 hover:bg-background">Produtos</Link>
