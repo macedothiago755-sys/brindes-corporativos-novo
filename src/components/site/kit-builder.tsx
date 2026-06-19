@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, isExternalImage } from "@/lib/utils";
 import type { KitRecommendation } from "@/lib/kit-recommendation";
 
 const objectives = [
@@ -235,6 +235,7 @@ export function KitBuilder() {
                     src={item.product.images[0] ?? "/products/placeholder-1.svg"}
                     alt={item.product.name}
                     fill
+                    unoptimized={isExternalImage(item.product.images[0] ?? "")}
                     className="object-cover"
                   />
                 </div>

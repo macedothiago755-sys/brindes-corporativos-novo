@@ -5,6 +5,7 @@ import { Palette, Users, Factory } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
+import { isExternalImage } from "@/lib/utils";
 
 const b2bHighlights = [
   { icon: Palette, label: "Personalização com sua marca" },
@@ -60,7 +61,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="grid gap-12 lg:grid-cols-2">
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-            <Image src={product.images[0]} alt={product.name} fill className="object-cover" priority />
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              unoptimized={isExternalImage(product.images[0])}
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
 

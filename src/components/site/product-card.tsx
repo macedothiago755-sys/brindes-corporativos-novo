@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { isExternalImage } from "@/lib/utils";
 
 export type ProductCardData = {
   slug: string;
@@ -33,6 +34,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             src={product.images[0] ?? "/products/placeholder-1.svg"}
             alt={product.name}
             fill
+            unoptimized={isExternalImage(product.images[0] ?? "")}
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 25vw"
           />
