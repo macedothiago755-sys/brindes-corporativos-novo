@@ -1,96 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Building2,
-  Briefcase,
-  ChefHat,
-  Coffee,
-  Crown,
-  Cpu,
-  CupSoda,
-  Dumbbell,
-  Factory,
-  Flame,
-  Frame,
-  HandHeart,
-  Leaf,
-  Package,
-  PartyPopper,
-  PawPrint,
-  Shirt,
-  ShieldCheck,
-  ShoppingBag,
-  Sofa,
-  Tag,
-  ToyBrick,
-  UtensilsCrossed,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
+import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-
-const categoryIcons: Record<string, LucideIcon> = {
-  brinquedos: ToyBrick,
-  canecas: Coffee,
-  "casa e decoracao": Sofa,
-  copos: CupSoda,
-  escritorio: Briefcase,
-  espelhos: Frame,
-  esporte: Dumbbell,
-  eventos: PartyPopper,
-  "kit churrasco": Flame,
-  "kits corporativos": Package,
-  "linha pet": PawPrint,
-  "moda e estilo": Shirt,
-  petisqueiras: UtensilsCrossed,
-  plaquinhas: Tag,
-  premium: Crown,
-  "sacolas e sacochilas": ShoppingBag,
-  sustentaveis: Leaf,
-  tecnologia: Cpu,
-  tabuas: ChefHat,
-  utilidades: Wrench,
-};
-
-function normalizeCategoryName(name: string) {
-  return name
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function getCategoryIcon(name: string): LucideIcon {
-  return categoryIcons[normalizeCategoryName(name)] ?? Package;
-}
+import { splitCategories } from "@/components/site/category-icons";
+import { CategoriesGrid } from "@/components/site/categories-grid";
 
 export async function CategoriesSection() {
   const categories = await prisma.category.findMany({
     where: { parentId: null },
     orderBy: { name: "asc" },
   });
+  const { main, rest } = splitCategories(categories);
 
   return (
-    <section className="container-premium py-20">
+    <section className="container-premium py-10">
       <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Categorias principais</h2>
-      <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-        {categories.map((c) => {
-          const Icon = getCategoryIcon(c.name);
-          return (
-            <Link
-              key={c.slug}
-              href={`/produtos?categoria=${c.slug}`}
-              className="group flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card px-3 py-6 text-center transition-colors hover:border-accent hover:bg-accent/5"
-            >
-              <Icon
-                className="h-8 w-8 text-foreground transition-colors group-hover:text-accent"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm font-medium">{c.name}</span>
-            </Link>
-          );
-        })}
+      <div className="mt-6">
+        <CategoriesGrid main={main} rest={rest} />
       </div>
     </section>
   );
