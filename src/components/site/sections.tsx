@@ -15,10 +15,7 @@ export async function CategoriesSection() {
 
   return (
     <section className="container-premium py-10">
-      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Categorias principais</h2>
-      <div className="mt-6">
-        <CategoriesGrid main={main} rest={rest} />
-      </div>
+      <CategoriesGrid main={main} rest={rest} />
     </section>
   );
 }

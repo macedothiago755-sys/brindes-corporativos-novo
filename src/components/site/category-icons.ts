@@ -12,6 +12,7 @@ import {
   Package,
   PartyPopper,
   PawPrint,
+  PenLine,
   Shirt,
   ShoppingBag,
   Sofa,
@@ -25,6 +26,7 @@ import {
 const categoryIcons: Record<string, LucideIcon> = {
   brinquedos: ToyBrick,
   canecas: Coffee,
+  canetas: PenLine,
   "casa e decoracao": Sofa,
   copos: CupSoda,
   escritorio: Briefcase,
@@ -58,7 +60,7 @@ export function getCategoryIcon(name: string): LucideIcon {
 }
 
 const PRIORITY_GROUPS: { keywords: string[] }[] = [
-  { keywords: ["corporativ", "brinde"] },
+  { keywords: ["caneta"] },
   { keywords: ["caneca"] },
   { keywords: ["caderno", "caderneta"] },
   { keywords: ["squeeze", "garrafa"] },
