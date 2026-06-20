@@ -46,8 +46,12 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="container-premium border-t border-border py-6 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Brindes Corporativos. Todos os direitos reservados.
+      <div className="container-premium flex flex-col gap-4 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} Brindes Corporativos. Todos os direitos reservados.</p>
+        <div className="flex gap-4">
+          <Link href="/politica-de-privacidade" className="hover:text-foreground">Aviso de Privacidade</Link>
+          <Link href="/termos-de-uso" className="hover:text-foreground">Termos de Uso</Link>
+        </div>
       </div>
     </footer>
   );

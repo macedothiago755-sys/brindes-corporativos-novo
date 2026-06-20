@@ -28,6 +28,9 @@ export async function POST(req: NextRequest) {
       email: parsed.data.email,
       telefone: parsed.data.telefone,
       couponCode: coupon?.active ? coupon.code : null,
+      consentAceito: parsed.data.consentAceito,
+      consentVersion: parsed.data.consentVersion,
+      consentDate: new Date(),
     },
   });
 

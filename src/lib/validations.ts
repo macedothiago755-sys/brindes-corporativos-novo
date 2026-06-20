@@ -15,6 +15,10 @@ export const quoteSchema = z.object({
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
   couponCode: z.string().optional(),
+  consentAceito: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade para enviar o orçamento." }),
+  }),
+  consentVersion: z.string().min(1),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
@@ -22,6 +26,10 @@ export type QuoteInput = z.infer<typeof quoteSchema>;
 export const leadSchema = z.object({
   email: z.string().email("E-mail inválido"),
   telefone: z.string().min(8, "Telefone inválido"),
+  consentAceito: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar a Política de Privacidade para continuar." }),
+  }),
+  consentVersion: z.string().min(1),
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;
@@ -48,6 +56,10 @@ export const kitQuoteSchema = z.object({
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
   couponCode: z.string().optional(),
+  consentAceito: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade para enviar o orçamento." }),
+  }),
+  consentVersion: z.string().min(1),
 });
 
 export type KitQuoteInput = z.infer<typeof kitQuoteSchema>;

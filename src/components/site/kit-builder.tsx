@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Building2, Gift, PartyPopper, Rocket, Star } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn, isExternalImage } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import type { KitRecommendation } from "@/lib/kit-recommendation";
 
 const objectives = [
@@ -40,6 +43,7 @@ export function KitBuilder() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
+  const [consentAceito, setConsentAceito] = useState(false);
 
   useEffect(() => {
     setCouponCode(getStoredCoupon());
@@ -69,6 +73,10 @@ export function KitBuilder() {
   async function handleSubmitQuote(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!recommendation || !quantity || !budgetPerPerson) return;
+    if (!consentAceito) {
+      setSubmitError("É necessário aceitar o Aviso de Privacidade para enviar o orçamento.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
 
@@ -91,6 +99,8 @@ export function KitBuilder() {
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
       couponCode: couponCode || undefined,
+      consentAceito,
+      consentVersion: LEGAL_TERMS_VERSION,
     };
 
     try {
@@ -313,13 +323,28 @@ export function KitBuilder() {
               </div>
             </div>
 
+            <label className="flex items-start gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={consentAceito}
+                onCheckedChange={(checked) => setConsentAceito(checked === true)}
+                className="mt-0.5"
+              />
+              <span>
+                Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme{" "}
+                <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
+                  Aviso de Privacidade
+                </Link>
+                .
+              </span>
+            </label>
+
             {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(3)}>
                 Ajustar orçamento
               </Button>
-              <Button type="submit" size="lg" variant="gradient" disabled={submitting}>
+              <Button type="submit" size="lg" variant="gradient" disabled={submitting || !consentAceito}>
                 {submitting ? "Enviando..." : "Solicitar orçamento deste kit"}
               </Button>
             </div>

@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Gift, Check, Copy } from "lucide-react";
+import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { setStoredCoupon } from "@/lib/coupon-storage";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
 const SHOWN_STORAGE_KEY = "brindes:newsletter-popup-shown";
 const SHOW_DELAY_MS = 4000;
@@ -19,6 +22,7 @@ export function NewsletterPopup() {
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [consentAceito, setConsentAceito] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(SHOWN_STORAGE_KEY)) return;
@@ -31,6 +35,10 @@ export function NewsletterPopup() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!consentAceito) {
+      setError("É necessário concordar com a Política de Privacidade para continuar.");
+      return;
+    }
     setError(null);
     setLoading(true);
 
@@ -38,7 +46,7 @@ export function NewsletterPopup() {
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, telefone }),
+        body: JSON.stringify({ email, telefone, consentAceito, consentVersion: LEGAL_TERMS_VERSION }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Não foi possível concluir o cadastro.");
@@ -113,9 +121,24 @@ export function NewsletterPopup() {
                 />
               </div>
 
+              <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Checkbox
+                  checked={consentAceito}
+                  onCheckedChange={(checked) => setConsentAceito(checked === true)}
+                  className="mt-0.5"
+                />
+                <span>
+                  Ao cadastrar, você concorda em receber contato da Paint Colors conforme nossa{" "}
+                  <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
+                    Política de Privacidade
+                  </Link>
+                  .
+                </span>
+              </label>
+
               {error && <p className="text-sm text-red-600">{error}</p>}
 
-              <Button type="submit" size="lg" variant="gradient" className="w-full" disabled={loading}>
+              <Button type="submit" size="lg" variant="gradient" className="w-full" disabled={loading || !consentAceito}>
                 {loading ? "Enviando..." : "Receber meu benefício"}
               </Button>
             </form>

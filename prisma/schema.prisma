@@ -265,6 +265,9 @@ model Quote {
   quantidadePessoas   Int?
   orcamentoPorPessoa  Float?
   couponCode  String?
+  consentAceito Boolean   @default(false)
+  consentVersion String?
+  consentDate    DateTime?
   items       QuoteItem[]
   attachments Attachment[]
   createdAt   DateTime     @default(now())
@@ -286,9 +289,25 @@ model Lead {
   email       String
   telefone    String
   couponCode  String?
+  consentAceito  Boolean   @default(false)
+  consentVersion String?
+  consentDate    DateTime?
   createdAt   DateTime @default(now())
 
   @@index([email])
+}
+
+model CookieConsent {
+  id                 String   @id @default(cuid())
+  sessionId          String
+  userId             String?
+  ipHash             String?
+  consentStatus      String
+  acceptedCategories String[] @default([])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([sessionId])
 }
 
 model QuoteItem {

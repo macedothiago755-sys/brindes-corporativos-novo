@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
 const quantities = ["50", "100", "250", "500", "1000+"];
 const personalizationOptions = [
@@ -37,6 +39,7 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
   const [personalizacao, setPersonalizacao] = useState<string[]>([]);
   const [metodo, setMetodo] = useState<string[]>([]);
   const [couponCode, setCouponCode] = useState("");
+  const [consentAceito, setConsentAceito] = useState(false);
 
   useEffect(() => {
     setCouponCode(getStoredCoupon());
@@ -48,6 +51,10 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!consentAceito) {
+      setError("É necessário aceitar o Aviso de Privacidade para enviar o orçamento.");
+      return;
+    }
     setError(null);
     setLoading(true);
 
@@ -83,6 +90,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
       couponCode: couponCode || undefined,
+      consentAceito,
+      consentVersion: LEGAL_TERMS_VERSION,
     };
 
     try {
@@ -241,9 +250,24 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
             </div>
           </div>
 
+          <label className="flex items-start gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              checked={consentAceito}
+              onCheckedChange={(checked) => setConsentAceito(checked === true)}
+              className="mt-0.5"
+            />
+            <span>
+              Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme{" "}
+              <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
+                Aviso de Privacidade
+              </Link>
+              .
+            </span>
+          </label>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          <Button type="submit" size="lg" className="w-full" disabled={loading || !consentAceito}>
             {loading ? "Enviando..." : "Solicitar orçamento"}
           </Button>
         </form>
