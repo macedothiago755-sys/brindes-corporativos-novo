@@ -39,7 +39,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
   const [personalizacao, setPersonalizacao] = useState<string[]>([]);
   const [metodo, setMetodo] = useState<string[]>([]);
   const [couponCode, setCouponCode] = useState("");
-  const [consentAceito, setConsentAceito] = useState(false);
+  const [consentObrigatorio, setConsentObrigatorio] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
     setCouponCode(getStoredCoupon());
@@ -51,8 +52,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!consentAceito) {
-      setError("É necessário aceitar o Aviso de Privacidade para enviar o orçamento.");
+    if (!consentObrigatorio) {
+      setError("É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento.");
       return;
     }
     setError(null);
@@ -90,7 +91,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
       couponCode: couponCode || undefined,
-      consentAceito,
+      consentObrigatorio,
+      consentMarketing,
       consentVersion: LEGAL_TERMS_VERSION,
     };
 
@@ -252,22 +254,38 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
 
           <label className="flex items-start gap-2 text-xs text-muted-foreground">
             <Checkbox
-              checked={consentAceito}
-              onCheckedChange={(checked) => setConsentAceito(checked === true)}
+              checked={consentObrigatorio}
+              onCheckedChange={(checked) => setConsentObrigatorio(checked === true)}
               className="mt-0.5"
             />
             <span>
-              Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme{" "}
+              Li e aceito o{" "}
               <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
                 Aviso de Privacidade
+              </Link>{" "}
+              e os{" "}
+              <Link href="/termos-de-uso" className="font-medium text-foreground underline">
+                Termos de Uso
               </Link>
               .
             </span>
           </label>
 
+          <label className="flex items-start gap-2 text-xs text-muted-foreground">
+            <Checkbox
+              checked={consentMarketing}
+              onCheckedChange={(checked) => setConsentMarketing(checked === true)}
+              className="mt-0.5"
+            />
+            <span>
+              Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme o Aviso de
+              Privacidade.
+            </span>
+          </label>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" size="lg" className="w-full" disabled={loading || !consentAceito}>
+          <Button type="submit" size="lg" className="w-full" disabled={loading || !consentObrigatorio}>
             {loading ? "Enviando..." : "Solicitar orçamento"}
           </Button>
         </form>

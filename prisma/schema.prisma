@@ -70,6 +70,19 @@ enum PriceTier {
   ALTO
 }
 
+enum DeletionRequestStatus {
+  ABERTO
+  EM_ANALISE
+  CONCLUIDO
+}
+
+enum AuditAction {
+  ACCESS
+  EXPORT
+  DELETE
+  ANONYMIZE
+}
+
 model User {
   id         String      @id @default(cuid())
   name       String
@@ -78,6 +91,7 @@ model User {
   role       Role        @default(ADMIN)
   createdAt  DateTime    @default(now())
   importJobs ImportJob[]
+  auditLogs  AuditLog[]
 }
 
 model Category {
@@ -265,9 +279,12 @@ model Quote {
   quantidadePessoas   Int?
   orcamentoPorPessoa  Float?
   couponCode  String?
-  consentAceito Boolean   @default(false)
-  consentVersion String?
-  consentDate    DateTime?
+  consentObrigatorioAceito  Boolean   @default(false)
+  consentObrigatorioVersion String?
+  consentObrigatorioDate    DateTime?
+  consentMarketingAceito    Boolean   @default(false)
+  consentMarketingVersion   String?
+  consentMarketingDate      DateTime?
   items       QuoteItem[]
   attachments Attachment[]
   createdAt   DateTime     @default(now())
@@ -286,12 +303,18 @@ model Coupon {
 
 model Lead {
   id          String   @id @default(cuid())
+  nome        String?
+  empresa     String?
   email       String
   telefone    String
   couponCode  String?
-  consentAceito  Boolean   @default(false)
-  consentVersion String?
-  consentDate    DateTime?
+  consentObrigatorioAceito  Boolean   @default(false)
+  consentObrigatorioVersion String?
+  consentObrigatorioDate    DateTime?
+  consentMarketingAceito    Boolean   @default(false)
+  consentMarketingVersion   String?
+  consentMarketingDate      DateTime?
+  anonymizedAt DateTime?
   createdAt   DateTime @default(now())
 
   @@index([email])
@@ -304,10 +327,38 @@ model CookieConsent {
   ipHash             String?
   consentStatus      String
   acceptedCategories String[] @default([])
+  policyVersion      String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@index([sessionId])
+}
+
+model DataDeletionRequest {
+  id          String                 @id @default(cuid())
+  email       String
+  telefone    String?
+  mensagem    String?
+  status      DeletionRequestStatus  @default(ABERTO)
+  notasAdmin  String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id])
+  action     AuditAction
+  targetType String
+  targetId   String?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId])
+  @@index([targetType])
 }
 
 model QuoteItem {

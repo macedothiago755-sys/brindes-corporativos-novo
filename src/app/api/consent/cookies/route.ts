@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       ipHash: hashIp(ip),
       consentStatus: body.consentStatus,
       acceptedCategories,
+      policyVersion: typeof body.policyVersion === "string" ? body.policyVersion : null,
     },
   });
 

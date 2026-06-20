@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit";
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const userId = (session?.user as { id?: string } | undefined)?.id;
   const role = (session?.user as { role?: string } | undefined)?.role;
@@ -13,8 +13,17 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   }
 
   const { id } = await params;
-  await prisma.lead.delete({ where: { id } });
-  await logAudit(userId ?? null, "DELETE", "Lead", id);
+  const anonymized = await prisma.lead.update({
+    where: { id },
+    data: {
+      nome: null,
+      empresa: null,
+      email: `anonimizado-${id}@paintcolors.invalid`,
+      telefone: "ANONIMIZADO",
+      anonymizedAt: new Date(),
+    },
+  });
+  await logAudit(userId ?? null, "ANONYMIZE", "Lead", id);
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, lead: anonymized });
 }

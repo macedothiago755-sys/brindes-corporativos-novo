@@ -24,9 +24,29 @@ export function LeadRowActions({ leadId }: { leadId: string }) {
     }
   }
 
+  async function handleAnonymize() {
+    if (!confirm("Anonimizar os dados deste lead? Nome, e-mail e telefone serão substituídos permanentemente.")) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/leads/${leadId}/anonymize`, { method: "PATCH" });
+      if (!res.ok) throw new Error();
+      toast.success("Dados anonimizados com sucesso.");
+      router.refresh();
+    } catch {
+      toast.error("Não foi possível anonimizar os dados.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <Button variant="outline" size="sm" disabled={loading} onClick={handleDelete}>
-      Excluir dados
-    </Button>
+    <div className="flex gap-2">
+      <Button variant="outline" size="sm" disabled={loading} onClick={handleAnonymize}>
+        Anonimizar
+      </Button>
+      <Button variant="outline" size="sm" disabled={loading} onClick={handleDelete}>
+        Excluir dados
+      </Button>
+    </div>
   );
 }

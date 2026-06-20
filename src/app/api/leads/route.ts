@@ -23,14 +23,20 @@ export async function POST(req: NextRequest) {
 
   const coupon = await prisma.coupon.findUnique({ where: { code: WELCOME_COUPON_CODE } });
 
+  const now = new Date();
   await prisma.lead.create({
     data: {
+      nome: parsed.data.nome,
+      empresa: parsed.data.empresa,
       email: parsed.data.email,
       telefone: parsed.data.telefone,
       couponCode: coupon?.active ? coupon.code : null,
-      consentAceito: parsed.data.consentAceito,
-      consentVersion: parsed.data.consentVersion,
-      consentDate: new Date(),
+      consentObrigatorioAceito: parsed.data.consentObrigatorio,
+      consentObrigatorioVersion: parsed.data.consentVersion,
+      consentObrigatorioDate: now,
+      consentMarketingAceito: parsed.data.consentMarketing,
+      consentMarketingVersion: parsed.data.consentMarketing ? parsed.data.consentVersion : null,
+      consentMarketingDate: parsed.data.consentMarketing ? now : null,
     },
   });
 

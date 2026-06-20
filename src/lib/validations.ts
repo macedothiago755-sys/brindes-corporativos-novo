@@ -15,20 +15,24 @@ export const quoteSchema = z.object({
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
   couponCode: z.string().optional(),
-  consentAceito: z.literal(true, {
-    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade para enviar o orçamento." }),
+  consentObrigatorio: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento." }),
   }),
+  consentMarketing: z.boolean().default(false),
   consentVersion: z.string().min(1),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
 
 export const leadSchema = z.object({
+  nome: z.string().min(2, "Informe seu nome"),
+  empresa: z.string().min(2, "Informe sua empresa"),
   email: z.string().email("E-mail inválido"),
   telefone: z.string().min(8, "Telefone inválido"),
-  consentAceito: z.literal(true, {
-    errorMap: () => ({ message: "É necessário aceitar a Política de Privacidade para continuar." }),
+  consentObrigatorio: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade para continuar." }),
   }),
+  consentMarketing: z.boolean().default(false),
   consentVersion: z.string().min(1),
 });
 
@@ -56,9 +60,10 @@ export const kitQuoteSchema = z.object({
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
   couponCode: z.string().optional(),
-  consentAceito: z.literal(true, {
-    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade para enviar o orçamento." }),
+  consentObrigatorio: z.literal(true, {
+    errorMap: () => ({ message: "É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento." }),
   }),
+  consentMarketing: z.boolean().default(false),
   consentVersion: z.string().min(1),
 });
 

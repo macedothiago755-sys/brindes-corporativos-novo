@@ -16,13 +16,16 @@ const SHOW_DELAY_MS = 4000;
 
 export function NewsletterPopup() {
   const [open, setOpen] = useState(false);
+  const [nome, setNome] = useState("");
+  const [empresa, setEmpresa] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [consentAceito, setConsentAceito] = useState(false);
+  const [consentObrigatorio, setConsentObrigatorio] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(SHOWN_STORAGE_KEY)) return;
@@ -35,8 +38,8 @@ export function NewsletterPopup() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!consentAceito) {
-      setError("É necessário concordar com a Política de Privacidade para continuar.");
+    if (!consentObrigatorio) {
+      setError("É necessário aceitar o Aviso de Privacidade para continuar.");
       return;
     }
     setError(null);
@@ -46,7 +49,15 @@ export function NewsletterPopup() {
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, telefone, consentAceito, consentVersion: LEGAL_TERMS_VERSION }),
+        body: JSON.stringify({
+          nome,
+          empresa,
+          email,
+          telefone,
+          consentObrigatorio,
+          consentMarketing,
+          consentVersion: LEGAL_TERMS_VERSION,
+        }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Não foi possível concluir o cadastro.");
@@ -100,6 +111,26 @@ export function NewsletterPopup() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <Label htmlFor="popup-nome">Nome</Label>
+                <Input
+                  id="popup-nome"
+                  required
+                  className="mt-2"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="popup-empresa">Empresa</Label>
+                <Input
+                  id="popup-empresa"
+                  required
+                  className="mt-2"
+                  value={empresa}
+                  onChange={(e) => setEmpresa(e.target.value)}
+                />
+              </div>
+              <div>
                 <Label htmlFor="popup-email">E-mail</Label>
                 <Input
                   id="popup-email"
@@ -123,22 +154,38 @@ export function NewsletterPopup() {
 
               <label className="flex items-start gap-2 text-xs text-muted-foreground">
                 <Checkbox
-                  checked={consentAceito}
-                  onCheckedChange={(checked) => setConsentAceito(checked === true)}
+                  checked={consentObrigatorio}
+                  onCheckedChange={(checked) => setConsentObrigatorio(checked === true)}
                   className="mt-0.5"
                 />
                 <span>
-                  Ao cadastrar, você concorda em receber contato da Paint Colors conforme nossa{" "}
+                  Li e aceito o{" "}
                   <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
-                    Política de Privacidade
+                    Aviso de Privacidade
+                  </Link>{" "}
+                  e os{" "}
+                  <Link href="/termos-de-uso" className="font-medium text-foreground underline">
+                    Termos de Uso
                   </Link>
                   .
                 </span>
               </label>
 
+              <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Checkbox
+                  checked={consentMarketing}
+                  onCheckedChange={(checked) => setConsentMarketing(checked === true)}
+                  className="mt-0.5"
+                />
+                <span>
+                  Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme o Aviso de
+                  Privacidade.
+                </span>
+              </label>
+
               {error && <p className="text-sm text-red-600">{error}</p>}
 
-              <Button type="submit" size="lg" variant="gradient" className="w-full" disabled={loading || !consentAceito}>
+              <Button type="submit" size="lg" variant="gradient" className="w-full" disabled={loading || !consentObrigatorio}>
                 {loading ? "Enviando..." : "Receber meu benefício"}
               </Button>
             </form>
