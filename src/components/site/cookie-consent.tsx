@@ -5,16 +5,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
 const STORAGE_KEY = "brindes:cookie-consent";
 
 type Preferences = {
   essenciais: true;
-  analise: boolean;
+  estatisticos: boolean;
   marketing: boolean;
 };
 
-const DEFAULT_PREFERENCES: Preferences = { essenciais: true, analise: false, marketing: false };
+const DEFAULT_PREFERENCES: Preferences = { essenciais: true, estatisticos: false, marketing: false };
 
 function acceptedCategoriesFrom(preferences: Preferences) {
   return (Object.keys(preferences) as (keyof Preferences)[]).filter((key) => preferences[key]);
@@ -25,7 +26,11 @@ async function persistConsent(status: string, preferences: Preferences) {
     await fetch("/api/consent/cookies", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ consentStatus: status, acceptedCategories: acceptedCategoriesFrom(preferences) }),
+      body: JSON.stringify({
+        consentStatus: status,
+        acceptedCategories: acceptedCategoriesFrom(preferences),
+        policyVersion: LEGAL_TERMS_VERSION,
+      }),
     });
   } catch {
     // registro de consentimento é best-effort; não deve bloquear a navegação
@@ -61,6 +66,10 @@ export function CookieConsent() {
               pode aceitar ou gerenciar suas preferências. Saiba mais em nosso{" "}
               <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
                 Aviso de Privacidade
+              </Link>{" "}
+              e na{" "}
+              <Link href="/politica-de-cookies" className="font-medium text-foreground underline">
+                Política de Cookies
               </Link>
               .
             </p>
@@ -71,11 +80,11 @@ export function CookieConsent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => save("recusado_opcionais", { essenciais: true, analise: false, marketing: false })}
+                onClick={() => save("recusado_opcionais", { essenciais: true, estatisticos: false, marketing: false })}
               >
                 Recusar opcionais
               </Button>
-              <Button size="sm" variant="gradient" onClick={() => save("aceito_todos", { essenciais: true, analise: true, marketing: true })}>
+              <Button size="sm" variant="gradient" onClick={() => save("aceito_todos", { essenciais: true, estatisticos: true, marketing: true })}>
                 Aceitar todos
               </Button>
             </div>
@@ -105,14 +114,14 @@ export function CookieConsent() {
 
             <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
               <div>
-                <p className="text-sm font-medium">Cookies de análise</p>
+                <p className="text-sm font-medium">Cookies estatísticos</p>
                 <p className="text-xs text-muted-foreground">
-                  Nos ajudam a entender como você usa o site (ex: Google Analytics) para melhorar a experiência.
+                  Nos ajudam a entender como você usa o site (ex: ferramentas de Analytics) para melhorar a experiência.
                 </p>
               </div>
               <Checkbox
-                checked={preferences.analise}
-                onCheckedChange={(checked) => setPreferences((p) => ({ ...p, analise: checked === true }))}
+                checked={preferences.estatisticos}
+                onCheckedChange={(checked) => setPreferences((p) => ({ ...p, estatisticos: checked === true }))}
               />
             </div>
 

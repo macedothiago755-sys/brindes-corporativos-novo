@@ -43,7 +43,8 @@ export function KitBuilder() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
-  const [consentAceito, setConsentAceito] = useState(false);
+  const [consentObrigatorio, setConsentObrigatorio] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
     setCouponCode(getStoredCoupon());
@@ -73,8 +74,8 @@ export function KitBuilder() {
   async function handleSubmitQuote(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!recommendation || !quantity || !budgetPerPerson) return;
-    if (!consentAceito) {
-      setSubmitError("É necessário aceitar o Aviso de Privacidade para enviar o orçamento.");
+    if (!consentObrigatorio) {
+      setSubmitError("É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento.");
       return;
     }
     setSubmitting(true);
@@ -99,7 +100,8 @@ export function KitBuilder() {
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
       couponCode: couponCode || undefined,
-      consentAceito,
+      consentObrigatorio,
+      consentMarketing,
       consentVersion: LEGAL_TERMS_VERSION,
     };
 
@@ -325,16 +327,32 @@ export function KitBuilder() {
 
             <label className="flex items-start gap-2 text-xs text-muted-foreground">
               <Checkbox
-                checked={consentAceito}
-                onCheckedChange={(checked) => setConsentAceito(checked === true)}
+                checked={consentObrigatorio}
+                onCheckedChange={(checked) => setConsentObrigatorio(checked === true)}
                 className="mt-0.5"
               />
               <span>
-                Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme{" "}
+                Li e aceito o{" "}
                 <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
                   Aviso de Privacidade
+                </Link>{" "}
+                e os{" "}
+                <Link href="/termos-de-uso" className="font-medium text-foreground underline">
+                  Termos de Uso
                 </Link>
                 .
+              </span>
+            </label>
+
+            <label className="flex items-start gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={consentMarketing}
+                onCheckedChange={(checked) => setConsentMarketing(checked === true)}
+                className="mt-0.5"
+              />
+              <span>
+                Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme o Aviso de
+                Privacidade.
               </span>
             </label>
 
@@ -344,7 +362,7 @@ export function KitBuilder() {
               <Button type="button" variant="outline" onClick={() => setStep(3)}>
                 Ajustar orçamento
               </Button>
-              <Button type="submit" size="lg" variant="gradient" disabled={submitting || !consentAceito}>
+              <Button type="submit" size="lg" variant="gradient" disabled={submitting || !consentObrigatorio}>
                 {submitting ? "Enviando..." : "Solicitar orçamento deste kit"}
               </Button>
             </div>

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
 import { LeadRowActions } from "./lead-row-actions";
+import { DeletionRequestActions } from "./deletion-request-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +15,13 @@ export default async function AdminPrivacyPage() {
     redirect("/admin");
   }
 
-  const [leads, cookieConsents] = await Promise.all([
+  const [leads, cookieConsents, deletionRequests, totalLeads, marketingLeads, pendingRequests] = await Promise.all([
     prisma.lead.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.cookieConsent.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+    prisma.dataDeletionRequest.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.lead.count(),
+    prisma.lead.count({ where: { consentMarketingAceito: true } }),
+    prisma.dataDeletionRequest.count({ where: { status: { not: "CONCLUIDO" } } }),
   ]);
 
   return (
@@ -34,17 +39,33 @@ export default async function AdminPrivacyPage() {
         </a>
       </div>
 
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">Total de leads cadastrados</p>
+          <p className="mt-1 text-2xl font-semibold">{totalLeads}</p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">Leads autorizados para marketing</p>
+          <p className="mt-1 text-2xl font-semibold">{marketingLeads}</p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">Solicitações de exclusão pendentes</p>
+          <p className="mt-1 text-2xl font-semibold">{pendingRequests}</p>
+        </div>
+      </div>
+
       <section className="mt-8">
         <h2 className="text-lg font-semibold tracking-tight">Leads e consentimento</h2>
         <div className="mt-4 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted text-left">
               <tr>
+                <th className="px-4 py-3">Nome / Empresa</th>
                 <th className="px-4 py-3">E-mail</th>
                 <th className="px-4 py-3">Telefone</th>
                 <th className="px-4 py-3">Cupom</th>
-                <th className="px-4 py-3">Consentimento</th>
-                <th className="px-4 py-3">Versão</th>
+                <th className="px-4 py-3">Consent. obrigatório</th>
+                <th className="px-4 py-3">Consent. marketing</th>
                 <th className="px-4 py-3">Data do aceite</th>
                 <th className="px-4 py-3">Ações</th>
               </tr>
@@ -52,19 +73,33 @@ export default async function AdminPrivacyPage() {
             <tbody>
               {leads.map((lead) => (
                 <tr key={lead.id} className="border-t border-border hover:bg-muted/50">
-                  <td className="px-4 py-3 font-medium">{lead.email}</td>
+                  <td className="px-4 py-3 font-medium">
+                    {lead.anonymizedAt ? (
+                      <span className="text-muted-foreground">Anonimizado</span>
+                    ) : (
+                      <>
+                        {lead.nome || "—"}
+                        <span className="block text-xs text-muted-foreground">{lead.empresa || "—"}</span>
+                      </>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">{lead.email}</td>
                   <td className="px-4 py-3">{lead.telefone}</td>
                   <td className="px-4 py-3">
                     {lead.couponCode ? <Badge variant="outline">{lead.couponCode}</Badge> : <span className="text-muted-foreground">—</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={lead.consentAceito ? "accent" : "outline"}>
-                      {lead.consentAceito ? "Aceito" : "Não aceito"}
+                    <Badge variant={lead.consentObrigatorioAceito ? "accent" : "outline"}>
+                      {lead.consentObrigatorioAceito ? "Aceito" : "Não aceito"}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{lead.consentVersion || "—"}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant={lead.consentMarketingAceito ? "accent" : "outline"}>
+                      {lead.consentMarketingAceito ? "Aceito" : "Não aceito"}
+                    </Badge>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {lead.consentDate ? lead.consentDate.toLocaleString("pt-BR") : "—"}
+                    {lead.consentObrigatorioDate ? lead.consentObrigatorioDate.toLocaleString("pt-BR") : "—"}
                   </td>
                   <td className="px-4 py-3">
                     <LeadRowActions leadId={lead.id} />
@@ -73,8 +108,46 @@ export default async function AdminPrivacyPage() {
               ))}
               {leads.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">
                     Nenhum lead cadastrado ainda.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold tracking-tight">Solicitações de exclusão de dados</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Pedidos de exclusão registrados pelos próprios titulares dos dados.
+        </p>
+        <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted text-left">
+              <tr>
+                <th className="px-4 py-3">E-mail</th>
+                <th className="px-4 py-3">Mensagem</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deletionRequests.map((r) => (
+                <tr key={r.id} className="border-t border-border hover:bg-muted/50">
+                  <td className="px-4 py-3 font-medium">{r.email}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.mensagem || "—"}</td>
+                  <td className="px-4 py-3">
+                    <DeletionRequestActions requestId={r.id} status={r.status} />
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.createdAt.toLocaleString("pt-BR")}</td>
+                </tr>
+              ))}
+              {deletionRequests.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                    Nenhuma solicitação registrada ainda.
                   </td>
                 </tr>
               )}

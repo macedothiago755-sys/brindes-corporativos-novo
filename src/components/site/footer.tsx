@@ -4,7 +4,7 @@ import Image from "next/image";
 export function Footer() {
   return (
     <footer id="contato" className="border-t border-border bg-muted">
-      <div className="container-premium grid gap-10 py-16 lg:grid-cols-4">
+      <div className="container-premium grid gap-10 py-16 lg:grid-cols-5">
         <div>
           <div className="flex items-center gap-2">
             <Image src="/logo-paint-colors.png" alt="Paint Colors Company" width={32} height={32} className="h-8 w-8" />
@@ -44,14 +44,19 @@ export function Footer() {
             <li>Atendimento em todo o Brasil</li>
           </ul>
         </div>
+
+        <div>
+          <p className="text-sm font-semibold">Privacidade e Segurança</p>
+          <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <li><Link href="/politica-de-privacidade">Aviso de Privacidade</Link></li>
+            <li><Link href="/termos-de-uso">Termos de Uso</Link></li>
+            <li><Link href="/politica-de-cookies">Política de Cookies</Link></li>
+          </ul>
+        </div>
       </div>
 
       <div className="container-premium flex flex-col gap-4 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>© {new Date().getFullYear()} Brindes Corporativos. Todos os direitos reservados.</p>
-        <div className="flex gap-4">
-          <Link href="/politica-de-privacidade" className="hover:text-foreground">Aviso de Privacidade</Link>
-          <Link href="/termos-de-uso" className="hover:text-foreground">Termos de Uso</Link>
-        </div>
       </div>
     </footer>
   );

@@ -41,9 +41,12 @@ export async function POST(req: NextRequest) {
       objetivo: data.objetivo,
       prazo: data.prazo,
       couponCode,
-      consentAceito: data.consentAceito,
-      consentVersion: data.consentVersion,
-      consentDate: new Date(),
+      consentObrigatorioAceito: data.consentObrigatorio,
+      consentObrigatorioVersion: data.consentVersion,
+      consentObrigatorioDate: new Date(),
+      consentMarketingAceito: data.consentMarketing,
+      consentMarketingVersion: data.consentMarketing ? data.consentVersion : null,
+      consentMarketingDate: data.consentMarketing ? new Date() : null,
       items: {
         create: [
           {
