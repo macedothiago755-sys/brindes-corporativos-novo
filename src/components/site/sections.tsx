@@ -1,18 +1,69 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  Briefcase,
+  ChefHat,
+  Coffee,
+  Crown,
+  Cpu,
+  CupSoda,
+  Dumbbell,
+  Factory,
+  Flame,
+  Frame,
+  HandHeart,
+  Leaf,
+  Package,
+  PartyPopper,
+  PawPrint,
+  Shirt,
+  ShieldCheck,
+  ShoppingBag,
+  Sofa,
+  Tag,
+  ToyBrick,
+  UtensilsCrossed,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 
-const categoryImages = [
-  "/banners/banner-2-bolsa-1014x535.jpg",
-  "/banners/banner-3-garrafa-1014x535.jpg",
-  "/banners/banner-4-squeeze-1014x535.jpg",
-  "/banners/banner-5-caderno-1014x535.jpg",
-  "/banners/banner-7-copa1-1014x535.jpg",
-  "/banners/banner-8-frasqueira-1014x535.jpg",
-  "/banners/banner-9-copa2-1014x535.jpg",
-];
+const categoryIcons: Record<string, LucideIcon> = {
+  brinquedos: ToyBrick,
+  canecas: Coffee,
+  "casa e decoracao": Sofa,
+  copos: CupSoda,
+  escritorio: Briefcase,
+  espelhos: Frame,
+  esporte: Dumbbell,
+  eventos: PartyPopper,
+  "kit churrasco": Flame,
+  "kits corporativos": Package,
+  "linha pet": PawPrint,
+  "moda e estilo": Shirt,
+  petisqueiras: UtensilsCrossed,
+  plaquinhas: Tag,
+  premium: Crown,
+  "sacolas e sacochilas": ShoppingBag,
+  sustentaveis: Leaf,
+  tecnologia: Cpu,
+  tabuas: ChefHat,
+  utilidades: Wrench,
+};
+
+function normalizeCategoryName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function getCategoryIcon(name: string): LucideIcon {
+  return categoryIcons[normalizeCategoryName(name)] ?? Package;
+}
 
 export async function CategoriesSection() {
   const categories = await prisma.category.findMany({
@@ -24,23 +75,22 @@ export async function CategoriesSection() {
     <section className="container-premium py-20">
       <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Categorias principais</h2>
       <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-        {categories.map((c, i) => (
-          <Link
-            key={c.slug}
-            href={`/produtos?categoria=${c.slug}`}
-            className="group relative aspect-square overflow-hidden rounded-xl border border-border transition-colors hover:border-accent"
-          >
-            <Image
-              src={categoryImages[i % categoryImages.length]}
-              alt={c.name}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 33vw, 15vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-            <span className="absolute inset-x-2 bottom-2 text-center text-sm font-medium text-white">{c.name}</span>
-          </Link>
-        ))}
+        {categories.map((c) => {
+          const Icon = getCategoryIcon(c.name);
+          return (
+            <Link
+              key={c.slug}
+              href={`/produtos?categoria=${c.slug}`}
+              className="group flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card px-3 py-6 text-center transition-colors hover:border-accent hover:bg-accent/5"
+            >
+              <Icon
+                className="h-8 w-8 text-foreground transition-colors group-hover:text-accent"
+                strokeWidth={1.5}
+              />
+              <span className="text-sm font-medium">{c.name}</span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
