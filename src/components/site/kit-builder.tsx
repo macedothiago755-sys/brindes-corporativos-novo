@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Building2, Gift, PartyPopper, Rocket, Star } from "lucide-react";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { cn, isExternalImage } from "@/lib/utils";
+import { getStoredCoupon } from "@/lib/coupon-storage";
 import type { KitRecommendation } from "@/lib/kit-recommendation";
 
 const objectives = [
@@ -38,6 +39,11 @@ export function KitBuilder() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+
+  useEffect(() => {
+    setCouponCode(getStoredCoupon());
+  }, []);
 
   async function handleGenerate() {
     if (!objective || !quantity || !budgetPerPerson) return;
@@ -84,6 +90,7 @@ export function KitBuilder() {
       telefone: String(formData.get("telefone") || ""),
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
+      couponCode: couponCode || undefined,
     };
 
     try {
@@ -292,6 +299,17 @@ export function KitBuilder() {
               <div className="sm:col-span-2">
                 <Label htmlFor="cidade">Cidade</Label>
                 <Input id="cidade" name="cidade" className="mt-2" />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="couponCode">Cupom de desconto (opcional)</Label>
+                <Input
+                  id="couponCode"
+                  name="couponCode"
+                  className="mt-2"
+                  placeholder="Ex: BEMVINDO5"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                />
               </div>
             </div>
 

@@ -14,9 +14,17 @@ export const quoteSchema = z.object({
   observacoes: z.string().max(2000).optional(),
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
+  couponCode: z.string().optional(),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
+
+export const leadSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
+});
+
+export type LeadInput = z.infer<typeof leadSchema>;
 
 const kitQuoteItemSchema = z.object({
   productId: z.string().min(1),
@@ -39,6 +47,7 @@ export const kitQuoteSchema = z.object({
   observacoes: z.string().max(2000).optional(),
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
+  couponCode: z.string().optional(),
 });
 
 export type KitQuoteInput = z.infer<typeof kitQuoteSchema>;

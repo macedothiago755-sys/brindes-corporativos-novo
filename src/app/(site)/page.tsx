@@ -25,9 +25,9 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
-      <TrustStats />
       <BannerCarousel />
+      <TrustStats />
+      <Hero />
       <CategoriesSection />
       <SolutionsSection />
       <PromoGridSection />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { getStoredCoupon } from "@/lib/coupon-storage";
 
 const quantities = ["50", "100", "250", "500", "1000+"];
 const personalizationOptions = [
@@ -35,6 +36,11 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
   const [cor, setCor] = useState(colors[0] ?? "");
   const [personalizacao, setPersonalizacao] = useState<string[]>([]);
   const [metodo, setMetodo] = useState<string[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+
+  useEffect(() => {
+    setCouponCode(getStoredCoupon());
+  }, []);
 
   function toggle(list: string[], setList: (v: string[]) => void, value: string) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -76,6 +82,7 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
       telefone: String(formData.get("telefone") || ""),
       cidade: String(formData.get("cidade") || ""),
       observacoes: String(formData.get("observacoes") || ""),
+      couponCode: couponCode || undefined,
     };
 
     try {
@@ -220,6 +227,17 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
             <div className="sm:col-span-2">
               <Label htmlFor="observacoes">Observações</Label>
               <Textarea id="observacoes" name="observacoes" className="mt-2" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="couponCode">Cupom de desconto (opcional)</Label>
+              <Input
+                id="couponCode"
+                name="couponCode"
+                className="mt-2"
+                placeholder="Ex: BEMVINDO5"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              />
             </div>
           </div>
 

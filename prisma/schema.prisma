@@ -264,10 +264,31 @@ model Quote {
   kit         Kit?         @relation(fields: [kitId], references: [id])
   quantidadePessoas   Int?
   orcamentoPorPessoa  Float?
+  couponCode  String?
   items       QuoteItem[]
   attachments Attachment[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  @@index([couponCode])
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  percent   Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  email       String
+  telefone    String
+  couponCode  String?
+  createdAt   DateTime @default(now())
+
+  @@index([email])
 }
 
 model QuoteItem {

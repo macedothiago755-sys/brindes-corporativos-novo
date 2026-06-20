@@ -37,6 +37,7 @@ export default async function AdminQuotesPage() {
               <th className="px-4 py-3">Qtd.</th>
               <th className="px-4 py-3">Data</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Cupom</th>
               <th className="px-4 py-3">Arquivo</th>
             </tr>
           </thead>
@@ -54,6 +55,9 @@ export default async function AdminQuotesPage() {
                 <td className="px-4 py-3">{q.createdAt.toLocaleDateString("pt-BR")}</td>
                 <td className="px-4 py-3">
                   <Badge variant={q.status === "NOVO" ? "accent" : "outline"}>{statusLabels[q.status]}</Badge>
+                </td>
+                <td className="px-4 py-3">
+                  {q.couponCode ? <Badge variant="outline">{q.couponCode}</Badge> : <span className="text-muted-foreground">—</span>}
                 </td>
                 <td className="px-4 py-3">
                   {q.attachments[0] ? (

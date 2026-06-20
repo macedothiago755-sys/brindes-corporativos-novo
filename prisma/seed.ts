@@ -408,6 +408,12 @@ async function main() {
     },
   });
 
+  await prisma.coupon.upsert({
+    where: { code: "BEMVINDO5" },
+    update: {},
+    create: { code: "BEMVINDO5", percent: 5, active: true },
+  });
+
   console.log(`Seed concluído: ${categoryMap.size} categorias, ${counter} produtos, ${blogPosts.length} posts e usuário admin criados.`);
   console.log("Login admin: admin@brindescorporativos.com / admin123");
 }

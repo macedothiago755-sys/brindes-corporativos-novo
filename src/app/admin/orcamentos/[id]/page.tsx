@@ -58,6 +58,7 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
         <div><p className="text-xs text-muted-foreground">Quantidade</p><p className="font-medium">{item?.quantidade}</p></div>
         <div><p className="text-xs text-muted-foreground">Cores</p><p className="font-medium">{item?.cores.join(", ")}</p></div>
         <div><p className="text-xs text-muted-foreground">Personalização</p><p className="font-medium">{item?.personalizacao.join(", ")}</p></div>
+        <div><p className="text-xs text-muted-foreground">Cupom</p><p className="font-medium">{quote.couponCode || "—"}</p></div>
       </div>
 
       {quote.attachments.length > 0 && (

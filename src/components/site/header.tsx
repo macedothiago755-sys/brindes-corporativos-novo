@@ -33,7 +33,10 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-3 lg:flex">
+          <Button asChild variant="outline-accent">
+            <Link href="/montar-kit">Montar meu kit personalizado</Link>
+          </Button>
           <Button asChild variant="gradient">
             <Link href="/produtos">Solicitar orçamento</Link>
           </Button>
@@ -52,8 +55,11 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Button asChild size="lg" variant="gradient" className="mt-2">
-              <Link href="/produtos">Solicitar orçamento</Link>
+            <Button asChild size="lg" variant="outline-accent" className="mt-2">
+              <Link href="/montar-kit" onClick={() => setOpen(false)}>Montar meu kit personalizado</Link>
+            </Button>
+            <Button asChild size="lg" variant="gradient">
+              <Link href="/produtos" onClick={() => setOpen(false)}>Solicitar orçamento</Link>
             </Button>
           </nav>
         </div>

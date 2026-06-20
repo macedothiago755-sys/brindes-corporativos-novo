@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { quoteSchema } from "@/lib/validations";
 import { rateLimit } from "@/lib/rate-limit";
+import { resolveCouponCode } from "@/lib/coupons";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -27,6 +28,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
   }
 
+  const couponCode = await resolveCouponCode(data.couponCode);
+
   const quote = await prisma.quote.create({
     data: {
       clienteNome: data.clienteNome,
@@ -37,6 +40,7 @@ export async function POST(req: NextRequest) {
       observacoes: data.observacoes,
       objetivo: data.objetivo,
       prazo: data.prazo,
+      couponCode,
       items: {
         create: [
           {
