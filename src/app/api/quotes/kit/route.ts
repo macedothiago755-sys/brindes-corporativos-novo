@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       objetivo: data.objetivo,
       prazo: data.prazo,
       couponCode,
-      consentObrigatorioAceito: data.consentObrigatorio,
+      consentObrigatorioAceito: data.consentObrigatorio === true,
       consentObrigatorioVersion: data.consentVersion,
       consentObrigatorioDate: new Date(),
       consentMarketingAceito: data.consentMarketing,

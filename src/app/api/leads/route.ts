@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       email: parsed.data.email,
       telefone: parsed.data.telefone,
       couponCode: coupon?.active ? coupon.code : null,
-      consentObrigatorioAceito: parsed.data.consentObrigatorio,
+      consentObrigatorioAceito: parsed.data.consentObrigatorio === true,
       consentObrigatorioVersion: parsed.data.consentVersion,
       consentObrigatorioDate: now,
       consentMarketingAceito: parsed.data.consentMarketing,
