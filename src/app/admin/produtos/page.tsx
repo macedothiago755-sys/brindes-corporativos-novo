@@ -279,7 +279,7 @@ export default async function AdminProductsPage({
       <div className="mt-6">
         <TableToolbar
           action="/admin/produtos"
-          searchPlaceholder="Buscar por nome ou SKU..."
+          searchPlaceholder="Buscar por nome, SKU ou código do fornecedor..."
           searchValue={params.q}
           filters={[
             {
