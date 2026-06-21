@@ -40,7 +40,7 @@ export function Hero() {
 
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild size="lg" variant="gradient">
-              <Link href="/montar-kit">Começar agora (leva 30s)</Link>
+              <Link href="/montar-kit">Montar meu kit</Link>
             </Button>
             <Button asChild size="lg" variant="outline-accent">
               <Link href="/produtos?categoria=kits-corporativos">Ver exemplos de kits</Link>

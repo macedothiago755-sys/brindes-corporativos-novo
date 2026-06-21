@@ -31,10 +31,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) return {};
+  const title = product.metaTitle ?? `${product.name} | Brindes personalizados para empresas`;
+  const description = product.metaDescription ?? product.shortDescription ?? product.description;
   return {
-    title: product.name,
-    description: product.description,
-    openGraph: { images: product.images },
+    title,
+    description,
+    openGraph: { title, description, images: product.images },
   };
 }
 
@@ -52,6 +54,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     description: product.description,
     image: product.images,
     category: product.category.name,
+    ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+    ...(product.sku ? { sku: product.sku } : {}),
   };
 
   return (
@@ -62,10 +66,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
             <Image
-              src={product.images[0]}
+              src={product.images[0] ?? "/products/placeholder-1.svg"}
               alt={product.name}
               fill
-              unoptimized={isExternalImage(product.images[0])}
+              unoptimized={isExternalImage(product.images[0] ?? "")}
               className="object-cover"
               priority
             />
