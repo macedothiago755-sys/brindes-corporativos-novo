@@ -26,6 +26,12 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     siteName: SITE_NAME,
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Brindes Corporativos Personalizados em São Paulo | Paint Colors",
+    description:
+      "Crie kits e brindes corporativos personalizados em São Paulo. Personalize sua marca, escolha produtos e receba uma proposta rápida.",
+  },
 };
 
 const organizationJsonLd = {
