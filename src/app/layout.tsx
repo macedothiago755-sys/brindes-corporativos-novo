@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SITE_URL, SITE_NAME, CONTACT_EMAIL } from "@/lib/site-config";
+import { SITE_URL, SITE_NAME, CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/site-config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,6 +40,7 @@ const organizationJsonLd = {
     "@type": "ContactPoint",
     contactType: "Vendas",
     email: CONTACT_EMAIL,
+    telephone: `+${WHATSAPP_NUMBER}`,
     areaServed: "BR",
   },
 };
@@ -59,11 +60,12 @@ const localBusinessJsonLd = {
   name: SITE_NAME,
   description: "Fornecedor de brindes corporativos personalizados para empresas em São Paulo.",
   url: SITE_URL,
+  telephone: `+${WHATSAPP_NUMBER}`,
   areaServed: {
     "@type": "City",
     name: "São Paulo, SP",
   },
-  // telefone / endereço / horário: adicionar quando a empresa informar (sem endereço físico publicável por ora).
+  // endereço / horário: adicionar quando a empresa informar (sem endereço físico publicável por ora).
 };
 
 export default function RootLayout({
