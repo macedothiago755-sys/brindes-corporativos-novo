@@ -14,7 +14,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const vitrine = getVitrine(slug);
   if (!vitrine) return {};
-  return { title: vitrine.title, description: vitrine.description };
+  return {
+    title: vitrine.title,
+    description: vitrine.description,
+    alternates: { canonical: `/vitrine/${vitrine.slug}` },
+  };
 }
 
 export default async function VitrinePage({ params }: { params: Promise<{ slug: string }> }) {
