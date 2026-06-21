@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Palette, Users, Factory } from "lucide-react";
+import { Palette, Users, Factory, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { isExternalImage } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site-config";
 
 const b2bHighlights = [
   { icon: Palette, label: "Personalização com sua marca" },
@@ -54,26 +56,53 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     description: product.description,
     image: product.images,
     category: product.category.name,
-    ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+    url: `${SITE_URL}/produto/${product.slug}`,
+    brand: { "@type": "Brand", name: product.brand ?? "Paint Colors" },
     ...(product.sku ? { sku: product.sku } : {}),
   };
+
+  const gallery = product.images.length > 0 ? product.images : ["/products/placeholder-1.svg"];
 
   return (
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
+      <Breadcrumbs
+        items={[
+          { name: "Início", href: "/" },
+          { name: "Produtos", href: "/produtos" },
+          { name: product.category.name, href: `/produtos?categoria=${product.category.slug}` },
+          { name: product.name, href: `/produto/${product.slug}` },
+        ]}
+      />
+
       <div className="grid gap-12 lg:grid-cols-2">
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
             <Image
-              src={product.images[0] ?? "/products/placeholder-1.svg"}
+              src={gallery[0]}
               alt={product.name}
               fill
-              unoptimized={isExternalImage(product.images[0] ?? "")}
+              unoptimized={isExternalImage(gallery[0])}
               className="object-cover"
               priority
             />
           </div>
+          {gallery.length > 1 && (
+            <div className="grid grid-cols-4 gap-3">
+              {gallery.slice(0, 8).map((src, i) => (
+                <div key={src + i} className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted">
+                  <Image
+                    src={src}
+                    alt={`${product.name} — imagem ${i + 1}`}
+                    fill
+                    unoptimized={isExternalImage(src)}
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -91,6 +120,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <p className="mt-6 text-muted-foreground">{product.description}</p>
+
+          {product.benefits.length > 0 && (
+            <ul className="mt-6 space-y-2 text-sm">
+              {product.benefits.map((b) => (
+                <li key={b} className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                  <span className="text-foreground/90">{b}</span>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-foreground/80">
             {b2bHighlights.map((h) => (
