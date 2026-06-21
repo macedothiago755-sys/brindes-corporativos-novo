@@ -14,14 +14,51 @@ const links = [
   { href: "/#contato", label: "Contato" },
 ];
 
+const drawerGroups = [
+  {
+    title: "Produtos",
+    items: [
+      { href: "/produtos?categoria=escritorio", label: "Escritório" },
+      { href: "/produtos?categoria=tecnologia", label: "Tecnologia" },
+      { href: "/produtos?categoria=sustentaveis", label: "Sustentáveis" },
+      { href: "/produtos?categoria=kits-corporativos", label: "Kits personalizados" },
+      { href: "/produtos", label: "Ver todas categorias" },
+    ],
+  },
+  {
+    title: "Soluções",
+    items: [
+      { href: "/produtos?objetivo=EVENTO", label: "Eventos corporativos" },
+      { href: "/montar-kit", label: "RH" },
+      { href: "/produtos?objetivo=CLIENTE_VIP", label: "Clientes" },
+      { href: "/produtos?objetivo=ONBOARDING", label: "Onboarding" },
+    ],
+  },
+  {
+    title: "Empresa",
+    items: [
+      { href: "/#diferenciais", label: "Sobre" },
+      { href: "/#como-funciona", label: "Como funciona" },
+      { href: "/#cases", label: "Cases" },
+    ],
+  },
+];
+
 export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="container-premium flex h-20 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo-paint-colors.png" alt="Paint Colors Company" width={40} height={40} className="h-10 w-10" priority />
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/logo-paint-colors.png"
+            alt="Paint Colors Company"
+            width={52}
+            height={52}
+            className="h-[52px] w-[52px]"
+            priority
+          />
           <span className="hidden text-lg font-semibold tracking-tight sm:inline">Paint Colors</span>
         </Link>
 
@@ -35,29 +72,44 @@ export function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Button asChild variant="outline-accent">
-            <Link href="/montar-kit">Montar meu kit personalizado</Link>
+            <Link href="/montar-kit">Montar meu kit</Link>
           </Button>
           <Button asChild variant="gradient">
             <Link href="/produtos">Solicitar orçamento</Link>
           </Button>
         </div>
 
-        <button className="lg:hidden" onClick={() => setOpen(!open)} aria-label="Abrir menu">
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <Button asChild size="sm" variant="gradient">
+            <Link href="/montar-kit">Montar meu kit</Link>
+          </Button>
+          <button className="p-1" onClick={() => setOpen(!open)} aria-label="Abrir menu">
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {open && (
-        <div className="border-t border-border lg:hidden">
-          <nav className="container-premium flex flex-col gap-4 py-6">
-            {links.map((link) => (
-              <Link key={link.href} href={link.href} className="text-base font-medium" onClick={() => setOpen(false)}>
-                {link.label}
-              </Link>
+        <div className="max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-border lg:hidden">
+          <nav className="container-premium flex flex-col gap-6 py-6">
+            {drawerGroups.map((group) => (
+              <div key={group.title}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{group.title}</p>
+                <div className="mt-3 flex flex-col gap-3">
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="text-base font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
-            <Button asChild size="lg" variant="outline-accent" className="mt-2">
-              <Link href="/montar-kit" onClick={() => setOpen(false)}>Montar meu kit personalizado</Link>
-            </Button>
+
             <Button asChild size="lg" variant="gradient">
               <Link href="/produtos" onClick={() => setOpen(false)}>Solicitar orçamento</Link>
             </Button>

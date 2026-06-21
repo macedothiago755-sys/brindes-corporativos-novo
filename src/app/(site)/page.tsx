@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { Hero } from "@/components/site/hero";
 import { TrustStats } from "@/components/site/trust-stats";
-import { BannerCarousel } from "@/components/site/banner-carousel";
 import { FeaturedProductsCarousel } from "@/components/site/featured-products-carousel";
+import { FaqSection } from "@/components/site/faq-section";
+import { brindesSaoPauloFaq } from "@/lib/faq-data";
 import {
   CategoriesSection,
   SolutionsSection,
   DifferentiatorsSection,
   HowItWorksSection,
+  LocalSeoSection,
   ClientsSection,
   TestimonialsSection,
   FinalCtaSection,
@@ -24,11 +26,10 @@ export default async function HomePage() {
 
   return (
     <>
-      <CategoriesSection />
-      <BannerCarousel />
-      <TrustStats />
       <Hero />
-      <SolutionsSection />
+      <TrustStats />
+      <CategoriesSection />
+      <HowItWorksSection />
 
       <section className="container-premium py-20">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Produtos em destaque</h2>
@@ -37,10 +38,12 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <SolutionsSection />
       <DifferentiatorsSection />
-      <HowItWorksSection />
       <ClientsSection />
       <TestimonialsSection />
+      <LocalSeoSection />
+      <FaqSection items={brindesSaoPauloFaq} />
       <FinalCtaSection />
     </>
   );
