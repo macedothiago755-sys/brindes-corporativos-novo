@@ -8,8 +8,8 @@ import { CategoriesGrid } from "@/components/site/categories-grid";
 
 export async function CategoriesSection() {
   const categories = await prisma.category.findMany({
-    where: { parentId: null },
-    orderBy: { name: "asc" },
+    where: { parentId: null, active: true },
+    orderBy: { order: "asc" },
   });
   const { main, rest } = splitCategories(categories);
   const featured = pickFeaturedCategories(categories);

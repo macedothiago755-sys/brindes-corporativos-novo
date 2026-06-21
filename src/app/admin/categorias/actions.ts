@@ -48,7 +48,33 @@ export async function updateCategory(categoryId: string, formData: FormData) {
   const parentId = String(formData.get("parentId") || "").trim() || null;
   if (!name || parentId === categoryId) return;
 
-  await prisma.category.update({ where: { id: categoryId }, data: { name, parentId } });
+  const orderRaw = formData.get("order");
+  const order = orderRaw !== null && String(orderRaw).trim() !== "" ? Number(orderRaw) : undefined;
+  const metaTitle = String(formData.get("metaTitle") || "").trim() || null;
+  const metaDescription = String(formData.get("metaDescription") || "").trim() || null;
+
+  await prisma.category.update({
+    where: { id: categoryId },
+    data: {
+      name,
+      parentId,
+      ...(order !== undefined && !Number.isNaN(order) ? { order } : {}),
+      metaTitle,
+      metaDescription,
+    },
+  });
+  revalidatePath("/admin/categorias");
+}
+
+export async function toggleCategoryActive(formData: FormData) {
+  await requirePermission();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+
+  const category = await prisma.category.findUnique({ where: { id }, select: { active: true } });
+  if (!category) return;
+
+  await prisma.category.update({ where: { id }, data: { active: !category.active } });
   revalidatePath("/admin/categorias");
 }
 

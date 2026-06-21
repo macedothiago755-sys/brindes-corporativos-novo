@@ -95,13 +95,20 @@ model User {
 }
 
 model Category {
-  id       String     @id @default(cuid())
-  name     String
-  slug     String     @unique
-  parentId String?
-  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children Category[] @relation("CategoryHierarchy")
-  products Product[]
+  id              String     @id @default(cuid())
+  name            String
+  slug            String     @unique
+  parentId        String?
+  parent          Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children        Category[] @relation("CategoryHierarchy")
+  products        Product[]
+  active          Boolean    @default(true)
+  order           Int        @default(0)
+  description     String?
+  metaTitle       String?
+  metaDescription String?
+
+  @@index([active])
 }
 
 model Post {

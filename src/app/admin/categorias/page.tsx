@@ -5,7 +5,7 @@ import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryRow } from "@/components/admin/category-row";
-import { createCategory, updateCategory, deleteCategory } from "./actions";
+import { createCategory, updateCategory, deleteCategory, toggleCategoryActive } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export default async function AdminCategoriesPage() {
   if (!can(role, "categories:edit")) redirect("/admin");
 
   const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
     include: { _count: { select: { products: true } } },
   });
 
@@ -48,6 +48,7 @@ export default async function AdminCategoriesPage() {
                 <th className="px-4 py-3">Nome</th>
                 <th className="px-4 py-3">Slug</th>
                 <th className="px-4 py-3">Produtos</th>
+                <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -61,11 +62,12 @@ export default async function AdminCategoriesPage() {
                   productCount={category._count.products}
                   updateAction={updateCategory.bind(null, category.id)}
                   deleteAction={deleteCategory}
+                  toggleActiveAction={toggleCategoryActive}
                 />
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                     Nenhuma categoria cadastrada.
                   </td>
                 </tr>

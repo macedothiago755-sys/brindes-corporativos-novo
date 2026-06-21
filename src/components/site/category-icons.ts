@@ -1,14 +1,23 @@
 import {
+  Backpack,
+  Bath,
   Briefcase,
+  BriefcaseBusiness,
   ChefHat,
   Coffee,
   Crown,
   Cpu,
   CupSoda,
+  Droplets,
   Dumbbell,
   Flame,
+  Flower2,
   Frame,
+  GlassWater,
+  Hammer,
+  KeyRound,
   Leaf,
+  Notebook,
   Package,
   PartyPopper,
   PawPrint,
@@ -18,29 +27,50 @@ import {
   Sofa,
   Tag,
   ToyBrick,
+  Umbrella,
   UtensilsCrossed,
+  Wine,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 
 const categoryIcons: Record<string, LucideIcon> = {
-  brinquedos: ToyBrick,
+  // Categorias oficiais (FASE 10)
+  "blocos e cadernetas": Notebook,
+  "bolsas termicas": Backpack,
   canecas: Coffee,
   canetas: PenLine,
+  chaveiros: KeyRound,
+  "conjuntos executivos": BriefcaseBusiness,
+  cozinha: UtensilsCrossed,
+  "cuidados pessoais": Bath,
+  escritorio: Briefcase,
+  esportes: Dumbbell,
+  ferramentas: Hammer,
+  "guarda-chuva": Umbrella,
+  informatica: Cpu,
+  "kit churrasco": Flame,
+  "kit queijo": Wine,
+  "linha ecologica": Leaf,
+  "linha feminina": Flower2,
+  "linha masculina": Shirt,
+  "linha pet": PawPrint,
+  "mochilas e bolsas": Backpack,
+  necessaires: Droplets,
+  "sacolas e sacochilas": ShoppingBag,
+  "squeezes e garrafas": GlassWater,
+  // Categorias legadas (mantidas como fallback caso ainda sejam exibidas)
+  brinquedos: ToyBrick,
   "casa e decoracao": Sofa,
   copos: CupSoda,
-  escritorio: Briefcase,
   espelhos: Frame,
   esporte: Dumbbell,
   eventos: PartyPopper,
-  "kit churrasco": Flame,
   "kits corporativos": Package,
-  "linha pet": PawPrint,
   "moda e estilo": Shirt,
   petisqueiras: UtensilsCrossed,
   plaquinhas: Tag,
   premium: Crown,
-  "sacolas e sacochilas": ShoppingBag,
   sustentaveis: Leaf,
   tecnologia: Cpu,
   tabuas: ChefHat,
@@ -64,7 +94,7 @@ const PRIORITY_GROUPS: { keywords: string[] }[] = [
   { keywords: ["caneca"] },
   { keywords: ["caderno", "caderneta"] },
   { keywords: ["squeeze", "garrafa"] },
-  { keywords: ["sustent"] },
+  { keywords: ["ecologica"] },
   { keywords: ["sacola"] },
 ];
 
@@ -93,7 +123,7 @@ export function splitCategories<T extends { name: string }>(categories: T[], mai
   return { main, rest };
 }
 
-const MOBILE_FEATURED_KEYWORDS = ["escritorio", "tecnologia", "sustent", "evento"];
+const MOBILE_FEATURED_KEYWORDS = ["escritorio", "informatica", "ecologica", "esportes"];
 
 /** Categorias priorizadas para o grid compacto 2x2 do mobile. */
 export function pickFeaturedCategories<T extends { name: string }>(categories: T[], count = 4) {
