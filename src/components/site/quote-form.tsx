@@ -30,6 +30,7 @@ const methodOptions = [
 export function QuoteForm({ productId, productName, colors }: { productId: string; productName: string; colors: string[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,8 +47,25 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
     setCouponCode(getStoredCoupon());
   }, []);
 
+  useEffect(() => {
+    if (!open) setStep(1);
+  }, [open]);
+
   function toggle(list: string[], setList: (v: string[]) => void, value: string) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  }
+
+  function goToStep2() {
+    if (personalizacao.length === 0) {
+      setError("Selecione ao menos uma opção de personalização.");
+      return;
+    }
+    if (metodo.length === 0) {
+      setError("Selecione um método de personalização.");
+      return;
+    }
+    setError(null);
+    setStep(2);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -128,9 +146,17 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
         <DialogHeader>
           <DialogTitle>Solicitar orçamento</DialogTitle>
           <p className="mt-1 text-sm text-muted-foreground">{productName}</p>
+          <div className="mt-4 flex items-center gap-2">
+            <div className={cn("h-1.5 flex-1 rounded-full bg-muted", step >= 1 && "bg-accent")} />
+            <div className={cn("h-1.5 flex-1 rounded-full bg-muted", step >= 2 && "bg-accent")} />
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Etapa {step} de 2 · {step === 1 ? "Personalização do brinde" : "Seus dados de contato"}
+          </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className={cn("space-y-6", step !== 1 && "hidden")}>
           <div>
             <Label>Quantidade desejada</Label>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -214,6 +240,14 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
             <Input id="arquivo" name="arquivo" type="file" className="mt-2" accept="image/*,.pdf,.ai,.eps" />
           </div>
 
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          <Button type="button" size="lg" className="w-full" onClick={goToStep2}>
+            Continuar
+          </Button>
+          </div>
+
+          <div className={cn("space-y-6", step !== 2 && "hidden")}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="clienteNome">Nome</Label>
@@ -285,9 +319,15 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" size="lg" className="w-full" disabled={loading || !consentObrigatorio}>
-            {loading ? "Enviando..." : "Solicitar orçamento"}
-          </Button>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)}>
+              Voltar
+            </Button>
+            <Button type="submit" size="lg" className="flex-1" disabled={loading || !consentObrigatorio}>
+              {loading ? "Enviando..." : "Solicitar orçamento"}
+            </Button>
+          </div>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
