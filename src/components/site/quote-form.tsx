@@ -28,7 +28,7 @@ const methodOptions = [
   { id: "OUTRO", label: "Outro" },
 ];
 
-export function QuoteForm({ productId, productName, colors }: { productId: string; productName: string; colors: string[] }) {
+export function QuoteForm({ productId, productName, colors, unitPrice }: { productId: string; productName: string; colors: string[]; unitPrice?: number | null }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -132,6 +132,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
         product_name: productName,
         quantity: payload.quantidade,
         lead_source: "produto",
+        // Valor estimado do lead (somente quando o produto tem preço cadastrado).
+        ...(unitPrice ? { value: Number((unitPrice * payload.quantidade).toFixed(2)), currency: "BRL" } : {}),
       });
       setOpen(false);
       router.push("/orcamento/sucesso");

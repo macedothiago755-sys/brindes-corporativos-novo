@@ -161,7 +161,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </ul>
 
           <div className="mt-10">
-            <QuoteForm productId={product.id} productName={product.name} colors={product.colors} />
+            <QuoteForm productId={product.id} productName={product.name} colors={product.colors} unitPrice={product.price} />
           </div>
         </div>
       </div>
