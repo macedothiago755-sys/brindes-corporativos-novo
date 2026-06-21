@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Palette, Users, Factory, Check } from "lucide-react";
@@ -7,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
-import { isExternalImage } from "@/lib/utils";
+import { ProductGallery } from "@/components/site/product-gallery";
 import { SITE_URL } from "@/lib/site-config";
 
 const b2bHighlights = [
@@ -65,8 +64,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ...(product.sku ? { sku: product.sku } : {}),
   };
 
-  const gallery = product.images.length > 0 ? product.images : ["/products/placeholder-1.svg"];
-
   return (
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -81,33 +78,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       />
 
       <div className="grid gap-12 lg:grid-cols-2">
-        <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-            <Image
-              src={gallery[0]}
-              alt={product.name}
-              fill
-              unoptimized={isExternalImage(gallery[0])}
-              className="object-cover"
-              priority
-            />
-          </div>
-          {gallery.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
-              {gallery.slice(0, 8).map((src, i) => (
-                <div key={src + i} className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted">
-                  <Image
-                    src={src}
-                    alt={`${product.name} — imagem ${i + 1}`}
-                    fill
-                    unoptimized={isExternalImage(src)}
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery images={product.images} alt={product.name} />
 
         <div>
           <p className="text-sm uppercase tracking-wide text-muted-foreground">{product.category.name}</p>
