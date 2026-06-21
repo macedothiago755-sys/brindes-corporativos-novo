@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, isExternalImage } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
+import { trackEvent } from "@/lib/analytics";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import type { KitRecommendation } from "@/lib/kit-recommendation";
 
@@ -115,6 +116,10 @@ export function KitBuilder() {
         const data = await res.json().catch(() => null);
         throw new Error(data?.error ?? "Não foi possível enviar o orçamento.");
       }
+      trackEvent("complete_quote", {
+        quantity: Number(quantity) || undefined,
+        lead_source: "kit",
+      });
       router.push("/orcamento/sucesso");
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Erro inesperado.");
