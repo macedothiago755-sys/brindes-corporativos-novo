@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
+import { trackEvent } from "@/lib/analytics";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
 const quantities = ["50", "100", "250", "500", "1000+"];
@@ -49,7 +50,8 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
 
   useEffect(() => {
     if (!open) setStep(1);
-  }, [open]);
+    else trackEvent("start_quote", { product_name: productName });
+  }, [open, productName]);
 
   function toggle(list: string[], setList: (v: string[]) => void, value: string) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -126,6 +128,11 @@ export function QuoteForm({ productId, productName, colors }: { productId: strin
         throw new Error(data?.error ?? "Não foi possível enviar o orçamento.");
       }
 
+      trackEvent("complete_quote", {
+        product_name: productName,
+        quantity: payload.quantidade,
+        lead_source: "produto",
+      });
       setOpen(false);
       router.push("/orcamento/sucesso");
     } catch (err) {
