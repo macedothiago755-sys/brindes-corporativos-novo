@@ -28,11 +28,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { categoria, objetivo } = await searchParams;
   const category = categoria ? await prisma.category.findUnique({ where: { slug: categoria } }) : null;
-  const title = resolveHeading(category, objetivo);
-  return {
-    title,
-    description: `${title}. Personalize com a marca da sua empresa e receba uma proposta sob medida.`,
-  };
+  const title = category?.metaTitle?.trim() || resolveHeading(category, objetivo);
+  const description =
+    category?.metaDescription?.trim() ||
+    `${resolveHeading(category, objetivo)}. Personalize com a marca da sua empresa e receba uma proposta sob medida.`;
+  return { title, description };
 }
 
 export const dynamic = "force-dynamic";
