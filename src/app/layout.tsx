@@ -33,6 +33,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
+  logo: `${SITE_URL}/logo-paint-colors.png`,
   description:
     "Especialistas em brindes corporativos personalizados para empresas: catálogo inteligente, orçamento sob medida e atendimento dedicado.",
   contactPoint: {
@@ -41,6 +42,15 @@ const organizationJsonLd = {
     email: CONTACT_EMAIL,
     areaServed: "BR",
   },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+  inLanguage: "pt-BR",
+  publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
 };
 
 const localBusinessJsonLd = {
@@ -67,6 +77,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <script
           type="application/ld+json"
