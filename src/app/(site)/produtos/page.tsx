@@ -15,7 +15,7 @@ const objectiveLabels: Record<string, string> = {
   PREMIACAO: "ações de premiação",
 };
 
-type ProductsSearchParams = { categoria?: string; metodo?: string; tag?: string; objetivo?: string };
+type ProductsSearchParams = { categoria?: string; metodo?: string; tag?: string; objetivo?: string; q?: string };
 
 function resolveHeading(category: { name: string } | null, objetivo?: string) {
   if (category) return getCategoryHeading(category.name);
@@ -46,7 +46,8 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<ProductsSearchParams>;
 }) {
-  const { categoria, metodo, tag, objetivo } = await searchParams;
+  const { categoria, metodo, tag, objetivo, q } = await searchParams;
+  const search = q?.trim();
 
   const category = categoria
     ? await prisma.category.findUnique({ where: { slug: categoria }, include: { children: true } })
@@ -56,7 +57,7 @@ export default async function ProductsPage({
       ? [category.id, ...category.children.map((c) => c.id)]
       : [category.id]
     : undefined;
-  const heading = resolveHeading(category, objetivo);
+  const heading = search ? `Resultados para “${search}”` : resolveHeading(category, objetivo);
 
   const [products, topCategories] = await Promise.all([
     prisma.product.findMany({
@@ -66,6 +67,15 @@ export default async function ProductsPage({
         ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
         ...(tag ? { tags: { has: tag } } : {}),
         ...(objetivo ? { objectives: { has: objetivo as ProductObjective } } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { shortDescription: { contains: search, mode: "insensitive" } },
+                { tags: { has: search.toLowerCase() } },
+              ],
+            }
+          : {}),
       },
       include: { category: true },
       orderBy: { createdAt: "desc" },
