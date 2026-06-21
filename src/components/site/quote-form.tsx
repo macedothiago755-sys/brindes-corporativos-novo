@@ -166,13 +166,14 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className={cn("space-y-6", step !== 1 && "hidden")}>
-          <div>
-            <Label>Quantidade desejada</Label>
+          <div role="group" aria-labelledby="qtd-label">
+            <Label id="qtd-label">Quantidade desejada</Label>
             <div className="mt-2 flex flex-wrap gap-2">
               {quantities.map((q) => (
                 <button
                   type="button"
                   key={q}
+                  aria-pressed={quantidade === q}
                   onClick={() => setQuantidade(q)}
                   className={cn(
                     "rounded-md border border-border px-4 py-2 text-sm",
@@ -187,6 +188,7 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
               <Input
                 className="mt-3"
                 placeholder="Informe a quantidade aproximada"
+                aria-label="Quantidade aproximada"
                 value={customQty}
                 onChange={(e) => setCustomQty(e.target.value)}
               />
@@ -194,13 +196,14 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
           </div>
 
           {colors.length > 0 && (
-            <div>
-              <Label>Cor</Label>
+            <div role="group" aria-labelledby="cor-label">
+              <Label id="cor-label">Cor</Label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {colors.map((c) => (
                   <button
                     type="button"
                     key={c}
+                    aria-pressed={cor === c}
                     onClick={() => setCor(c)}
                     className={cn(
                       "rounded-md border border-border px-4 py-2 text-sm",
@@ -214,12 +217,13 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             </div>
           )}
 
-          <div>
-            <Label>Personalização</Label>
+          <div role="group" aria-labelledby="pers-label">
+            <Label id="pers-label">Personalização</Label>
             <div className="mt-2 grid grid-cols-2 gap-3">
               {personalizationOptions.map((opt) => (
-                <label key={opt.id} className="flex items-center gap-2 text-sm">
+                <label key={opt.id} htmlFor={`pers-${opt.id}`} className="flex items-center gap-2 text-sm">
                   <Checkbox
+                    id={`pers-${opt.id}`}
                     checked={personalizacao.includes(opt.id)}
                     onCheckedChange={() => toggle(personalizacao, setPersonalizacao, opt.id)}
                   />
@@ -229,12 +233,13 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             </div>
           </div>
 
-          <div>
-            <Label>Método de personalização</Label>
+          <div role="group" aria-labelledby="metodo-label">
+            <Label id="metodo-label">Método de personalização</Label>
             <div className="mt-2 grid grid-cols-2 gap-3">
               {methodOptions.map((opt) => (
-                <label key={opt.id} className="flex items-center gap-2 text-sm">
+                <label key={opt.id} htmlFor={`met-${opt.id}`} className="flex items-center gap-2 text-sm">
                   <Checkbox
+                    id={`met-${opt.id}`}
                     checked={metodo.includes(opt.id)}
                     onCheckedChange={() => toggle(metodo, setMetodo, opt.id)}
                   />
@@ -249,7 +254,7 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             <Input id="arquivo" name="arquivo" type="file" className="mt-2" accept="image/*,.pdf,.ai,.eps" />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
           <Button type="button" size="lg" className="w-full" onClick={goToStep2}>
             Continuar
@@ -299,9 +304,11 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             <Checkbox
               checked={consentObrigatorio}
               onCheckedChange={(checked) => setConsentObrigatorio(checked === true)}
+              aria-labelledby="consent-obrigatorio-label"
+              aria-required="true"
               className="mt-0.5"
             />
-            <span>
+            <span id="consent-obrigatorio-label">
               Li e aceito o{" "}
               <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
                 Aviso de Privacidade
@@ -318,15 +325,16 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             <Checkbox
               checked={consentMarketing}
               onCheckedChange={(checked) => setConsentMarketing(checked === true)}
+              aria-labelledby="consent-marketing-label"
               className="mt-0.5"
             />
-            <span>
+            <span id="consent-marketing-label">
               Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme o Aviso de
               Privacidade.
             </span>
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
           <div className="flex gap-3">
             <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)}>

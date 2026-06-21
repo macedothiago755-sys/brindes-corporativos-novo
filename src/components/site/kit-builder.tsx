@@ -150,6 +150,7 @@ export function KitBuilder() {
               <button
                 key={o.id}
                 type="button"
+                aria-pressed={objective === o.id}
                 onClick={() => setObjective(o.id)}
                 className={cn(
                   "flex items-center gap-3 rounded-xl border border-border p-4 text-left text-sm font-medium transition-colors hover:border-accent",
@@ -175,6 +176,7 @@ export function KitBuilder() {
               <button
                 key={q}
                 type="button"
+                aria-pressed={quantity === q}
                 onClick={() => setQuantity(q)}
                 className={cn(
                   "rounded-md border border-border px-5 py-3 text-sm font-medium hover:border-accent",
@@ -189,6 +191,7 @@ export function KitBuilder() {
             className="mt-4 max-w-xs"
             type="number"
             placeholder="Outra quantidade"
+            aria-label="Outra quantidade de pessoas"
             min={1}
             value={quantity || ""}
             onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : "")}
@@ -210,6 +213,7 @@ export function KitBuilder() {
               <button
                 key={b}
                 type="button"
+                aria-pressed={budgetPerPerson === b}
                 onClick={() => setBudgetPerPerson(b)}
                 className={cn(
                   "rounded-md border border-border px-5 py-3 text-sm font-medium hover:border-accent",
@@ -224,6 +228,7 @@ export function KitBuilder() {
             className="mt-4 max-w-xs"
             type="number"
             placeholder="Outro valor por pessoa"
+            aria-label="Outro valor por pessoa"
             min={1}
             value={budgetPerPerson || ""}
             onChange={(e) => setBudgetPerPerson(e.target.value ? Number(e.target.value) : "")}
@@ -234,7 +239,7 @@ export function KitBuilder() {
               <span className="font-medium text-foreground">{currency(Number(quantity) * Number(budgetPerPerson))}</span>
             </p>
           )}
-          {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
           <div className="mt-8 flex gap-3">
             <Button variant="outline" onClick={() => setStep(2)}>Voltar</Button>
             <Button size="lg" variant="gradient" disabled={!budgetPerPerson || loading} onClick={handleGenerate}>
@@ -334,9 +339,11 @@ export function KitBuilder() {
               <Checkbox
                 checked={consentObrigatorio}
                 onCheckedChange={(checked) => setConsentObrigatorio(checked === true)}
+                aria-labelledby="kit-consent-obrigatorio-label"
+                aria-required="true"
                 className="mt-0.5"
               />
-              <span>
+              <span id="kit-consent-obrigatorio-label">
                 Li e aceito o{" "}
                 <Link href="/politica-de-privacidade" className="font-medium text-foreground underline">
                   Aviso de Privacidade
@@ -353,15 +360,16 @@ export function KitBuilder() {
               <Checkbox
                 checked={consentMarketing}
                 onCheckedChange={(checked) => setConsentMarketing(checked === true)}
+                aria-labelledby="kit-consent-marketing-label"
                 className="mt-0.5"
               />
-              <span>
+              <span id="kit-consent-marketing-label">
                 Autorizo a Paint Colors a utilizar meus dados para contato comercial conforme o Aviso de
                 Privacidade.
               </span>
             </label>
 
-            {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+            {submitError && <p role="alert" className="text-sm text-red-600">{submitError}</p>}
 
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(3)}>

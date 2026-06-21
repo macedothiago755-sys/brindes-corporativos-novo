@@ -98,6 +98,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
             <div key={c.slug}>
               <button
                 onClick={() => toggleParam("categoria", c.slug)}
+                aria-pressed={activeCategory === c.slug}
                 className={cn(
                   "w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
                   activeCategory === c.slug && "bg-foreground text-background"
@@ -111,6 +112,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
                     <button
                       key={child.slug}
                       onClick={() => toggleParam("categoria", child.slug)}
+                      aria-pressed={activeCategory === child.slug}
                       className={cn(
                         "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
                         activeCategory === child.slug && "bg-foreground text-background"
@@ -133,6 +135,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
             <button
               key={m.value}
               onClick={() => toggleParam("metodo", m.value)}
+              aria-pressed={activeMethod === m.value}
               className={cn(
                 "rounded-md px-3 py-2 text-left text-sm hover:bg-muted",
                 activeMethod === m.value && "bg-foreground text-background"
@@ -151,6 +154,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
             <button
               key={t.value}
               onClick={() => toggleParam("tag", t.value)}
+              aria-pressed={activeTag === t.value}
               className={cn(
                 "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted",
                 activeTag === t.value && "bg-foreground text-background"
