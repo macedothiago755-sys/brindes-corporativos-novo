@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page } from "playwright";
+import type { Browser, Page } from "playwright";
 import * as cheerio from "cheerio";
 import type { SupplierAdapter, ScrapedProduct, ScrapeError } from "./types";
 import { cleanInline, cleanText, normalizeColor, normalizeDimensions, parsePrice, resolveUrl } from "./utils/clean";
@@ -219,8 +219,20 @@ async function runWithConcurrency<T>(items: T[], concurrency: number, worker: (i
 }
 
 export async function runCrawl(options: CrawlOptions): Promise<{ links: string[] }> {
+  if (process.env.VERCEL === "1") {
+    throw new Error(
+      "O importador automático não está disponível neste ambiente (depende de um navegador real, que não roda em funções serverless)."
+    );
+  }
+
   const { categoryUrl, adapter, concurrency = 3, onProgress, onProductScraped, onProductError } = options;
 
+  // Import dinâmico: evita que o Playwright apareça no grafo estático de
+  // módulos. Um `import` estático é avaliado assim que o arquivo é carregado
+  // pelo bundler/runtime — mesmo atrás de outro `import()` dinâmico mais acima
+  // na cadeia — o que em produção na Vercel falha (binário/`browsers.json`
+  // do Chromium não existem no bundle serverless).
+  const { chromium } = await import("playwright");
   const browser: Browser = await chromium.launch({ headless: true });
   try {
     const listContext = await browser.newContext({ userAgent: USER_AGENT });
