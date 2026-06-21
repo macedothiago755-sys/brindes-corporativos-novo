@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { BannerCarousel } from "@/components/site/banner-carousel";
 import { Hero } from "@/components/site/hero";
@@ -17,6 +18,10 @@ import {
 } from "@/components/site/sections";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const featured = await prisma.product.findMany({

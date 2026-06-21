@@ -34,7 +34,9 @@ export async function generateMetadata({
   const description =
     category?.metaDescription?.trim() ||
     `${resolveHeading(category, objetivo)}. Personalize com a marca da sua empresa e receba uma proposta sob medida.`;
-  return { title, description };
+  // Consolida o ruído de filtros: canonical aponta para a categoria (quando houver) ou para o catálogo base.
+  const canonical = category ? `/produtos?categoria=${category.slug}` : "/produtos";
+  return { title, description, alternates: { canonical } };
 }
 
 export const dynamic = "force-dynamic";
