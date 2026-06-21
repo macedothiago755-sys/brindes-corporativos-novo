@@ -183,7 +183,7 @@ export function NewsletterPopup() {
                 </span>
               </label>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" size="lg" variant="gradient" className="w-full" disabled={loading || !consentObrigatorio}>
                 {loading ? "Enviando..." : "Receber meu benefício"}
