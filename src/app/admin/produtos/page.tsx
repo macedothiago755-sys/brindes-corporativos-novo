@@ -66,6 +66,7 @@ function getProducts(params: {
             OR: [
               { name: { contains: q, mode: "insensitive" } },
               { sku: { contains: q, mode: "insensitive" } },
+              { supplierCode: { contains: q, mode: "insensitive" } },
             ],
           }
         : {}),
@@ -146,6 +147,11 @@ export default async function AdminProductsPage({
       header: "SKU",
       sortable: true,
       render: (p) => p.sku ?? "—",
+    },
+    {
+      key: "supplierCode",
+      header: "Código fornecedor",
+      render: (p) => p.supplierCode ?? "—",
     },
     {
       key: "status",
