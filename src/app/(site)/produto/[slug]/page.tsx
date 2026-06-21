@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Palette, Users, Factory, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getProductBySlug } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
@@ -23,15 +24,11 @@ const methodLabels: Record<string, string> = {
   TRANSFER: "Transfer",
 };
 
-async function getProduct(slug: string) {
-  return prisma.product.findUnique({ where: { slug }, include: { category: true } });
-}
-
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
   const title = product.metaTitle ?? `${product.name} | Brindes personalizados para empresas`;
   const description = product.metaDescription ?? product.shortDescription ?? product.description;
@@ -44,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product || product.status !== "ATIVO") notFound();
 
   // Registra a visualização após a resposta, sem bloquear a renderização.

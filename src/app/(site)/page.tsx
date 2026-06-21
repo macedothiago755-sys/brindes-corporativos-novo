@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
+import { getFeaturedProducts } from "@/lib/cached-queries";
 import { BannerCarousel } from "@/components/site/banner-carousel";
 import { Hero } from "@/components/site/hero";
 import { TrustStats } from "@/components/site/trust-stats";
@@ -24,11 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const featured = await prisma.product.findMany({
-    where: { featured: true },
-    include: { category: true },
-    take: 12,
-  });
+  const featured = await getFeaturedProducts();
 
   return (
     <>

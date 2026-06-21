@@ -2,19 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getBlogPostBySlug } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
-
-async function getPost(slug: string) {
-  return prisma.post.findUnique({ where: { slug } });
-}
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const post = await getBlogPostBySlug(slug);
   if (!post) return {};
   return {
     title: post.title,
@@ -33,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
 
   const jsonLd = {

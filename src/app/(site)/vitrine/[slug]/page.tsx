@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getVitrineProducts } from "@/lib/cached-queries";
 import { ProductCard } from "@/components/site/product-card";
 import { VITRINES, getVitrine } from "@/lib/vitrines";
 
@@ -26,15 +26,7 @@ export default async function VitrinePage({ params }: { params: Promise<{ slug: 
   const vitrine = getVitrine(slug);
   if (!vitrine) notFound();
 
-  const products = await prisma.product.findMany({
-    where: {
-      status: "ATIVO",
-      ...(vitrine.tag ? { tags: { has: vitrine.tag } } : {}),
-    },
-    include: { category: true },
-    orderBy: { createdAt: "desc" },
-    take: vitrine.newest ? 24 : undefined,
-  });
+  const products = await getVitrineProducts(vitrine.tag, vitrine.newest ? 24 : undefined);
 
   return (
     <div className="container-premium py-16">
