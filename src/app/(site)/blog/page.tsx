@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getBlogPosts } from "@/lib/cached-queries";
 
 export const metadata: Metadata = {
   title: "Blog | Brindes Corporativos",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
-  const posts = await prisma.post.findMany({ orderBy: { publishedAt: "desc" } });
+  const posts = await getBlogPosts();
 
   return (
     <div className="container-premium py-16">

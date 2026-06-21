@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getSolutionBySlug } from "@/lib/cached-queries";
 import { ProductCard } from "@/components/site/product-card";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -9,19 +9,9 @@ import { SITE_URL } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
-async function getSolution(slug: string) {
-  return prisma.solution.findUnique({
-    where: { slug },
-    include: {
-      products: { include: { product: { include: { category: true } } } },
-      kits: { where: { active: true }, include: { items: { include: { product: true } } } },
-    },
-  });
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const solution = await prisma.solution.findUnique({ where: { slug } });
+  const solution = await getSolutionBySlug(slug);
   if (!solution) return {};
   return {
     title: solution.title,
@@ -37,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SolutionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const solution = await getSolution(slug);
+  const solution = await getSolutionBySlug(slug);
 
   if (!solution) notFound();
 

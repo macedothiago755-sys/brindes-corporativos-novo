@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import type { ProductObjective } from "@prisma/client";
+import { CACHE_TAGS } from "@/lib/cached-queries";
 
 function slugify(value: string) {
   return value
@@ -54,6 +55,7 @@ export async function createSolution(formData: FormData) {
   });
 
   revalidatePath("/admin/solucoes");
+  revalidateTag(CACHE_TAGS.solutions, "max");
   redirect(`/admin/solucoes/${solution.id}`);
 }
 
@@ -82,6 +84,7 @@ export async function updateSolution(solutionId: string, formData: FormData) {
   ]);
 
   revalidatePath("/admin/solucoes");
+  revalidateTag(CACHE_TAGS.solutions, "max");
   revalidatePath(`/admin/solucoes/${solutionId}`);
 }
 
@@ -91,4 +94,5 @@ export async function deleteSolution(formData: FormData) {
   if (!id) return;
   await prisma.solution.delete({ where: { id } });
   revalidatePath("/admin/solucoes");
+  revalidateTag(CACHE_TAGS.solutions, "max");
 }

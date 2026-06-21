@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { productSchema } from "@/lib/validations";
 import { enhanceDescription } from "@/scrapers/enhance-description";
+import { CACHE_TAGS } from "@/lib/cached-queries";
 
 function slugify(value: string) {
   return value
@@ -109,6 +110,7 @@ export async function createProduct(formData: FormData) {
   });
 
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
   redirect(`/admin/produtos/${product.id}`);
 }
 
@@ -160,6 +162,7 @@ export async function updateProduct(id: string, formData: FormData) {
   ]);
 
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
   revalidatePath(`/admin/produtos/${id}`);
   redirect(`/admin/produtos/${id}`);
 }
@@ -169,6 +172,7 @@ export async function deleteProduct(formData: FormData) {
   const id = String(formData.get("id"));
   await prisma.product.delete({ where: { id } });
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
 }
 
 export async function duplicateProduct(formData: FormData) {
@@ -222,6 +226,7 @@ export async function duplicateProduct(formData: FormData) {
   });
 
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
 }
 
 export async function bulkUpdateProducts(formData: FormData) {
@@ -267,6 +272,7 @@ export async function bulkUpdateProducts(formData: FormData) {
   }
 
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
 }
 
 export async function generateMissingDescriptions() {
@@ -289,6 +295,7 @@ export async function generateMissingDescriptions() {
   }
 
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
   revalidatePath("/admin/produtos/saude");
 }
 
@@ -299,4 +306,5 @@ export async function toggleProductStatus(formData: FormData) {
   const next = current === "ATIVO" ? "INDISPONIVEL" : "ATIVO";
   await prisma.product.update({ where: { id }, data: { status: next } });
   revalidatePath("/admin/produtos");
+  revalidateTag(CACHE_TAGS.products, "max");
 }
