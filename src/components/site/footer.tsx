@@ -22,10 +22,10 @@ export function Footer() {
           <p className="text-sm font-semibold">Catálogo</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li><Link href="/produtos?categoria=escritorio">Escritório</Link></li>
-            <li><Link href="/produtos?categoria=tecnologia">Tecnologia</Link></li>
+            <li><Link href="/produtos?categoria=informatica">Informática</Link></li>
             <li><Link href="/produtos?categoria=kit-churrasco">Kit Churrasco</Link></li>
             <li><Link href="/produtos?categoria=canecas">Canecas</Link></li>
-            <li><Link href="/produtos?categoria=sustentaveis">Sustentáveis</Link></li>
+            <li><Link href="/produtos?categoria=linha-ecologica">Linha Ecológica</Link></li>
           </ul>
         </div>
 

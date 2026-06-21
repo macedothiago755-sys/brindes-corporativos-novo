@@ -43,7 +43,7 @@ export function Hero() {
               <Link href="/montar-kit">Montar meu kit</Link>
             </Button>
             <Button asChild size="lg" variant="outline-accent">
-              <Link href="/produtos?categoria=kits-corporativos">Ver exemplos de kits</Link>
+              <Link href="/produtos">Ver catálogo completo</Link>
             </Button>
           </div>
 
