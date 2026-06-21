@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CONTACT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from "@/lib/site-config";
 
 export function Footer() {
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
   return (
     <footer id="contato" className="border-t border-border bg-muted">
       <div className="container-premium grid gap-10 py-16 lg:grid-cols-5">
@@ -39,9 +42,13 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold">Contato comercial</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <li>comercial@brindescorporativos.com</li>
-            <li>(11) 4000-0000</li>
-            <li>Atendimento em todo o Brasil</li>
+            <li>{CONTACT_EMAIL}</li>
+            <li>
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                Fale pelo WhatsApp
+              </a>
+            </li>
+            <li>Atendimento para empresas em São Paulo e em todo o Brasil</li>
           </ul>
         </div>
 
@@ -56,7 +63,7 @@ export function Footer() {
       </div>
 
       <div className="container-premium flex flex-col gap-4 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} Brindes Corporativos. Todos os direitos reservados.</p>
+        <p>© {new Date().getFullYear()} Paint Colors. Todos os direitos reservados.</p>
       </div>
     </footer>
   );

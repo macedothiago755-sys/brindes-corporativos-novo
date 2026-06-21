@@ -21,43 +21,85 @@ function CategoryCard({ category, className }: { category: CategoryItem; classNa
   );
 }
 
-export function CategoriesGrid({ main, rest }: { main: CategoryItem[]; rest: CategoryItem[] }) {
+function AllCategoriesDialog({ categories, trigger }: { categories: CategoryItem[]; trigger: React.ReactNode }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Todas as categorias</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {categories.map((category) => (
+            <CategoryCard key={category.slug} category={category} />
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CategoriesGrid({
+  main,
+  rest,
+  featured,
+  all,
+}: {
+  main: CategoryItem[];
+  rest: CategoryItem[];
+  featured: CategoryItem[];
+  all: CategoryItem[];
+}) {
   return (
     <>
-      <div
-        className={cn(
-          "flex gap-2.5 overflow-x-auto pb-1 snap-x snap-mandatory",
-          "sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-6"
+      <div className="sm:hidden">
+        <p className="text-sm font-semibold text-foreground/80">Explore por categoria</p>
+        <div className="mt-3 grid grid-cols-2 gap-2.5">
+          {featured.map((category) => {
+            const Icon = getCategoryIcon(category.name);
+            return (
+              <Link
+                key={category.slug}
+                href={`/produtos?categoria=${category.slug}`}
+                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card py-4 text-center text-xs font-medium transition-colors hover:border-accent hover:bg-accent/5"
+              >
+                <Icon className="h-5 w-5 text-accent" strokeWidth={1.75} />
+                <span className="truncate">{category.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+        {all.length > 0 && (
+          <AllCategoriesDialog
+            categories={all}
+            trigger={
+              <button
+                type="button"
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-accent/60 bg-accent/5 py-3 text-sm font-medium text-accent"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Ver todas categorias
+              </button>
+            }
+          />
         )}
-      >
+      </div>
+
+      <div className="hidden gap-2.5 sm:grid sm:grid-cols-3 lg:grid-cols-6">
         {main.map((category) => (
-          <div key={category.slug} className="w-[44%] shrink-0 sm:w-full">
-            <CategoryCard category={category} />
-          </div>
+          <CategoryCard key={category.slug} category={category} />
         ))}
 
         {rest.length > 0 && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <button
-                type="button"
-                className={cn(cardClass, "w-[44%] shrink-0 border-dashed border-accent/60 bg-accent/5 sm:w-full")}
-              >
+          <AllCategoriesDialog
+            categories={rest}
+            trigger={
+              <button type="button" className={cn(cardClass, "w-full border-dashed border-accent/60 bg-accent/5")}>
                 <LayoutGrid className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} />
                 <span className="truncate">Ver mais categorias</span>
               </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Todas as categorias</DialogTitle>
-              </DialogHeader>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {rest.map((category) => (
-                  <CategoryCard key={category.slug} category={category} />
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+            }
+          />
         )}
       </div>
     </>

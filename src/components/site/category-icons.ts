@@ -92,3 +92,30 @@ export function splitCategories<T extends { name: string }>(categories: T[], mai
   const rest = categories.filter((_, i) => !selected.has(i));
   return { main, rest };
 }
+
+const MOBILE_FEATURED_KEYWORDS = ["escritorio", "tecnologia", "sustent", "evento"];
+
+/** Categorias priorizadas para o grid compacto 2x2 do mobile. */
+export function pickFeaturedCategories<T extends { name: string }>(categories: T[], count = 4) {
+  const normalized = categories.map((c) => normalizeCategoryName(c.name));
+  const selected = new Set<number>();
+  const picked: T[] = [];
+
+  for (const keyword of MOBILE_FEATURED_KEYWORDS) {
+    if (picked.length >= count) break;
+    const idx = normalized.findIndex((n, i) => !selected.has(i) && n.includes(keyword));
+    if (idx !== -1) {
+      selected.add(idx);
+      picked.push(categories[idx]);
+    }
+  }
+
+  for (let i = 0; i < categories.length && picked.length < count; i++) {
+    if (!selected.has(i)) {
+      selected.add(i);
+      picked.push(categories[i]);
+    }
+  }
+
+  return picked;
+}

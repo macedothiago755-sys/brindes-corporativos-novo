@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
-import { Building2, Package, ClipboardCheck } from "lucide-react";
 
 const stats = [
-  { icon: Building2, value: 350, suffix: "+", label: "Empresas atendidas", color: "var(--brand-purple)" },
-  { icon: Package, value: 1200, suffix: "+", label: "Produtos personalizados", color: "var(--brand-magenta)" },
-  { icon: ClipboardCheck, value: 4000, suffix: "+", label: "Projetos entregues", color: "var(--brand-blue)" },
+  { value: 350, suffix: "+", label: "empresas atendidas" },
+  { value: 4000, suffix: "+", label: "projetos entregues" },
+  { value: 1200, suffix: "+", label: "produtos personalizados" },
 ];
 
 function Counter({ value, suffix }: { value: number; suffix: string }) {
@@ -27,7 +26,7 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
   }, [spring]);
 
   return (
-    <span ref={ref} className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+    <span ref={ref} className="font-semibold text-foreground">
       {display.toLocaleString("pt-BR")}
       {suffix}
     </span>
@@ -36,24 +35,15 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
 
 export function TrustStats() {
   return (
-    <section className="border-b border-border bg-background py-12">
-      <div className="container-premium grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex items-center gap-4 rounded-xl border border-border bg-card p-6 shadow-sm"
-          >
-            <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${stat.color}1a`, color: stat.color }}
-            >
-              <stat.icon className="h-6 w-6" />
-            </div>
-            <div>
-              <Counter value={stat.value} suffix={stat.suffix} />
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </div>
-          </div>
+    <section className="border-b border-border bg-background py-3.5">
+      <div className="container-premium flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-center text-xs sm:text-sm">
+        {stats.map((stat, i) => (
+          <span key={stat.label} className="flex items-center gap-2.5">
+            <span className="text-muted-foreground">
+              <Counter value={stat.value} suffix={stat.suffix} /> {stat.label}
+            </span>
+            {i < stats.length - 1 && <span className="text-border" aria-hidden="true">|</span>}
+          </span>
         ))}
       </div>
     </section>

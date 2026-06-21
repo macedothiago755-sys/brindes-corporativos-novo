@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { splitCategories } from "@/components/site/category-icons";
+import { splitCategories, pickFeaturedCategories } from "@/components/site/category-icons";
 import { CategoriesGrid } from "@/components/site/categories-grid";
 
 export async function CategoriesSection() {
@@ -12,10 +12,30 @@ export async function CategoriesSection() {
     orderBy: { name: "asc" },
   });
   const { main, rest } = splitCategories(categories);
+  const featured = pickFeaturedCategories(categories);
 
   return (
     <section className="container-premium py-10">
-      <CategoriesGrid main={main} rest={rest} />
+      <CategoriesGrid main={main} rest={rest} featured={featured} all={categories} />
+    </section>
+  );
+}
+
+export function LocalSeoSection() {
+  return (
+    <section className="border-t border-border bg-muted py-16">
+      <div className="container-premium">
+        <p className="text-sm font-medium uppercase tracking-widest text-accent">São Paulo</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Brindes corporativos em São Paulo</h2>
+        <p className="mt-4 max-w-2xl text-muted-foreground">
+          A Paint Colors ajuda empresas de São Paulo a criarem brindes personalizados para eventos, clientes,
+          parceiros e colaboradores. Atendemos empresas paulistas com agilidade e suporte dedicado para eventos
+          corporativos na capital e na região metropolitana.
+        </p>
+        <Button asChild variant="outline-accent" className="mt-6">
+          <Link href="/brindes-corporativos-sao-paulo">Ver brindes para empresas em São Paulo</Link>
+        </Button>
+      </div>
     </section>
   );
 }
@@ -88,17 +108,16 @@ export function DifferentiatorsSection() {
 }
 
 const steps = [
-  { step: "01", title: "Escolha seus produtos", desc: "Navegue pelo catálogo ou monte um kit personalizado para seu objetivo." },
-  { step: "02", title: "Envie sua identidade visual", desc: "Compartilhe logotipo e diretrizes de marca para a personalização." },
-  { step: "03", title: "Aprovação da arte", desc: "Validamos a arte final com você antes de iniciar a produção." },
-  { step: "04", title: "Produção e entrega", desc: "Produzimos em escala e entregamos no prazo combinado." },
+  { step: "01", title: "Escolha ou monte seu kit", desc: "Navegue pelo catálogo ou responda algumas perguntas para montar um kit personalizado." },
+  { step: "02", title: "Envie sua logo e aprove a arte", desc: "Compartilhe sua identidade visual e validamos a arte final antes da produção." },
+  { step: "03", title: "Produção e entrega", desc: "Produzimos em escala e entregamos no prazo combinado." },
 ];
 
 export function HowItWorksSection() {
   return (
     <section id="como-funciona" className="container-premium py-20">
       <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Como funciona</h2>
-      <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-10 grid gap-8 sm:grid-cols-3">
         {steps.map((s) => (
           <div key={s.step}>
             <p className="text-3xl font-semibold text-accent">{s.step}</p>
@@ -117,7 +136,7 @@ export async function ClientsSection() {
   const clients = await prisma.clientLogo.findMany({ orderBy: { order: "asc" } });
 
   return (
-    <section className="border-t border-border py-16">
+    <section id="cases" className="border-t border-border py-16">
       <div className="container-premium">
         <p className="text-center text-sm uppercase tracking-widest text-muted-foreground">
           Empresas que confiam na nossa estrutura
