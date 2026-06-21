@@ -117,6 +117,14 @@ export default async function ProductsPage({
         Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado para sua empresa.
       </p>
 
+      {/* Região viva: anuncia a contagem de resultados a leitores de tela
+          sempre que os filtros ou a busca mudam (navegação soft atualiza o texto). */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {products.length === 1
+          ? "1 produto encontrado"
+          : `${products.length} produtos encontrados`}
+      </p>
+
       <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
         <FilterSidebar categories={topCategories} />
 
