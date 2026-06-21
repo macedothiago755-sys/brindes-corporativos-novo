@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getAdapter } from "@/scrapers/adapters";
 import { enhanceDescription } from "@/scrapers/enhance-description";
-import { createScrapeProvider } from "@/lib/import/provider";
 import { findDuplicateImportedProduct } from "@/lib/import/dedupe";
 import { buildProductDraft } from "@/lib/import/product-mapper";
 
@@ -36,6 +35,11 @@ export async function startImportJob(jobId: string) {
     data: { status: "EM_EXECUCAO", startedAt: new Date() },
   });
 
+  // Import dinâmico: o motor de scraping usa Playwright (navegador real),
+  // que não roda em funções serverless. Mantendo-o fora do import estático
+  // deste arquivo, as outras rotas que usam `importer.ts` (ex: promover/
+  // melhorar produto importado) não carregam o Playwright sem necessidade.
+  const { createScrapeProvider } = await import("@/lib/import/provider");
   const provider = createScrapeProvider(adapter);
 
   try {
