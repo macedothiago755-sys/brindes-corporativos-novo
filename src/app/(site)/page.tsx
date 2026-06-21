@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { BannerCarousel } from "@/components/site/banner-carousel";
 import { Hero } from "@/components/site/hero";
 import { TrustStats } from "@/components/site/trust-stats";
 import { FeaturedProductsCarousel } from "@/components/site/featured-products-carousel";
@@ -26,6 +27,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <BannerCarousel />
       <Hero />
       <TrustStats />
       <CategoriesSection />
