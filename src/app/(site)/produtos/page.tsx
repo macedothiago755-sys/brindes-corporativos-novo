@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/site/product-card";
 import { FilterSidebar } from "@/components/site/filter-sidebar";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { getCategoryHeading } from "@/lib/category-copy";
+import { SITE_URL } from "@/lib/site-config";
 import type { CustomizationMethod, ProductObjective } from "@prisma/client";
 
 const objectiveLabels: Record<string, string> = {
@@ -73,8 +75,31 @@ export default async function ProductsPage({
     }),
   ]);
 
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: heading,
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 30).map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/produto/${product.slug}`,
+      name: product.name,
+    })),
+  };
+
+  const breadcrumbItems = [
+    { name: "Início", href: "/" },
+    { name: "Produtos", href: "/produtos" },
+    ...(category ? [{ name: category.name, href: `/produtos?categoria=${category.slug}` }] : []),
+  ];
+
   return (
     <div className="container-premium py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+
+      <Breadcrumbs items={breadcrumbItems} />
+
       <h1 className="text-3xl font-semibold tracking-tight">{heading}</h1>
       <p className="mt-2 text-muted-foreground">
         Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado para sua empresa.
