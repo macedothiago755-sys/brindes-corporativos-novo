@@ -7,6 +7,7 @@ import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import { Pagination } from "@/components/admin/pagination";
 import { SelectionProvider, SelectAllCheckbox, RowCheckbox, BulkActionBar } from "@/components/admin/bulk-selection";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
@@ -36,17 +37,10 @@ const SORTABLE_FIELDS: Record<string, true> = {
   updatedAt: true,
 };
 
-function getProducts(params: {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  sort?: string;
-  dir?: "asc" | "desc";
-  issue?: string;
-}) {
-  const { q, categoryId, status, sort, dir, issue } = params;
-  const sortField = sort && SORTABLE_FIELDS[sort] ? sort : "createdAt";
-  const sortDir = dir === "asc" ? "asc" : "desc";
+const PAGE_SIZE = 25;
+
+function buildProductsWhere(params: { q?: string; categoryId?: string; status?: string; issue?: string }) {
+  const { q, categoryId, status, issue } = params;
 
   const issueWhere =
     issue === "sem-imagem"
@@ -59,33 +53,64 @@ function getProducts(params: {
       ? { benefits: { isEmpty: true }, features: { isEmpty: true } }
       : {};
 
+  return {
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { sku: { contains: q, mode: "insensitive" as const } },
+            { supplierCode: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(categoryId ? { categoryId } : {}),
+    ...(status ? { status: status as "ATIVO" | "RASCUNHO" | "INDISPONIVEL" } : {}),
+    ...issueWhere,
+  };
+}
+
+function getProducts(params: {
+  q?: string;
+  categoryId?: string;
+  status?: string;
+  sort?: string;
+  dir?: "asc" | "desc";
+  issue?: string;
+  page?: number;
+}) {
+  const { sort, dir, page = 1 } = params;
+  const sortField = sort && SORTABLE_FIELDS[sort] ? sort : "createdAt";
+  const sortDir = dir === "asc" ? "asc" : "desc";
+
   return prisma.product.findMany({
-    where: {
-      ...(q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" } },
-              { sku: { contains: q, mode: "insensitive" } },
-              { supplierCode: { contains: q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(categoryId ? { categoryId } : {}),
-      ...(status ? { status: status as "ATIVO" | "RASCUNHO" | "INDISPONIVEL" } : {}),
-      ...issueWhere,
-    },
+    where: buildProductsWhere(params),
     include: { category: true },
     orderBy: { [sortField]: sortDir },
+    take: PAGE_SIZE,
+    skip: (page - 1) * PAGE_SIZE,
   });
+}
+
+function countProducts(params: { q?: string; categoryId?: string; status?: string; issue?: string }) {
+  return prisma.product.count({ where: buildProductsWhere(params) });
 }
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; categoryId?: string; status?: string; sort?: string; dir?: string; issue?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    categoryId?: string;
+    status?: string;
+    sort?: string;
+    dir?: string;
+    issue?: string;
+    page?: string;
+  }>;
 }) {
   const params = await searchParams;
   const dir = params.dir === "asc" ? "asc" : "desc";
+  const page = Math.max(1, Number(params.page) || 1);
 
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
@@ -93,8 +118,9 @@ export default async function AdminProductsPage({
   const canDelete = can(role, "products:delete");
   const canImport = can(role, "importer:run");
 
-  const [products, categories] = await Promise.all([
-    getProducts({ ...params, dir }),
+  const [products, total, categories] = await Promise.all([
+    getProducts({ ...params, dir, page }),
+    countProducts(params),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
 
@@ -115,6 +141,18 @@ export default async function AdminProductsPage({
     if (params.status) sp.set("status", params.status);
     sp.set("sort", key);
     sp.set("dir", nextDir);
+    return `/admin/produtos?${sp.toString()}`;
+  }
+
+  function buildPageHref(nextPage: number) {
+    const sp = new URLSearchParams();
+    if (params.q) sp.set("q", params.q);
+    if (params.categoryId) sp.set("categoryId", params.categoryId);
+    if (params.status) sp.set("status", params.status);
+    if (params.issue) sp.set("issue", params.issue);
+    if (params.sort) sp.set("sort", params.sort);
+    if (params.dir) sp.set("dir", params.dir);
+    sp.set("page", String(nextPage));
     return `/admin/produtos?${sp.toString()}`;
   }
 
@@ -323,6 +361,7 @@ export default async function AdminProductsPage({
             emptyState="Nenhum produto encontrado."
           />
         )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={total} buildHref={buildPageHref} />
       </div>
     </div>
   );
