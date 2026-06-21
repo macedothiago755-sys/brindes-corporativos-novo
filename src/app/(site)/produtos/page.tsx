@@ -67,9 +67,9 @@ export default async function ProductsPage({
       orderBy: { createdAt: "desc" },
     }),
     prisma.category.findMany({
-      where: { parentId: null },
-      include: { children: { orderBy: { name: "asc" } } },
-      orderBy: { name: "asc" },
+      where: { parentId: null, active: true },
+      include: { children: { where: { active: true }, orderBy: { order: "asc" } } },
+      orderBy: { order: "asc" },
     }),
   ]);
 

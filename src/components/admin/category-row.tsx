@@ -11,21 +11,39 @@ interface CategoryOption {
 }
 
 interface CategoryRowProps {
-  category: { id: string; name: string; slug: string; parentId: string | null };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    parentId: string | null;
+    active: boolean;
+    order: number;
+    metaTitle: string | null;
+    metaDescription: string | null;
+  };
   depth: number;
   parentOptions: CategoryOption[];
   productCount: number;
   updateAction: (formData: FormData) => void | Promise<void>;
   deleteAction: (formData: FormData) => void | Promise<void>;
+  toggleActiveAction: (formData: FormData) => void | Promise<void>;
 }
 
-export function CategoryRow({ category, depth, parentOptions, productCount, updateAction, deleteAction }: CategoryRowProps) {
+export function CategoryRow({
+  category,
+  depth,
+  parentOptions,
+  productCount,
+  updateAction,
+  deleteAction,
+  toggleActiveAction,
+}: CategoryRowProps) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
     return (
       <tr className="border-t border-border bg-muted/40">
-        <td colSpan={4} className="px-4 py-3">
+        <td colSpan={5} className="px-4 py-3">
           <form
             action={async (formData) => {
               await updateAction(formData);
@@ -48,6 +66,25 @@ export function CategoryRow({ category, depth, parentOptions, productCount, upda
                   </option>
                 ))}
             </select>
+            <Input
+              name="order"
+              type="number"
+              defaultValue={category.order}
+              className="h-9 w-20"
+              title="Ordem de prioridade"
+            />
+            <Input
+              name="metaTitle"
+              defaultValue={category.metaTitle ?? ""}
+              placeholder="Título SEO"
+              className="h-9 w-56"
+            />
+            <Input
+              name="metaDescription"
+              defaultValue={category.metaDescription ?? ""}
+              placeholder="Descrição SEO"
+              className="h-9 w-64"
+            />
             <Button type="submit" size="sm">Salvar</Button>
             <Button type="button" variant="outline" size="sm" onClick={() => setEditing(false)}>Cancelar</Button>
           </form>
@@ -64,11 +101,34 @@ export function CategoryRow({ category, depth, parentOptions, productCount, upda
       </td>
       <td className="px-4 py-3 text-muted-foreground">{category.slug}</td>
       <td className="px-4 py-3 text-muted-foreground">{productCount}</td>
+      <td className="px-4 py-3">
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            category.active ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {category.active ? "Ativa" : "Inativa"}
+        </span>
+      </td>
       <td className="px-4 py-3 text-right">
         <div className="inline-flex gap-2">
           <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)}>
             Editar
           </Button>
+          <form action={toggleActiveAction}>
+            <input type="hidden" name="id" value={category.id} />
+            <ConfirmSubmitButton
+              variant="outline"
+              size="sm"
+              confirmMessage={
+                category.active
+                  ? `Ocultar a categoria "${category.name}" do site público? Os produtos vinculados continuam intactos no admin.`
+                  : `Reativar a categoria "${category.name}" no site público?`
+              }
+            >
+              {category.active ? "Ocultar" : "Reativar"}
+            </ConfirmSubmitButton>
+          </form>
           <form action={deleteAction}>
             <input type="hidden" name="id" value={category.id} />
             <ConfirmSubmitButton
