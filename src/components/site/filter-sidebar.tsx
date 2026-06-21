@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Option = { label: string; value: string };
@@ -41,9 +43,54 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
   const activeCategory = searchParams.get("categoria");
   const activeMethod = searchParams.get("metodo");
   const activeTag = searchParams.get("tag");
+  const activeQuery = searchParams.get("q") ?? "";
+
+  const [query, setQuery] = useState(activeQuery);
+
+  function submitSearch(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    const trimmed = value.trim();
+    if (trimmed) params.set("q", trimmed);
+    else params.delete("q");
+    router.push(`/produtos?${params.toString()}`);
+  }
 
   return (
     <aside className="space-y-8">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitSearch(query);
+        }}
+        role="search"
+      >
+        <p className="text-sm font-semibold">Buscar</p>
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-border bg-background px-3">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nome ou termo..."
+            aria-label="Buscar produtos"
+            className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {query && (
+            <button
+              type="button"
+              aria-label="Limpar busca"
+              onClick={() => {
+                setQuery("");
+                submitSearch("");
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </form>
+
       <div>
         <p className="text-sm font-semibold">Categoria</p>
         <div className="mt-3 flex max-h-[480px] flex-col gap-1 overflow-y-auto pr-2">
@@ -115,8 +162,14 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
         </div>
       </div>
 
-      {(activeCategory || activeMethod || activeTag) && (
-        <button onClick={() => router.push("/produtos")} className="text-sm text-accent underline">
+      {(activeCategory || activeMethod || activeTag || activeQuery) && (
+        <button
+          onClick={() => {
+            setQuery("");
+            router.push("/produtos");
+          }}
+          className="text-sm text-accent underline"
+        >
           Limpar filtros
         </button>
       )}
