@@ -1,26 +1,73 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/site/product-card";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { Button } from "@/components/ui/button";
+import { SITE_URL } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
-export default async function SolutionPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-
-  const solution = await prisma.solution.findUnique({
+async function getSolution(slug: string) {
+  return prisma.solution.findUnique({
     where: { slug },
     include: {
       products: { include: { product: { include: { category: true } } } },
       kits: { where: { active: true }, include: { items: { include: { product: true } } } },
     },
   });
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const solution = await prisma.solution.findUnique({ where: { slug } });
+  if (!solution) return {};
+  return {
+    title: solution.title,
+    description: solution.description,
+    alternates: { canonical: `/solucoes/${solution.slug}` },
+    openGraph: {
+      title: solution.title,
+      description: solution.description,
+      ...(solution.image ? { images: [solution.image] } : {}),
+    },
+  };
+}
+
+export default async function SolutionPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const solution = await getSolution(slug);
 
   if (!solution) notFound();
 
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: solution.title,
+    numberOfItems: solution.products.length,
+    itemListElement: solution.products.slice(0, 30).map(({ product }, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/produto/${product.slug}`,
+      name: product.name,
+    })),
+  };
+
   return (
     <div className="container-premium py-16">
+      {solution.products.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      )}
+
+      <Breadcrumbs
+        items={[
+          { name: "Início", href: "/" },
+          { name: "Soluções", href: "/produtos" },
+          { name: solution.title, href: `/solucoes/${solution.slug}` },
+        ]}
+      />
+
       <p className="text-sm font-medium uppercase tracking-widest text-accent">Solução por objetivo</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{solution.title}</h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">{solution.description}</p>
