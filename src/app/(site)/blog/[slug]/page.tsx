@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 async function getPost(slug: string) {
   return prisma.post.findUnique({ where: { slug } });
@@ -17,7 +19,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: post.title,
     description: post.excerpt,
-    openGraph: { images: [post.coverImage] },
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      images: [post.coverImage],
+      publishedTime: post.publishedAt.toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
+    },
   };
 }
 
@@ -33,17 +43,30 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     description: post.excerpt,
     image: [post.coverImage],
     datePublished: post.publishedAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo-paint-colors.png` },
+    },
   };
 
   return (
     <article className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <Link href="/blog" className="text-sm text-accent underline">
-        ← Voltar para o blog
-      </Link>
+      <Breadcrumbs
+        items={[
+          { name: "Início", href: "/" },
+          { name: "Blog", href: "/blog" },
+          { name: post.title, href: `/blog/${post.slug}` },
+        ]}
+      />
 
-      <p className="mt-6 text-xs uppercase tracking-wide text-muted-foreground">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {post.publishedAt.toLocaleDateString("pt-BR")}
       </p>
       <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">{post.title}</h1>
