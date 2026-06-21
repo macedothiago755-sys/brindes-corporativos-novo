@@ -239,7 +239,7 @@ export function KitBuilder() {
               <span className="font-medium text-foreground">{currency(Number(quantity) * Number(budgetPerPerson))}</span>
             </p>
           )}
-          {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
           <div className="mt-8 flex gap-3">
             <Button variant="outline" onClick={() => setStep(2)}>Voltar</Button>
             <Button size="lg" variant="gradient" disabled={!budgetPerPerson || loading} onClick={handleGenerate}>
@@ -369,7 +369,7 @@ export function KitBuilder() {
               </span>
             </label>
 
-            {submitError && <p role="alert" className="text-sm text-red-600">{submitError}</p>}
+            {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
 
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(3)}>

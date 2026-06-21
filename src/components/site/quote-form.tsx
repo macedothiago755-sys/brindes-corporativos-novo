@@ -254,7 +254,7 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             <Input id="arquivo" name="arquivo" type="file" className="mt-2" accept="image/*,.pdf,.ai,.eps" />
           </div>
 
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
           <Button type="button" size="lg" className="w-full" onClick={goToStep2}>
             Continuar
@@ -334,7 +334,7 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             </span>
           </label>
 
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
           <div className="flex gap-3">
             <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)}>
