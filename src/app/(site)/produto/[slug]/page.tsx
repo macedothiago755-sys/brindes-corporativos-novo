@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import { Palette, Users, Factory, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +48,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProduct(slug);
   if (!product || product.status !== "ATIVO") notFound();
 
-  await prisma.productView.create({ data: { productId: product.id } });
+  // Registra a visualização após a resposta, sem bloquear a renderização.
+  after(() => {
+    prisma.productView.create({ data: { productId: product.id } }).catch(() => {});
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
