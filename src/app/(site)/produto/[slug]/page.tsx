@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Palette, Users, Factory, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getProductBySlug } from "@/lib/cached-queries";
+import { getProductBySlug, getRelatedProducts } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
+import { ProductCard } from "@/components/site/product-card";
 import { TrackView } from "@/components/site/track-view";
 import { SITE_URL } from "@/lib/site-config";
 
@@ -50,6 +51,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     prisma.productView.create({ data: { productId: product.id } }).catch(() => {});
   });
 
+  const related = await getRelatedProducts(product.categoryId, product.id);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -63,6 +66,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   };
 
   return (
+    <>
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <TrackView
@@ -168,5 +172,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
     </div>
+
+    {related.length > 0 && (
+      <section className="border-t border-border bg-muted py-16">
+        <div className="container-premium">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Produtos relacionados em {product.category.name}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Outros brindes da mesma categoria que combinam com o seu projeto.
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
+            {related.map((item) => (
+              <ProductCard key={item.slug} product={item} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+    </>
   );
 }
