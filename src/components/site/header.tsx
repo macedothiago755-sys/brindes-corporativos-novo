@@ -10,7 +10,7 @@ const links = [
   { href: "/produtos", label: "Produtos" },
   { href: "/vitrine/mais-vendidos", label: "Soluções" },
   { href: "/blog", label: "Inspirações" },
-  { href: "/#diferenciais", label: "Sobre nós" },
+  { href: "/sobre", label: "Sobre nós" },
   { href: "/#contato", label: "Contato" },
 ];
 
@@ -37,7 +37,7 @@ const drawerGroups = [
   {
     title: "Empresa",
     items: [
-      { href: "/#diferenciais", label: "Sobre" },
+      { href: "/sobre", label: "Sobre" },
       { href: "/#como-funciona", label: "Como funciona" },
       { href: "/#cases", label: "Cases" },
     ],
