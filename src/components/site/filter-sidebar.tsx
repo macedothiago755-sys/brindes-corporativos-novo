@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { categoryPath } from "@/lib/routes";
 
 type Option = { label: string; value: string };
 export type CategoryOption = { name: string; slug: string; children: { name: string; slug: string }[] };
@@ -28,19 +29,43 @@ const tags: Option[] = [
 export function FilterSidebar({ categories }: { categories: CategoryOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  function toggleParam(key: string, value: string) {
+  // A categoria agora vive no path (/categoria/[slug]); os demais filtros
+  // (método, tag, busca) seguem em query string sobre a base atual.
+  const onCategoryRoute = pathname.startsWith("/categoria/");
+  const activeCategory = onCategoryRoute
+    ? decodeURIComponent(pathname.split("/")[2] ?? "")
+    : searchParams.get("categoria");
+
+  function nonCategoryParams() {
     const params = new URLSearchParams(searchParams.toString());
-    const current = params.get(key);
-    if (current === value) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-    router.push(`/produtos?${params.toString()}`);
+    params.delete("categoria");
+    return params;
   }
 
-  const activeCategory = searchParams.get("categoria");
+  function withQuery(base: string, params: URLSearchParams) {
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  }
+
+  function toggleCategory(slug: string) {
+    const params = nonCategoryParams();
+    if (activeCategory === slug) {
+      router.push(withQuery("/produtos", params));
+    } else {
+      router.push(withQuery(categoryPath(slug), params));
+    }
+  }
+
+  function toggleParam(key: "metodo" | "tag", value: string) {
+    const params = nonCategoryParams();
+    if (params.get(key) === value) params.delete(key);
+    else params.set(key, value);
+    const base = onCategoryRoute ? pathname : "/produtos";
+    router.push(withQuery(base, params));
+  }
+
   const activeMethod = searchParams.get("metodo");
   const activeTag = searchParams.get("tag");
   const activeQuery = searchParams.get("q") ?? "";
@@ -48,11 +73,12 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
   const [query, setQuery] = useState(activeQuery);
 
   function submitSearch(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = nonCategoryParams();
     const trimmed = value.trim();
     if (trimmed) params.set("q", trimmed);
     else params.delete("q");
-    router.push(`/produtos?${params.toString()}`);
+    const base = onCategoryRoute ? pathname : "/produtos";
+    router.push(withQuery(base, params));
   }
 
   return (
@@ -97,7 +123,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
           {categories.map((c) => (
             <div key={c.slug}>
               <button
-                onClick={() => toggleParam("categoria", c.slug)}
+                onClick={() => toggleCategory(c.slug)}
                 aria-pressed={activeCategory === c.slug}
                 className={cn(
                   "w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
@@ -111,7 +137,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
                   {c.children.map((child) => (
                     <button
                       key={child.slug}
-                      onClick={() => toggleParam("categoria", child.slug)}
+                      onClick={() => toggleCategory(child.slug)}
                       aria-pressed={activeCategory === child.slug}
                       className={cn(
                         "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",

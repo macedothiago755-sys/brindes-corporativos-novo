@@ -1,0 +1,152 @@
+import { prisma } from "@/lib/prisma";
+import { ProductCard } from "@/components/site/product-card";
+import { FilterSidebar } from "@/components/site/filter-sidebar";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { FaqSection } from "@/components/site/faq-section";
+import { TrackView } from "@/components/site/track-view";
+import { getCategoryHeading } from "@/lib/category-copy";
+import { getCategoryIntro, getCategoryFaq } from "@/lib/category-content";
+import { getActiveCategoriesTree } from "@/lib/cached-queries";
+import { categoryPath } from "@/lib/routes";
+import { SITE_URL } from "@/lib/site-config";
+import type { Category, CustomizationMethod, ProductObjective } from "@prisma/client";
+
+export const objectiveLabels: Record<string, string> = {
+  ONBOARDING: "onboarding de colaboradores",
+  EVENTO: "eventos corporativos",
+  CLIENTE_VIP: "clientes VIP",
+  FEIRA: "feiras e exposições",
+  PREMIACAO: "ações de premiação",
+};
+
+export function resolveHeading(category: { name: string } | null, objetivo?: string) {
+  if (category) return getCategoryHeading(category.name);
+  if (objetivo && objectiveLabels[objetivo]) return `Brindes corporativos para ${objectiveLabels[objetivo]}`;
+  return "Catálogo de brindes corporativos personalizados";
+}
+
+export type CatalogCategory = Category & { children: Category[] };
+
+/**
+ * Renderização compartilhada do catálogo, usada tanto pela URL canônica de
+ * categoria (/categoria/[slug]) quanto pelo catálogo geral (/produtos). Centraliza
+ * a query de produtos, o JSON-LD, os filtros e o conteúdo de categoria, evitando
+ * duplicação de lógica entre as duas rotas.
+ */
+export async function CatalogView({
+  category,
+  metodo,
+  tag,
+  objetivo,
+  search,
+}: {
+  category: CatalogCategory | null;
+  metodo?: string;
+  tag?: string;
+  objetivo?: string;
+  search?: string;
+}) {
+  const categoryIds = category
+    ? category.children.length
+      ? [category.id, ...category.children.map((c) => c.id)]
+      : [category.id]
+    : undefined;
+  const heading = search ? `Resultados para “${search}”` : resolveHeading(category, objetivo);
+  const intro = category ? getCategoryIntro(category.slug) : null;
+
+  const [products, topCategories] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        status: "ATIVO",
+        ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+        ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
+        ...(tag ? { tags: { has: tag } } : {}),
+        ...(objetivo ? { objectives: { has: objetivo as ProductObjective } } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { shortDescription: { contains: search, mode: "insensitive" } },
+                { tags: { has: search.toLowerCase() } },
+              ],
+            }
+          : {}),
+      },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    getActiveCategoriesTree(),
+  ]);
+
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: heading,
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 30).map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/produto/${product.slug}`,
+      name: product.name,
+    })),
+  };
+
+  const breadcrumbItems = [
+    { name: "Início", href: "/" },
+    { name: "Produtos", href: "/produtos" },
+    ...(category ? [{ name: category.name, href: categoryPath(category.slug) }] : []),
+  ];
+
+  return (
+    <>
+      <div className="container-premium py-16">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <TrackView
+          event="view_category"
+          params={{
+            category: category?.slug ?? objetivo ?? (search ? "busca" : "todos"),
+            ...(search ? { search } : {}),
+            results: products.length,
+          }}
+        />
+
+        <Breadcrumbs items={breadcrumbItems} />
+
+        <h1 className="text-3xl font-semibold tracking-tight">{heading}</h1>
+        <p className="mt-2 max-w-3xl text-muted-foreground">
+          {intro ??
+            "Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado para sua empresa."}
+        </p>
+
+        {/* Região viva: anuncia a contagem de resultados a leitores de tela
+            sempre que os filtros ou a busca mudam (navegação soft atualiza o texto). */}
+        <p role="status" aria-live="polite" className="sr-only">
+          {products.length === 1 ? "1 produto encontrado" : `${products.length} produtos encontrados`}
+        </p>
+
+        <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
+          <FilterSidebar categories={topCategories} />
+
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.slug} product={product} />
+            ))}
+            {products.length === 0 && (
+              <p className="col-span-full text-sm text-muted-foreground">
+                Nenhum produto encontrado para os filtros selecionados.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {category && (
+        <FaqSection
+          items={getCategoryFaq(category.name)}
+          id={`faq-${category.slug}`}
+          title={`Perguntas frequentes sobre ${category.name.toLowerCase()}`}
+        />
+      )}
+    </>
+  );
+}

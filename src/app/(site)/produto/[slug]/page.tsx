@@ -11,6 +11,7 @@ import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductCard } from "@/components/site/product-card";
 import { TrackView } from "@/components/site/track-view";
 import { SITE_URL } from "@/lib/site-config";
+import { categoryPath } from "@/lib/routes";
 
 const b2bHighlights = [
   { icon: Palette, label: "Personalização com sua marca" },
@@ -78,7 +79,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         items={[
           { name: "Início", href: "/" },
           { name: "Produtos", href: "/produtos" },
-          { name: product.category.name, href: `/produtos?categoria=${product.category.slug}` },
+          { name: product.category.name, href: categoryPath(product.category.slug) },
           { name: product.name, href: `/produto/${product.slug}` },
         ]}
       />

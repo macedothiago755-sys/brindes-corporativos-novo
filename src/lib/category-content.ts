@@ -3,7 +3,7 @@ import type { FaqItem } from "@/components/site/faq-section";
 /**
  * Texto introdutório único por categoria (indexado por slug).
  *
- * Objetivo de SEO: as URLs de categoria (`/produtos?categoria=...`) são as de
+ * Objetivo de SEO: as URLs de categoria (`/categoria/...`) são as de
  * maior intenção comercial ("canecas personalizadas", "brindes ecológicos").
  * Sem texto próprio elas ficam "magras" para o Google. Cada parágrafo aqui é
  * único e responde à intenção de busca + casos de uso da categoria.

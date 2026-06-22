@@ -18,10 +18,10 @@ const drawerGroups = [
   {
     title: "Produtos",
     items: [
-      { href: "/produtos?categoria=escritorio", label: "Escritório" },
-      { href: "/produtos?categoria=informatica", label: "Informática" },
-      { href: "/produtos?categoria=linha-ecologica", label: "Linha ecológica" },
-      { href: "/produtos?categoria=canecas", label: "Canecas" },
+      { href: "/categoria/escritorio", label: "Escritório" },
+      { href: "/categoria/informatica", label: "Informática" },
+      { href: "/categoria/linha-ecologica", label: "Linha ecológica" },
+      { href: "/categoria/canecas", label: "Canecas" },
       { href: "/produtos", label: "Ver todas categorias" },
     ],
   },
