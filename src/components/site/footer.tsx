@@ -1,6 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CONTACT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from "@/lib/site-config";
+import {
+  CONTACT_EMAIL,
+  WHATSAPP_NUMBER,
+  WHATSAPP_MESSAGE,
+  BUSINESS_PHONE_DISPLAY,
+  BUSINESS_PHONE_E164,
+  BUSINESS_HOURS_DISPLAY,
+  BUSINESS_ADDRESS,
+} from "@/lib/site-config";
 
 export function Footer() {
   const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
@@ -32,8 +40,8 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold">Empresa</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <li><Link href="/sobre">Sobre a empresa</Link></li>
             <li><Link href="/blog">Blog</Link></li>
-            <li><Link href="/#diferenciais">Diferenciais</Link></li>
             <li><Link href="/#como-funciona">Como funciona</Link></li>
             <li><Link href="/admin/login">Acesso administrativo</Link></li>
           </ul>
@@ -42,13 +50,29 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold">Contato comercial</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <li>{CONTACT_EMAIL}</li>
+            <li>
+              <a href={`tel:${BUSINESS_PHONE_E164}`} className="hover:text-foreground">
+                {BUSINESS_PHONE_DISPLAY}
+              </a>
+            </li>
+            <li>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-foreground">
+                {CONTACT_EMAIL}
+              </a>
+            </li>
             <li>
               <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
                 Fale pelo WhatsApp
               </a>
             </li>
-            <li>Atendimento para empresas em São Paulo e em todo o Brasil</li>
+            <li>
+              <address className="not-italic">
+                {BUSINESS_ADDRESS.street}
+                <br />
+                {BUSINESS_ADDRESS.locality} – {BUSINESS_ADDRESS.region}, CEP {BUSINESS_ADDRESS.postalCode}
+              </address>
+            </li>
+            <li>{BUSINESS_HOURS_DISPLAY}</li>
           </ul>
         </div>
 

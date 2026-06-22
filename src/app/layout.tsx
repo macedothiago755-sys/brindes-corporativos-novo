@@ -1,8 +1,24 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
-import { SITE_URL, SITE_NAME, CONTACT_EMAIL, WHATSAPP_NUMBER, GTM_CONTAINER_ID } from "@/lib/site-config";
+import {
+  SITE_URL,
+  SITE_NAME,
+  CONTACT_EMAIL,
+  GTM_CONTAINER_ID,
+  BUSINESS_PHONE_E164,
+  BUSINESS_ADDRESS,
+} from "@/lib/site-config";
 import "./globals.css";
+
+const postalAddress = {
+  "@type": "PostalAddress",
+  streetAddress: BUSINESS_ADDRESS.street,
+  addressLocality: BUSINESS_ADDRESS.locality,
+  addressRegion: BUSINESS_ADDRESS.region,
+  postalCode: BUSINESS_ADDRESS.postalCode,
+  addressCountry: BUSINESS_ADDRESS.country,
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,12 +59,15 @@ const organizationJsonLd = {
   logo: `${SITE_URL}/logo-paint-colors.png`,
   description:
     "Especialistas em brindes corporativos personalizados para empresas: catálogo inteligente, orçamento sob medida e atendimento dedicado.",
+  telephone: BUSINESS_PHONE_E164,
+  address: postalAddress,
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "Vendas",
     email: CONTACT_EMAIL,
-    telephone: `+${WHATSAPP_NUMBER}`,
+    telephone: BUSINESS_PHONE_E164,
     areaServed: "BR",
+    availableLanguage: "Portuguese",
   },
 };
 
@@ -67,12 +86,23 @@ const localBusinessJsonLd = {
   name: SITE_NAME,
   description: "Fornecedor de brindes corporativos personalizados para empresas em São Paulo.",
   url: SITE_URL,
-  telephone: `+${WHATSAPP_NUMBER}`,
+  logo: `${SITE_URL}/logo-paint-colors.png`,
+  image: `${SITE_URL}/logo-paint-colors.png`,
+  email: CONTACT_EMAIL,
+  telephone: BUSINESS_PHONE_E164,
+  address: postalAddress,
   areaServed: {
     "@type": "City",
     name: "São Paulo, SP",
   },
-  // endereço / horário: adicionar quando a empresa informar (sem endereço físico publicável por ora).
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "08:00",
+      closes: "18:00",
+    },
+  ],
 };
 
 export default function RootLayout({

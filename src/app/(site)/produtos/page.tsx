@@ -4,7 +4,9 @@ import { ProductCard } from "@/components/site/product-card";
 import { FilterSidebar } from "@/components/site/filter-sidebar";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { getCategoryHeading } from "@/lib/category-copy";
+import { getCategoryIntro, getCategoryFaq } from "@/lib/category-content";
 import { TrackView } from "@/components/site/track-view";
+import { FaqSection } from "@/components/site/faq-section";
 import { SITE_URL } from "@/lib/site-config";
 import type { CustomizationMethod, ProductObjective } from "@prisma/client";
 
@@ -59,6 +61,7 @@ export default async function ProductsPage({
       : [category.id]
     : undefined;
   const heading = search ? `Resultados para “${search}”` : resolveHeading(category, objetivo);
+  const intro = category ? getCategoryIntro(category.slug) : null;
 
   const [products, topCategories] = await Promise.all([
     prisma.product.findMany({
@@ -108,6 +111,7 @@ export default async function ProductsPage({
   ];
 
   return (
+    <>
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <TrackView
@@ -122,8 +126,9 @@ export default async function ProductsPage({
       <Breadcrumbs items={breadcrumbItems} />
 
       <h1 className="text-3xl font-semibold tracking-tight">{heading}</h1>
-      <p className="mt-2 text-muted-foreground">
-        Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado para sua empresa.
+      <p className="mt-2 max-w-3xl text-muted-foreground">
+        {intro ??
+          "Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado para sua empresa."}
       </p>
 
       {/* Região viva: anuncia a contagem de resultados a leitores de tela
@@ -149,5 +154,14 @@ export default async function ProductsPage({
         </div>
       </div>
     </div>
+
+    {category && (
+      <FaqSection
+        items={getCategoryFaq(category.name)}
+        id={`faq-${category.slug}`}
+        title={`Perguntas frequentes sobre ${category.name.toLowerCase()}`}
+      />
+    )}
+    </>
   );
 }
