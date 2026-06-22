@@ -5,6 +5,7 @@ export const CACHE_TAGS = {
   products: "products",
   posts: "posts",
   solutions: "solutions",
+  categories: "categories",
 } as const;
 
 export const getFeaturedProducts = unstable_cache(
@@ -59,6 +60,36 @@ export const getBlogPostBySlug = unstable_cache(
   async (slug: string) => prisma.post.findUnique({ where: { slug } }),
   ["blog-post-by-slug"],
   { revalidate: 300, tags: [CACHE_TAGS.posts] }
+);
+
+export const getActiveCategories = unstable_cache(
+  async () => prisma.category.findMany({ where: { parentId: null, active: true }, orderBy: { order: "asc" } }),
+  ["active-categories"],
+  { revalidate: 300, tags: [CACHE_TAGS.categories] }
+);
+
+export const getActiveCategoriesTree = unstable_cache(
+  async () =>
+    prisma.category.findMany({
+      where: { parentId: null, active: true },
+      include: { children: { where: { active: true }, orderBy: { order: "asc" } } },
+      orderBy: { order: "asc" },
+    }),
+  ["active-categories-tree"],
+  { revalidate: 300, tags: [CACHE_TAGS.categories] }
+);
+
+export const getCategoryBySlug = unstable_cache(
+  async (slug: string) =>
+    prisma.category.findUnique({ where: { slug }, include: { children: true } }),
+  ["category-by-slug"],
+  { revalidate: 300, tags: [CACHE_TAGS.categories] }
+);
+
+export const getSolutionsList = unstable_cache(
+  async () => prisma.solution.findMany({ orderBy: { order: "asc" } }),
+  ["solutions-list"],
+  { revalidate: 300, tags: [CACHE_TAGS.solutions] }
 );
 
 export const getSolutionBySlug = unstable_cache(

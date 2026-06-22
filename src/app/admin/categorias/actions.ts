@@ -41,6 +41,7 @@ export async function createCategory(formData: FormData) {
   await prisma.category.create({ data: { name, slug, parentId } });
   revalidatePath("/admin/categorias");
   revalidateTag(CACHE_TAGS.products, "max");
+  revalidateTag(CACHE_TAGS.categories, "max");
 }
 
 export async function updateCategory(categoryId: string, formData: FormData) {
@@ -67,6 +68,7 @@ export async function updateCategory(categoryId: string, formData: FormData) {
   });
   revalidatePath("/admin/categorias");
   revalidateTag(CACHE_TAGS.products, "max");
+  revalidateTag(CACHE_TAGS.categories, "max");
 }
 
 export async function toggleCategoryActive(formData: FormData) {
@@ -80,6 +82,7 @@ export async function toggleCategoryActive(formData: FormData) {
   await prisma.category.update({ where: { id }, data: { active: !category.active } });
   revalidatePath("/admin/categorias");
   revalidateTag(CACHE_TAGS.products, "max");
+  revalidateTag(CACHE_TAGS.categories, "max");
 }
 
 export async function deleteCategory(formData: FormData) {
@@ -99,4 +102,5 @@ export async function deleteCategory(formData: FormData) {
   await prisma.category.delete({ where: { id } });
   revalidatePath("/admin/categorias");
   revalidateTag(CACHE_TAGS.products, "max");
+  revalidateTag(CACHE_TAGS.categories, "max");
 }

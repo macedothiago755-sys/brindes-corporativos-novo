@@ -5,6 +5,7 @@ import { FilterSidebar } from "@/components/site/filter-sidebar";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { getCategoryHeading } from "@/lib/category-copy";
 import { getCategoryIntro, getCategoryFaq } from "@/lib/category-content";
+import { getCategoryBySlug, getActiveCategoriesTree } from "@/lib/cached-queries";
 import { TrackView } from "@/components/site/track-view";
 import { FaqSection } from "@/components/site/faq-section";
 import { SITE_URL } from "@/lib/site-config";
@@ -32,7 +33,7 @@ export async function generateMetadata({
   searchParams: Promise<ProductsSearchParams>;
 }): Promise<Metadata> {
   const { categoria, objetivo } = await searchParams;
-  const category = categoria ? await prisma.category.findUnique({ where: { slug: categoria } }) : null;
+  const category = categoria ? await getCategoryBySlug(categoria) : null;
   const title = category?.metaTitle?.trim() || resolveHeading(category, objetivo);
   const description =
     category?.metaDescription?.trim() ||
@@ -42,8 +43,6 @@ export async function generateMetadata({
   return { title, description, alternates: { canonical } };
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -52,9 +51,7 @@ export default async function ProductsPage({
   const { categoria, metodo, tag, objetivo, q } = await searchParams;
   const search = q?.trim();
 
-  const category = categoria
-    ? await prisma.category.findUnique({ where: { slug: categoria }, include: { children: true } })
-    : null;
+  const category = categoria ? await getCategoryBySlug(categoria) : null;
   const categoryIds = category
     ? category.children.length
       ? [category.id, ...category.children.map((c) => c.id)]
@@ -84,11 +81,7 @@ export default async function ProductsPage({
       include: { category: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.category.findMany({
-      where: { parentId: null, active: true },
-      include: { children: { where: { active: true }, orderBy: { order: "asc" } } },
-      orderBy: { order: "asc" },
-    }),
+    getActiveCategoriesTree(),
   ]);
 
   const itemListJsonLd = {
