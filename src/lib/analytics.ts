@@ -11,7 +11,11 @@ export type AnalyticsEvent =
   | "start_quote"
   | "complete_quote"
   | "whatsapp_click"
-  | "category_click";
+  | "category_click"
+  | "start_kit"
+  | "generate_kit"
+  | "newsletter_view"
+  | "generate_lead";
 
 export function trackEvent(event: AnalyticsEvent, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;

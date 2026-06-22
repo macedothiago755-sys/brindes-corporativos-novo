@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { setStoredCoupon } from "@/lib/coupon-storage";
+import { trackEvent } from "@/lib/analytics";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
 const SHOWN_STORAGE_KEY = "brindes:newsletter-popup-shown";
@@ -31,6 +32,7 @@ export function NewsletterPopup() {
     if (sessionStorage.getItem(SHOWN_STORAGE_KEY)) return;
     const timer = setTimeout(() => {
       setOpen(true);
+      trackEvent("newsletter_view");
       sessionStorage.setItem(SHOWN_STORAGE_KEY, "1");
     }, SHOW_DELAY_MS);
     return () => clearTimeout(timer);
@@ -64,6 +66,7 @@ export function NewsletterPopup() {
 
       setCouponCode(data.couponCode);
       setStoredCoupon(data.couponCode);
+      trackEvent("generate_lead", { lead_source: "newsletter_popup" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {

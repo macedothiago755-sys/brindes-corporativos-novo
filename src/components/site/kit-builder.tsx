@@ -64,6 +64,12 @@ export function KitBuilder() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Não foi possível montar o kit.");
       setRecommendation(data);
+      trackEvent("generate_kit", {
+        objective,
+        quantity: Number(quantity) || undefined,
+        budget_per_person: Number(budgetPerPerson) || undefined,
+        items: Array.isArray(data?.items) ? data.items.length : undefined,
+      });
       setStep(4);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado.");
@@ -162,7 +168,16 @@ export function KitBuilder() {
               </button>
             ))}
           </div>
-          <Button className="mt-8" size="lg" variant="gradient" disabled={!objective} onClick={() => setStep(2)}>
+          <Button
+            className="mt-8"
+            size="lg"
+            variant="gradient"
+            disabled={!objective}
+            onClick={() => {
+              trackEvent("start_kit", { objective });
+              setStep(2);
+            }}
+          >
             Continuar
           </Button>
         </div>
