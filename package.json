@@ -11,7 +11,8 @@
     "db:categories": "tsx prisma/seed-categories.ts",
     "db:solutions": "tsx prisma/seed-solutions.ts",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "importar": "tsx scripts/import-supplier.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
