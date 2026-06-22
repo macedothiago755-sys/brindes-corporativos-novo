@@ -50,6 +50,52 @@ function bestCombo(
   return best.ids;
 }
 
+async function findManualKit(
+  objective: ProductObjective,
+  target: number
+): Promise<KitRecommendation | null> {
+  const kits = await prisma.kit.findMany({
+    where: { active: true, manual: true, objective },
+    include: {
+      items: {
+        include: { product: true },
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  const fitting = kits
+    .map((kit) => {
+      const items: KitRecommendationItem[] = kit.items
+        .filter((item) => item.product.status === "ATIVO" && item.product.price != null)
+        .map((item) => ({
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            slug: item.product.slug,
+            images: item.product.images,
+            price: item.product.price as number,
+          },
+          quantityPerPerson: item.quantityPerPerson,
+        }));
+      const totalPerPerson = items.reduce((sum, i) => sum + i.product.price * i.quantityPerPerson, 0);
+      return { items, totalPerPerson };
+    })
+    .filter((kit) => kit.items.length > 0 && kit.totalPerPerson <= target)
+    .sort((a, b) => b.totalPerPerson - a.totalPerPerson)[0];
+
+  if (!fitting) return null;
+
+  return {
+    targetPerPerson: target,
+    totalPerPerson: fitting.totalPerPerson,
+    totalBudget: 0,
+    totalGeral: 0,
+    marginPerPerson: 0,
+    items: fitting.items,
+  };
+}
+
 export async function recommendKit(params: {
   objective: ProductObjective;
   quantity: number;
@@ -57,6 +103,16 @@ export async function recommendKit(params: {
 }): Promise<KitRecommendation | null> {
   const { objective, quantity, budgetPerPerson } = params;
   const target = budgetPerPerson * SAFETY_MARGIN;
+
+  const manualKit = await findManualKit(objective, target);
+  if (manualKit) {
+    return {
+      ...manualKit,
+      totalBudget: budgetPerPerson * quantity,
+      totalGeral: manualKit.totalPerPerson * quantity,
+      marginPerPerson: budgetPerPerson - manualKit.totalPerPerson,
+    };
+  }
 
   let products = await prisma.product.findMany({
     where: { status: "ATIVO", price: { not: null }, objectives: { has: objective } },
