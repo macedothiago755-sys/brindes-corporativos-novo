@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       </div>
 
       <div className="relative mt-8 aspect-[1920/600] w-full overflow-hidden rounded-xl bg-muted">
-        <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
+        <Image src={post.coverImage} alt={post.title} fill className="object-cover" preload />
       </div>
 
       <div className="prose prose-neutral mt-10 max-w-2xl text-base leading-relaxed text-foreground/90">

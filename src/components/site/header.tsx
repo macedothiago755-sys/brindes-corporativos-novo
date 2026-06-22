@@ -57,7 +57,7 @@ export function Header() {
             width={52}
             height={52}
             className="h-[52px] w-[52px]"
-            priority
+            preload
           />
           <span className="hidden text-lg font-semibold tracking-tight sm:inline">Paint Colors</span>
         </Link>
