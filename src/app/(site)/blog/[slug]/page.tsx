@@ -6,6 +6,7 @@ import { getBlogPostBySlug, getBlogPosts } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 import { isExternalImage } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -108,14 +109,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         ))}
       </div>
 
-      <div className="mt-12 rounded-xl border border-border bg-muted p-8 text-center">
-        <p className="font-semibold">Quer um brinde personalizado para sua empresa?</p>
-        <p className="mt-2 text-sm text-muted-foreground">
+      <div className="mt-12 rounded-xl border border-border bg-muted py-12 text-center">
+        <h2 className="mx-auto max-w-xl text-2xl font-semibold tracking-tight">
+          Quer um brinde personalizado para sua empresa?
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
           Navegue pelo catálogo e solicite um orçamento sob medida para o seu projeto.
         </p>
-        <Link href="/produtos" className="mt-4 inline-block text-sm font-medium text-accent underline">
-          Ver catálogo de produtos
-        </Link>
+        <Button asChild size="lg" variant="gradient" className="mt-6">
+          <Link href="/produtos">Solicitar orçamento</Link>
+        </Button>
       </div>
 
       {related.length > 0 && (
