@@ -60,7 +60,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
           src={src}
           alt={alt}
           fill
-          priority
+          preload
           unoptimized={isExternalImage(src)}
           sizes="(min-width: 1024px) 600px, 100vw"
           className={cn(

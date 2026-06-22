@@ -82,7 +82,7 @@ export function BannerCarousel() {
                   src={banner.src}
                   alt={banner.alt}
                   fill
-                  priority={i === 0}
+                  preload={i === 0}
                   className="object-cover"
                   sizes="(min-width: 1280px) 1200px, 100vw"
                 />
