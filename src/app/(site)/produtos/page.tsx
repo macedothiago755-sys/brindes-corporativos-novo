@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/site/product-card";
 import { FilterSidebar } from "@/components/site/filter-sidebar";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { getCategoryHeading } from "@/lib/category-copy";
+import { TrackView } from "@/components/site/track-view";
 import { SITE_URL } from "@/lib/site-config";
 import type { CustomizationMethod, ProductObjective } from "@prisma/client";
 
@@ -109,6 +110,14 @@ export default async function ProductsPage({
   return (
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      <TrackView
+        event="view_category"
+        params={{
+          category: category?.slug ?? objetivo ?? (search ? "busca" : "todos"),
+          ...(search ? { search } : {}),
+          results: products.length,
+        }}
+      />
 
       <Breadcrumbs items={breadcrumbItems} />
 

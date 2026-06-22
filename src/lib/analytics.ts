@@ -7,6 +7,7 @@ declare global {
 
 export type AnalyticsEvent =
   | "view_product"
+  | "view_category"
   | "start_quote"
   | "complete_quote"
   | "whatsapp_click"

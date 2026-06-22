@@ -58,14 +58,9 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
   }
 
   function goToStep2() {
-    if (personalizacao.length === 0) {
-      setError("Selecione ao menos uma opção de personalização.");
-      return;
-    }
-    if (metodo.length === 0) {
-      setError("Selecione um método de personalização.");
-      return;
-    }
+    // Personalização e método são opcionais: não bloqueiam o avanço para o
+    // contato (reduz fricção no funil). O time comercial confirma os detalhes
+    // depois, a partir dos dados do lead.
     setError(null);
     setStep(2);
   }
