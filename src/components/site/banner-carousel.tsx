@@ -23,12 +23,12 @@ const banners: Banner[] = [
   {
     src: "/banners/banner-home-2-hidratacao.jpg",
     alt: "Garrafas e squeezes personalizados para empresas",
-    href: "/produtos?categoria=squeezes-e-garrafas",
+    href: "/categoria/squeezes-e-garrafas",
   },
   {
     src: "/banners/banner-home-3-sustentavel.jpg",
     alt: "Produtos ecológicos e sustentáveis personalizados com a marca da empresa",
-    href: "/produtos?categoria=linha-ecologica",
+    href: "/categoria/linha-ecologica",
   },
 ];
 

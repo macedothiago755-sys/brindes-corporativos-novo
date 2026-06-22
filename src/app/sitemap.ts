@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/sobre`, lastModified: new Date(), priority: 0.7 },
     { url: `${base}/blog`, lastModified: new Date(), priority: 0.8 },
     ...categories.map((c) => ({
-      url: `${base}/produtos?categoria=${c.slug}`,
+      url: `${base}/categoria/${c.slug}`,
       lastModified: new Date(),
       priority: 0.8,
     })),

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { getCategoryIcon } from "@/components/site/category-icons";
+import { categoryPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 type CategoryItem = { slug: string; name: string };
@@ -14,7 +15,7 @@ const cardClass =
 function CategoryCard({ category, className }: { category: CategoryItem; className?: string }) {
   const Icon = getCategoryIcon(category.name);
   return (
-    <Link href={`/produtos?categoria=${category.slug}`} className={cn(cardClass, "w-full", className)}>
+    <Link href={categoryPath(category.slug)} className={cn(cardClass, "w-full", className)}>
       <Icon className="h-5 w-5 shrink-0 text-foreground transition-colors group-hover:text-accent" strokeWidth={1.75} />
       <span className="truncate">{category.name}</span>
     </Link>
@@ -60,7 +61,7 @@ export function CategoriesGrid({
             return (
               <Link
                 key={category.slug}
-                href={`/produtos?categoria=${category.slug}`}
+                href={categoryPath(category.slug)}
                 className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card py-4 text-center text-xs font-medium transition-colors hover:border-accent hover:bg-accent/5"
               >
                 <Icon className="h-5 w-5 text-accent" strokeWidth={1.75} />
