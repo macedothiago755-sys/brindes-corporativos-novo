@@ -10,6 +10,7 @@
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
     "db:categories": "tsx prisma/seed-categories.ts",
+    "db:solutions": "tsx prisma/seed-solutions.ts",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
