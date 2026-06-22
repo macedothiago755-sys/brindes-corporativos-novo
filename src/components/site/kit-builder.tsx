@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { WhatsappCta } from "@/components/site/whatsapp-cta";
 import { cn, isExternalImage } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
 import { trackEvent } from "@/lib/analytics";
@@ -395,6 +396,17 @@ export function KitBuilder() {
               </Button>
             </div>
           </form>
+
+          <div className="mt-6 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">Prefere falar agora com um especialista?</p>
+            <WhatsappCta
+              source="kit"
+              label="Finalizar pelo WhatsApp"
+              message={`Olá! Montei um kit no site:\n• Objetivo: ${
+                objectives.find((o) => o.id === objective)?.label ?? objective
+              }\n• ${quantity} pessoas\n• ${currency(Number(budgetPerPerson))} por pessoa\nGostaria de finalizar o orçamento.`}
+            />
+          </div>
         </div>
       )}
     </div>

@@ -10,6 +10,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductCard } from "@/components/site/product-card";
 import { TrackView } from "@/components/site/track-view";
+import { WhatsappCta } from "@/components/site/whatsapp-cta";
 import { SITE_URL } from "@/lib/site-config";
 import { categoryPath } from "@/lib/routes";
 
@@ -167,8 +168,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             ))}
           </ul>
 
-          <div className="mt-10">
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
             <QuoteForm productId={product.id} productName={product.name} colors={product.colors} unitPrice={product.price} />
+            <WhatsappCta
+              source="produto"
+              productName={product.name}
+              message={`Olá! Tenho interesse no brinde "${product.name}". Podem me ajudar com um orçamento?\n${SITE_URL}/produto/${product.slug}`}
+            />
           </div>
         </div>
       </div>
