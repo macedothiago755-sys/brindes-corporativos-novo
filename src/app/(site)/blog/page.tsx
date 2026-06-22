@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getBlogPosts } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { isExternalImage } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Blog | Brindes Corporativos",
@@ -37,6 +38,7 @@ export default async function BlogPage() {
                 src={post.coverImage}
                 alt={post.title}
                 fill
+                unoptimized={isExternalImage(post.coverImage)}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 1024px) 100vw, 33vw"
               />

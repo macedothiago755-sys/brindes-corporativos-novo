@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { isExternalImage } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +90,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       </div>
 
       <div className="relative mt-8 aspect-[1920/600] w-full overflow-hidden rounded-xl bg-muted">
-        <Image src={post.coverImage} alt={post.title} fill className="object-cover" preload />
+        <Image
+          src={post.coverImage}
+          alt={post.title}
+          fill
+          unoptimized={isExternalImage(post.coverImage)}
+          className="object-cover"
+          preload
+        />
       </div>
 
       <div className="prose prose-neutral mt-10 max-w-2xl text-base leading-relaxed text-foreground/90">
@@ -125,6 +133,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     src={item.coverImage}
                     alt={item.title}
                     fill
+                    unoptimized={isExternalImage(item.coverImage)}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 1024px) 100vw, 33vw"
                   />
