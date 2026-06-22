@@ -69,6 +69,10 @@ const organizationJsonLd = {
     areaServed: "BR",
     availableLanguage: "Portuguese",
   },
+  sameAs: [
+    "https://www.instagram.com/paintcolors_personalizados/",
+    "https://www.linkedin.com/company/paint-colors-brasil/",
+  ],
 };
 
 const websiteJsonLd = {
