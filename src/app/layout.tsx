@@ -42,12 +42,17 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     siteName: SITE_NAME,
+    // Imagem padrão de compartilhamento (links sem OG próprio: home, sobre,
+    // blog, categorias). Sem ela, prévias no WhatsApp/LinkedIn vinham sem
+    // imagem, derrubando o CTR. Produto e post sobrescrevem com a própria.
+    images: [{ url: "/banners/banner-home-1-marca.jpg", width: 1717, height: 916, alt: SITE_NAME }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Brindes Corporativos Personalizados em São Paulo | Paint Colors",
     description:
       "Crie kits e brindes corporativos personalizados em São Paulo. Personalize sua marca, escolha produtos e receba uma proposta rápida.",
+    images: ["/banners/banner-home-1-marca.jpg"],
   },
 };
 
