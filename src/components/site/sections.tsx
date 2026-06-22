@@ -130,27 +130,30 @@ export function HowItWorksSection() {
   );
 }
 
-const fallbackClients = ["Empresa A", "Empresa B", "Empresa C", "Empresa D", "Empresa E", "Empresa F"];
+// Segmentos reais atendidos — usados quando ainda não há logos de clientes
+// cadastradas, para não exibir nomes de empresas fictícios.
+const fallbackSegments = ["Indústria", "Varejo", "Saúde", "Educação", "Tecnologia", "Serviços"];
 
 export async function ClientsSection() {
   const clients = await prisma.clientLogo.findMany({ orderBy: { order: "asc" } });
+  const hasLogos = clients.length > 0;
 
   return (
     <section id="cases" className="border-t border-border py-16">
       <div className="container-premium">
         <p className="text-center text-sm uppercase tracking-widest text-muted-foreground">
-          Empresas que confiam na nossa estrutura
+          {hasLogos ? "Empresas que confiam na nossa estrutura" : "Segmentos que atendemos"}
         </p>
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-          {clients.length > 0
+          {hasLogos
             ? clients.map((c) => (
                 <div key={c.id} className="relative flex h-16 items-center justify-center rounded-md border border-border p-2">
                   <Image src={c.logoUrl} alt={c.name} fill className="object-contain p-2" sizes="200px" />
                 </div>
               ))
-            : fallbackClients.map((c) => (
-                <div key={c} className="flex h-16 items-center justify-center rounded-md border border-border text-xs font-medium text-muted-foreground">
-                  {c}
+            : fallbackSegments.map((s) => (
+                <div key={s} className="flex h-16 items-center justify-center rounded-md border border-border text-xs font-medium text-muted-foreground">
+                  {s}
                 </div>
               ))}
         </div>
@@ -159,15 +162,11 @@ export async function ClientsSection() {
   );
 }
 
-const fallbackTestimonials = [
-  { id: "1", quote: "O processo de orçamento foi rápido e o atendimento muito próximo. Os brindes chegaram impecáveis.", name: "Diretora de Marketing", company: "Grupo Industrial" },
-  { id: "2", quote: "Conseguimos personalizar exatamente como precisávamos para o evento institucional.", name: "Gerente de RH", company: "Holding Corporativa" },
-  { id: "3", quote: "Qualidade muito acima do que esperávamos para um brinde corporativo.", name: "Coordenador de Eventos", company: "Rede Nacional" },
-];
-
 export async function TestimonialsSection() {
-  const dbTestimonials = await prisma.testimonial.findMany({ orderBy: { order: "asc" } });
-  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : fallbackTestimonials;
+  const testimonials = await prisma.testimonial.findMany({ orderBy: { order: "asc" } });
+  // Sem depoimentos reais cadastrados, não exibimos a seção — evita prova
+  // social fictícia. Cadastre depoimentos em /admin/conteudo para reativá-la.
+  if (testimonials.length === 0) return null;
 
   return (
     <section className="bg-muted py-20">

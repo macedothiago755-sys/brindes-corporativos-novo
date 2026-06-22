@@ -9,9 +9,18 @@ export const CACHE_TAGS = {
 
 export const getFeaturedProducts = unstable_cache(
   async () => {
-    return prisma.product.findMany({
-      where: { featured: true },
+    const featured = await prisma.product.findMany({
+      where: { featured: true, status: "ATIVO" },
       include: { category: true },
+      take: 12,
+    });
+    if (featured.length > 0) return featured;
+    // Fallback: nenhum produto marcado como destaque — mostra os ativos mais
+    // recentes para a seção da home nunca ficar vazia.
+    return prisma.product.findMany({
+      where: { status: "ATIVO" },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
       take: 12,
     });
   },

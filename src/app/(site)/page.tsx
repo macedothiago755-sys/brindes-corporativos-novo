@@ -34,12 +34,14 @@ export default async function HomePage() {
       <CategoriesSection />
       <HowItWorksSection />
 
-      <section className="container-premium py-20">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Produtos em destaque</h2>
-        <div className="mt-10">
-          <FeaturedProductsCarousel products={featured} />
-        </div>
-      </section>
+      {featured.length > 0 && (
+        <section className="container-premium py-20">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Produtos em destaque</h2>
+          <div className="mt-10">
+            <FeaturedProductsCarousel products={featured} />
+          </div>
+        </section>
+      )}
 
       <SolutionsSection />
       <DifferentiatorsSection />

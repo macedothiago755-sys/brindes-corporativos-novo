@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
+import { TrackView } from "@/components/site/track-view";
 import { SITE_URL } from "@/lib/site-config";
 
 const b2bHighlights = [
@@ -64,6 +65,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="container-premium py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <TrackView
+        event="view_product"
+        params={{ product_id: product.id, product_name: product.name, category: product.category.name }}
+      />
 
       <Breadcrumbs
         items={[
