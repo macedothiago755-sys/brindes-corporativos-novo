@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBlogPostBySlug } from "@/lib/cached-queries";
+import { getBlogPostBySlug, getBlogPosts } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
@@ -31,6 +31,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
+
+  // "Continue lendo": prioriza posts que compartilham tags com o atual e
+  // completa com os mais recentes. Evita o beco sem saída no fim do artigo,
+  // distribui link equity interno e segura o leitor no site.
+  const allPosts = await getBlogPosts();
+  const others = allPosts.filter((p) => p.slug !== post.slug);
+  const related = [...others]
+    .sort(
+      (a, b) =>
+        b.tags.filter((t) => post.tags.includes(t)).length -
+        a.tags.filter((t) => post.tags.includes(t)).length
+    )
+    .slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -96,6 +109,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           Ver catálogo de produtos
         </Link>
       </div>
+
+      {related.length > 0 && (
+        <section className="mt-16 border-t border-border pt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Continue lendo</h2>
+          <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/blog/${item.slug}`}
+                className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-accent"
+              >
+                <div className="relative aspect-[1014/535] overflow-hidden bg-muted">
+                  <Image
+                    src={item.coverImage}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 33vw"
+                  />
+                </div>
+                <div className="p-5">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {item.publishedAt.toLocaleDateString("pt-BR")}
+                  </p>
+                  <h3 className="mt-2 font-semibold leading-snug">{item.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{item.excerpt}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 }
