@@ -96,3 +96,16 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out both;
 }
+
+/* Respeita a preferência de movimento reduzido do usuário (WCAG 2.3.3):
+   neutraliza animações e transições não essenciais em todo o site. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
