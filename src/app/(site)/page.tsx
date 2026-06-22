@@ -17,7 +17,7 @@ import {
   FinalCtaSection,
 } from "@/components/site/sections";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },

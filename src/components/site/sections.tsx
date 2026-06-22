@@ -3,14 +3,12 @@ import Image from "next/image";
 import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { getActiveCategories, getSolutionsList } from "@/lib/cached-queries";
 import { splitCategories, pickFeaturedCategories } from "@/components/site/category-icons";
 import { CategoriesGrid } from "@/components/site/categories-grid";
 
 export async function CategoriesSection() {
-  const categories = await prisma.category.findMany({
-    where: { parentId: null, active: true },
-    orderBy: { order: "asc" },
-  });
+  const categories = await getActiveCategories();
   const { main, rest } = splitCategories(categories);
   const featured = pickFeaturedCategories(categories);
 
@@ -41,7 +39,7 @@ export function LocalSeoSection() {
 }
 
 export async function SolutionsSection() {
-  const solutions = await prisma.solution.findMany({ orderBy: { order: "asc" } });
+  const solutions = await getSolutionsList();
   if (solutions.length === 0) return null;
 
   return (
