@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Bot, Sparkles } from "lucide-react";
 
 const mockObjectives = ["Clientes", "Funcionários", "Eventos"];
 
 export function HeroMockCard() {
+  const reducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={reducedMotion ? false : { opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, delay: 0.1 }}
+      transition={reducedMotion ? { duration: 0 } : { duration: 0.7, delay: 0.1 }}
       className="relative w-full"
     >
       <Link
