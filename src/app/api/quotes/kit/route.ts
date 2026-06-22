@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { kitQuoteSchema } from "@/lib/validations";
 import { rateLimit } from "@/lib/rate-limit";
 import { resolveCouponCode } from "@/lib/coupons";
+import { notifyNewQuote } from "@/lib/notify";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -61,6 +63,21 @@ export async function POST(req: NextRequest) {
       },
     },
   });
+
+  // Notifica o time comercial sem bloquear a resposta ao cliente. Só dispara
+  // se RESEND/webhook estiverem configurados; falhas são engolidas internamente.
+  after(() =>
+    notifyNewQuote({
+      tipo: "orçamento de kit",
+      clienteNome: data.clienteNome,
+      empresa: data.empresa,
+      email: data.email,
+      telefone: data.telefone,
+      cidade: data.cidade,
+      resumo: `Kit · ${data.quantidadePessoas ?? "?"} pessoas · ${products.length} itens`,
+      quoteId: quote.id,
+    })
+  );
 
   return NextResponse.json({ id: quote.id }, { status: 201 });
 }
