@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
-import { Palette, Users, Factory, Check } from "lucide-react";
+import Link from "next/link";
+import { Palette, Users, Factory, Check, Clock, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getProductBySlug, getRelatedProducts } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
@@ -176,6 +177,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               message={`Olá! Tenho interesse no brinde "${product.name}". Podem me ajudar com um orçamento?\n${SITE_URL}/produto/${product.slug}`}
             />
           </div>
+
+          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
+            <li className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-accent" />
+              Proposta em até 1 hora útil
+            </li>
+            <li className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+              Seus dados protegidos —{" "}
+              <Link href="/politica-de-privacidade" className="underline hover:text-foreground">
+                política de privacidade
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
