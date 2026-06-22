@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Building2, Factory, HandHeart, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { getActiveCategories, getSolutionsList } from "@/lib/cached-queries";
+import { getActiveCategories, getSolutionsList, safeQuery } from "@/lib/cached-queries";
 import { splitCategories, pickFeaturedCategories } from "@/components/site/category-icons";
 import { CategoriesGrid } from "@/components/site/categories-grid";
 
@@ -133,7 +133,7 @@ export function HowItWorksSection() {
 const fallbackSegments = ["Indústria", "Varejo", "Saúde", "Educação", "Tecnologia", "Serviços"];
 
 export async function ClientsSection() {
-  const clients = await prisma.clientLogo.findMany({ orderBy: { order: "asc" } });
+  const clients = await safeQuery(() => prisma.clientLogo.findMany({ orderBy: { order: "asc" } }), []);
   const hasLogos = clients.length > 0;
 
   return (
@@ -161,7 +161,7 @@ export async function ClientsSection() {
 }
 
 export async function TestimonialsSection() {
-  const testimonials = await prisma.testimonial.findMany({ orderBy: { order: "asc" } });
+  const testimonials = await safeQuery(() => prisma.testimonial.findMany({ orderBy: { order: "asc" } }), []);
   // Sem depoimentos reais cadastrados, não exibimos a seção — evita prova
   // social fictícia. Cadastre depoimentos em /admin/conteudo para reativá-la.
   if (testimonials.length === 0) return null;

@@ -8,23 +8,39 @@ export const CACHE_TAGS = {
   categories: "categories",
 } as const;
 
+/**
+ * Executa uma leitura e devolve um fallback se o banco falhar. Usado nas seções
+ * da home (renderizada via ISR): um soluço de banco no momento do build/prerender
+ * não pode derrubar o deploy inteiro — a página renderiza com a seção vazia e o
+ * ISR repopula no próximo revalidate. Em ambiente saudável é transparente.
+ */
+export async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error("[cached-queries] leitura falhou, usando fallback:", error);
+    return fallback;
+  }
+}
+
 export const getFeaturedProducts = unstable_cache(
-  async () => {
-    const featured = await prisma.product.findMany({
-      where: { featured: true, status: "ATIVO" },
-      include: { category: true },
-      take: 12,
-    });
-    if (featured.length > 0) return featured;
-    // Fallback: nenhum produto marcado como destaque — mostra os ativos mais
-    // recentes para a seção da home nunca ficar vazia.
-    return prisma.product.findMany({
-      where: { status: "ATIVO" },
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-      take: 12,
-    });
-  },
+  async () =>
+    safeQuery(async () => {
+      const featured = await prisma.product.findMany({
+        where: { featured: true, status: "ATIVO" },
+        include: { category: true },
+        take: 12,
+      });
+      if (featured.length > 0) return featured;
+      // Fallback: nenhum produto marcado como destaque — mostra os ativos mais
+      // recentes para a seção da home nunca ficar vazia.
+      return prisma.product.findMany({
+        where: { status: "ATIVO" },
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+      });
+    }, []),
   ["home-featured-products"],
   { revalidate: 300, tags: [CACHE_TAGS.products] }
 );
@@ -76,18 +92,26 @@ export const getBlogPostBySlug = unstable_cache(
 );
 
 export const getActiveCategories = unstable_cache(
-  async () => prisma.category.findMany({ where: { parentId: null, active: true }, orderBy: { order: "asc" } }),
+  async () =>
+    safeQuery(
+      () => prisma.category.findMany({ where: { parentId: null, active: true }, orderBy: { order: "asc" } }),
+      []
+    ),
   ["active-categories"],
   { revalidate: 300, tags: [CACHE_TAGS.categories] }
 );
 
 export const getActiveCategoriesTree = unstable_cache(
   async () =>
-    prisma.category.findMany({
-      where: { parentId: null, active: true },
-      include: { children: { where: { active: true }, orderBy: { order: "asc" } } },
-      orderBy: { order: "asc" },
-    }),
+    safeQuery(
+      () =>
+        prisma.category.findMany({
+          where: { parentId: null, active: true },
+          include: { children: { where: { active: true }, orderBy: { order: "asc" } } },
+          orderBy: { order: "asc" },
+        }),
+      []
+    ),
   ["active-categories-tree"],
   { revalidate: 300, tags: [CACHE_TAGS.categories] }
 );
@@ -100,7 +124,7 @@ export const getCategoryBySlug = unstable_cache(
 );
 
 export const getSolutionsList = unstable_cache(
-  async () => prisma.solution.findMany({ orderBy: { order: "asc" } }),
+  async () => safeQuery(() => prisma.solution.findMany({ orderBy: { order: "asc" } }), []),
   ["solutions-list"],
   { revalidate: 300, tags: [CACHE_TAGS.solutions] }
 );
