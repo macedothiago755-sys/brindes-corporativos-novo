@@ -37,6 +37,19 @@ export const getProductBySlug = unstable_cache(
   { revalidate: 300, tags: [CACHE_TAGS.products] }
 );
 
+export const getRelatedProducts = unstable_cache(
+  async (categoryId: string, excludeId: string) => {
+    return prisma.product.findMany({
+      where: { status: "ATIVO", categoryId, id: { not: excludeId } },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    });
+  },
+  ["related-products"],
+  { revalidate: 300, tags: [CACHE_TAGS.products] }
+);
+
 export const getVitrineProducts = unstable_cache(
   async (tag: string | undefined, take: number | undefined) => {
     return prisma.product.findMany({
