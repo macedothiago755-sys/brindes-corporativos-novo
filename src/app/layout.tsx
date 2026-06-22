@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       "Crie kits e brindes corporativos personalizados em São Paulo. Personalize sua marca, escolha produtos e receba uma proposta rápida.",
     images: ["/banners/banner-home-1-marca.jpg"],
   },
+  verification: {
+    google: "6JYzd8Po3EZ3a8fTam9o-ipLNum4kcD5TMN8GuRHqTk",
+  },
 };
 
 const organizationJsonLd = {
