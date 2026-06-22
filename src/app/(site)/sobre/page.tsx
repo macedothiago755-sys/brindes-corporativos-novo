@@ -4,6 +4,7 @@ import { Factory, ShieldCheck, HandHeart, Palette, MapPin, Clock, Phone, Mail } 
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/site/faq-section";
 import type { FaqItem } from "@/components/site/faq-section";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import {
   SITE_NAME,
   CONTACT_EMAIL,
@@ -75,6 +76,7 @@ export default function SobrePage() {
   return (
     <>
       <section className="container-premium py-16 sm:py-20">
+        <Breadcrumbs items={[{ name: "Início", href: "/" }, { name: "Sobre", href: "/sobre" }]} />
         <p className="text-sm font-medium uppercase tracking-widest text-accent">Sobre nós</p>
         <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
           Especialistas em brindes corporativos personalizados em São Paulo

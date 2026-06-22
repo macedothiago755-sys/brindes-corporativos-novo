@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getBlogPosts } from "@/lib/cached-queries";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Blog | Brindes Corporativos",
   description:
     "Conteúdos sobre brindes corporativos personalizados, tendências de marketing promocional e dicas para fortalecer sua marca.",
+  alternates: { canonical: "/blog" },
 };
 
 export const dynamic = "force-dynamic";
@@ -16,6 +18,7 @@ export default async function BlogPage() {
 
   return (
     <div className="container-premium py-16">
+      <Breadcrumbs items={[{ name: "Início", href: "/" }, { name: "Blog", href: "/blog" }]} />
       <h1 className="text-3xl font-semibold tracking-tight">Blog</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Conteúdos sobre brindes corporativos personalizados, tendências de marketing promocional e dicas para
