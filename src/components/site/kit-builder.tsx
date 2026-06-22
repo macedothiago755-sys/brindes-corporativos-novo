@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Building2, Gift, PartyPopper, Rocket, Star } from "lucide-react";
+import { Building2, Clock, Gift, PartyPopper, Rocket, ShieldCheck, Star } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -407,6 +407,20 @@ export function KitBuilder() {
               }\n• ${quantity} pessoas\n• ${currency(Number(budgetPerPerson))} por pessoa\nGostaria de finalizar o orçamento.`}
             />
           </div>
+
+          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
+            <li className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-accent" />
+              Proposta em até 1 hora útil
+            </li>
+            <li className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+              Seus dados protegidos —{" "}
+              <Link href="/politica-de-privacidade" className="underline hover:text-foreground">
+                política de privacidade
+              </Link>
+            </li>
+          </ul>
         </div>
       )}
     </div>

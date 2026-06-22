@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, posts, categories, solutions] = await Promise.all([
-    prisma.product.findMany({ select: { slug: true, updatedAt: true } }),
+    // Só produtos ATIVO entram no sitemap: a página de produto faz notFound()
+    // para RASCUNHO/INDISPONIVEL, então listá-los geraria URLs 404 — o que o
+    // Google penaliza como sinal de sitemap de baixa qualidade.
+    prisma.product.findMany({ where: { status: "ATIVO" }, select: { slug: true, updatedAt: true } }),
     prisma.post.findMany({ select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ where: { active: true }, select: { slug: true } }),
     prisma.solution.findMany({ select: { slug: true, updatedAt: true } }),

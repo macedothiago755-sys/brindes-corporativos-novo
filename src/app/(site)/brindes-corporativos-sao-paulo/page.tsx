@@ -3,12 +3,14 @@ import Link from "next/link";
 import { Building2, Gift, PartyPopper, Sparkles, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/site/faq-section";
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { brindesSaoPauloFaq } from "@/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Brindes Corporativos em São Paulo | Kits Personalizados para Empresas",
   description:
     "Empresa de brindes corporativos em São Paulo. Kits personalizados para eventos, clientes e onboarding, com atendimento na capital e região metropolitana.",
+  alternates: { canonical: "/brindes-corporativos-sao-paulo" },
 };
 
 const items = [
@@ -48,6 +50,12 @@ export default function BrindesCorporativosSaoPauloPage() {
   return (
     <>
       <section className="container-premium py-16 sm:py-20">
+        <Breadcrumbs
+          items={[
+            { name: "Início", href: "/" },
+            { name: "Brindes em São Paulo", href: "/brindes-corporativos-sao-paulo" },
+          ]}
+        />
         <p className="text-sm font-medium uppercase tracking-widest text-accent">São Paulo</p>
         <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
           Brindes corporativos personalizados em São Paulo
