@@ -80,13 +80,13 @@ export const getVitrineProducts = unstable_cache(
 );
 
 export const getBlogPosts = unstable_cache(
-  async () => prisma.post.findMany({ orderBy: { publishedAt: "desc" } }),
+  async () => safeQuery(() => prisma.post.findMany({ orderBy: { publishedAt: "desc" } }), []),
   ["blog-posts"],
   { revalidate: 300, tags: [CACHE_TAGS.posts] }
 );
 
 export const getBlogPostBySlug = unstable_cache(
-  async (slug: string) => prisma.post.findUnique({ where: { slug } }),
+  async (slug: string) => safeQuery(() => prisma.post.findUnique({ where: { slug } }), null),
   ["blog-post-by-slug"],
   { revalidate: 300, tags: [CACHE_TAGS.posts] }
 );
