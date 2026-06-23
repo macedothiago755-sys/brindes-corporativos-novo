@@ -1,3 +1,4 @@
+import type { UserRole } from "@prisma/client";
 import { prisma } from "@/config/database";
 import { ApiError } from "@/shared/utils/ApiError";
 import { comparePassword, generateToken, hashPassword } from "@/shared/services/auth.service";
@@ -7,6 +8,14 @@ interface RegisterInput {
   name: string;
   email: string;
   password: string;
+}
+
+interface InviteUserInput {
+  tenantId: string;
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
 }
 
 interface LoginInput {
@@ -52,6 +61,32 @@ export const authService = {
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role, tenantId: tenant.id },
     };
+  },
+
+  /**
+   * Cria um usuário adicional (RH/colaborador) dentro do tenant de quem
+   * convida. Quem chama já deve ter sido autorizado (OWNER/ADMIN) pelo
+   * middleware de rota — aqui só garantimos o vínculo correto ao tenant.
+   */
+  async inviteUser(input: InviteUserInput): Promise<AuthResult["user"]> {
+    const existingUser = await prisma.user.findUnique({ where: { email: input.email } });
+    if (existingUser) {
+      throw ApiError.badRequest("Já existe um usuário com este e-mail");
+    }
+
+    const passwordHash = await hashPassword(input.password);
+
+    const user = await prisma.user.create({
+      data: {
+        tenantId: input.tenantId,
+        name: input.name,
+        email: input.email,
+        passwordHash,
+        role: input.role,
+      },
+    });
+
+    return { id: user.id, name: user.name, email: user.email, role: user.role, tenantId: user.tenantId };
   },
 
   async login(input: LoginInput): Promise<AuthResult> {

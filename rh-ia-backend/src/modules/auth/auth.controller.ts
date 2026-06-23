@@ -14,6 +14,13 @@ const loginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
+const inviteUserSchema = z.object({
+  name: z.string().min(2, "Nome é obrigatório"),
+  email: z.string().email(),
+  password: z.string().min(8, "Senha deve ter ao menos 8 caracteres"),
+  role: z.enum(["ADMIN", "RECRUITER", "EMPLOYEE"]),
+});
+
 export const authController = {
   async register(req: Request, res: Response): Promise<void> {
     const input = registerSchema.parse(req.body);
@@ -25,5 +32,12 @@ export const authController = {
     const input = loginSchema.parse(req.body);
     const result = await authService.login(input);
     res.status(200).json({ data: result });
+  },
+
+  async inviteUser(req: Request, res: Response): Promise<void> {
+    const tenantId = req.tenantId as string;
+    const input = inviteUserSchema.parse(req.body);
+    const user = await authService.inviteUser({ ...input, tenantId });
+    res.status(201).json({ data: user });
   },
 };

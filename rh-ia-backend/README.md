@@ -15,17 +15,15 @@ npm run dev
 
 ## Endpoints (v1)
 
-- `POST /api/v1/auth/register` — cria a empresa (tenant) + usuário administrador, retorna JWT
+- `POST /api/v1/auth/register` — cria a empresa (tenant) + usuário administrador (role `ADMIN`), retorna JWT
 - `POST /api/v1/auth/login` — autentica e retorna JWT
+- `POST /api/v1/auth/users` — convida um novo usuário do tenant com um papel (`ADMIN`/`RECRUITER`/`EMPLOYEE`) — restrito a `OWNER`/`ADMIN`
 - `POST /api/v1/tenants` — gerenciamento administrativo avulso de tenants (uso interno)
-- `POST /api/v1/jobs` — cria vaga (estrutura requisitos via IA — mockado)
-- `GET /api/v1/jobs` / `GET /api/v1/jobs/:id`
-- `POST /api/v1/jobs/:id/resumes` — upload de currículo PDF (multipart, campo `resume`) + análise IA mockada (`ai_score`, `ai_summary`)
-- `POST /api/v1/knowledge/upload` — recebe o texto de um documento institucional, quebra em chunks (~1000 chars, overlap 200) e persiste vinculado ao tenant
-- `POST /api/v1/knowledge/chunks` — adiciona um único chunk de conteúdo à base do tenant
-- `POST /api/v1/knowledge/ask` — pergunta do colaborador: rankeia os chunks do tenant por TF-IDF/cosseno, injeta os top-3 como contexto e chama o Claude 3.5 Sonnet com prompt de sistema restrito ao contexto fornecido
+- `POST /api/v1/jobs`, `GET /api/v1/jobs`, `GET /api/v1/jobs/:id`, `POST /api/v1/jobs/:id/resumes` — gestão de vagas e currículos, restrito à equipe de RH (`OWNER`/`ADMIN`/`RECRUITER`)
+- `POST /api/v1/knowledge/upload`, `POST /api/v1/knowledge/chunks` — manutenção da base de conhecimento, restrito à equipe de RH (`OWNER`/`ADMIN`/`RECRUITER`)
+- `POST /api/v1/knowledge/ask` — qualquer colaborador autenticado do tenant pode perguntar ao assistente; rankeia os chunks por TF-IDF/cosseno, injeta os top-3 como contexto e chama o Claude 3.5 Sonnet com prompt de sistema restrito ao contexto fornecido
 
-Todas as rotas de `jobs` e `knowledge` exigem `Authorization: Bearer <token>` (JWT emitido em `/auth/register` ou `/auth/login`). `tenantId`, `userId` e `role` vêm **exclusivamente** do payload do token, nunca de body/query/params — isso é o que garante isolamento entre empresas clientes.
+Todas as rotas (exceto `/auth/register` e `/auth/login`) exigem `Authorization: Bearer <token>`. `tenantId`, `userId` e `role` vêm **exclusivamente** do payload do token, nunca de body/query/params — isso é o que garante isolamento entre empresas clientes. Autorização por papel é feita pelo middleware `requireRole` (`shared/middlewares/requireRole.ts`): falta de papel adequado retorna `403`, distinto do `401` de autenticação ausente/inválida.
 
 ## O que é mock hoje
 
