@@ -73,19 +73,33 @@ export function ProductMockupViewer({ productId, productImage, productName, meth
   // enviar cabeçalhos CORS. Quando não enviar, o canvas fica "tainted" e o
   // salvamento cai no fallback (envia o logo original + parâmetros).
   useEffect(() => {
-    const img = new Image();
-    if (isExternalImage(productImage)) img.crossOrigin = "anonymous";
-    img.decoding = "async";
-    img.fetchPriority = "high";
-    img.onload = () => {
-      bgImgRef.current = img;
-      setBgLoaded(true);
-    };
-    img.onerror = () => setBgError(true);
-    img.src = productImage;
+    let cancelled = false;
+
+    // CDNs sem cabeçalho Access-Control-Allow-Origin rejeitam a requisição por
+    // completo quando crossOrigin="anonymous" é definido (não apenas "tainted").
+    // Tenta com CORS primeiro (necessário para exportar o composite); se falhar,
+    // recarrega sem CORS para ao menos exibir a imagem (exporta via fallback).
+    function load(withCors: boolean) {
+      const img = new Image();
+      if (withCors && isExternalImage(productImage)) img.crossOrigin = "anonymous";
+      img.decoding = "async";
+      img.fetchPriority = "high";
+      img.onload = () => {
+        if (cancelled) return;
+        bgImgRef.current = img;
+        setBgLoaded(true);
+      };
+      img.onerror = () => {
+        if (cancelled) return;
+        if (withCors) load(false);
+        else setBgError(true);
+      };
+      img.src = productImage;
+    }
+
+    load(true);
     return () => {
-      img.onload = null;
-      img.onerror = null;
+      cancelled = true;
     };
   }, [productImage]);
 
