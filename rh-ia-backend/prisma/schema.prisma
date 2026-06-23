@@ -50,13 +50,14 @@ model Tenant {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  tenantId  String   @map("tenant_id")
-  name      String
-  email     String   @unique
-  role      UserRole @default(EMPLOYEE)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(EMPLOYEE)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 

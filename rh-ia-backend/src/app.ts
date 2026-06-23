@@ -1,10 +1,11 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { authRouter } from "@/modules/auth/auth.routes";
 import { tenantRouter } from "@/modules/tenants/tenant.routes";
 import { jobsRouter } from "@/modules/jobs/jobs.routes";
 import { knowledgeRouter } from "@/modules/knowledge/knowledge.routes";
-import { requireTenant } from "@/shared/middlewares/auth";
+import { requireAuth } from "@/shared/middlewares/tenant.middleware";
 import { errorHandler, notFoundHandler } from "@/shared/middlewares/errorHandler";
 
 export function createApp(): Express {
@@ -20,12 +21,16 @@ export function createApp(): Express {
 
   const v1 = express.Router();
 
-  // Gerenciamento de tenants não exige tenant resolvido (é quem os cria).
+  // Rotas públicas: registro/login criam o tenant e emitem o JWT.
+  v1.use("/auth", authRouter);
+
+  // Gerenciamento avulso de tenants (uso administrativo/interno).
   v1.use("/tenants", tenantRouter);
 
-  // Demais módulos operam no contexto de um tenant autenticado.
-  v1.use("/jobs", requireTenant, jobsRouter);
-  v1.use("/knowledge", requireTenant, knowledgeRouter);
+  // Demais módulos exigem JWT válido; tenantId/userId vêm exclusivamente
+  // do token, nunca de body/query/params.
+  v1.use("/jobs", requireAuth, jobsRouter);
+  v1.use("/knowledge", requireAuth, knowledgeRouter);
 
   app.use("/api/v1", v1);
 
