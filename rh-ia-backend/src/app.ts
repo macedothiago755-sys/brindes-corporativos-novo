@@ -6,6 +6,7 @@ import { tenantRouter } from "@/modules/tenants/tenant.routes";
 import { jobsRouter } from "@/modules/jobs/jobs.routes";
 import { knowledgeRouter } from "@/modules/knowledge/knowledge.routes";
 import { webhookRouter } from "@/modules/billing/webhook.routes";
+import { integrationRouter } from "@/modules/integrations/integration.routes";
 import { requireAuth } from "@/shared/middlewares/tenant.middleware";
 import { errorHandler, notFoundHandler } from "@/shared/middlewares/errorHandler";
 
@@ -14,6 +15,12 @@ export function createApp(): Express {
 
   app.use(helmet());
   app.use(cors());
+
+  // Webhooks de canais externos (Slack/WhatsApp) precisam do corpo bruto para
+  // validar a assinatura HMAC — são montados ANTES do express.json() global,
+  // que de outra forma consumiria o stream e descartaria os bytes originais.
+  app.use("/api/v1/integrations", integrationRouter);
+
   app.use(express.json());
 
   app.get("/health", (_req, res) => {

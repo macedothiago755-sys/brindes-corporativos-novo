@@ -17,6 +17,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
     "@prisma/client": "^6.19.3",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -33,7 +34,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.10.5",
-    "axios": "^1.18.1",
     "prisma": "^6.19.3",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.19.2",
