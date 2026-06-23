@@ -4,14 +4,17 @@ import { revalidatePath } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { SITE_URL } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
-const statusOptions = ["NOVO", "EM_ANALISE", "RESPONDIDO", "FECHADO", "PERDIDO"] as const;
+const statusOptions = ["NOVO", "EM_ANALISE", "RESPONDIDO", "APROVADO", "AJUSTE_SOLICITADO", "FECHADO", "PERDIDO"] as const;
 const statusLabels: Record<string, string> = {
   NOVO: "Novo",
   EM_ANALISE: "Em análise",
   RESPONDIDO: "Respondido",
+  APROVADO: "Aprovado",
+  AJUSTE_SOLICITADO: "Ajuste solicitado",
   FECHADO: "Fechado",
   PERDIDO: "Perdido",
 };
@@ -59,7 +62,36 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
         <div><p className="text-xs text-muted-foreground">Cores</p><p className="font-medium">{item?.cores.join(", ")}</p></div>
         <div><p className="text-xs text-muted-foreground">Personalização</p><p className="font-medium">{item?.personalizacao.join(", ")}</p></div>
         <div><p className="text-xs text-muted-foreground">Cupom</p><p className="font-medium">{quote.couponCode || "—"}</p></div>
+        <div>
+          <p className="text-xs text-muted-foreground">Visualização da proposta</p>
+          <p className="font-medium">
+            {quote.viewCount === 0
+              ? "Não visualizado"
+              : `Visualizado ${quote.viewCount}x - Última em ${quote.lastViewedAt?.toLocaleDateString("pt-BR")}`}
+          </p>
+        </div>
       </div>
+
+      {quote.approvalToken && (
+        <p className="mt-6 text-sm text-muted-foreground">
+          Link de aprovação para enviar ao cliente:{" "}
+          <a
+            href={`${SITE_URL}/orcamento/aprovar/${quote.approvalToken}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent underline"
+          >
+            {SITE_URL}/orcamento/aprovar/{quote.approvalToken}
+          </a>
+        </p>
+      )}
+
+      {quote.feedbackNotes && (
+        <div className="mt-6 rounded-xl border border-border p-6">
+          <p className="text-sm font-semibold">Ajuste solicitado pelo cliente</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{quote.feedbackNotes}</p>
+        </div>
+      )}
 
       {quote.attachments.length > 0 && (
         <div className="mt-6">

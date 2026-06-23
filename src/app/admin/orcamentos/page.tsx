@@ -8,6 +8,8 @@ const statusLabels: Record<string, string> = {
   NOVO: "Novo",
   EM_ANALISE: "Em análise",
   RESPONDIDO: "Respondido",
+  APROVADO: "Aprovado",
+  AJUSTE_SOLICITADO: "Ajuste solicitado",
   FECHADO: "Fechado",
   PERDIDO: "Perdido",
 };
@@ -38,6 +40,7 @@ export default async function AdminQuotesPage() {
               <th className="px-4 py-3">Data</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Cupom</th>
+              <th className="px-4 py-3">Visualização</th>
               <th className="px-4 py-3">Arquivo</th>
             </tr>
           </thead>
@@ -58,6 +61,15 @@ export default async function AdminQuotesPage() {
                 </td>
                 <td className="px-4 py-3">
                   {q.couponCode ? <Badge variant="outline">{q.couponCode}</Badge> : <span className="text-muted-foreground">—</span>}
+                </td>
+                <td className="px-4 py-3">
+                  {q.viewCount === 0 ? (
+                    <Badge variant="outline">Não visualizado</Badge>
+                  ) : (
+                    <Badge variant="accent">
+                      Visualizado {q.viewCount}x{q.lastViewedAt ? ` - Última em ${q.lastViewedAt.toLocaleDateString("pt-BR")}` : ""}
+                    </Badge>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   {q.attachments[0] ? (

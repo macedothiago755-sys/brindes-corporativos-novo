@@ -28,6 +28,8 @@ enum QuoteStatus {
   NOVO
   EM_ANALISE
   RESPONDIDO
+  APROVADO
+  AJUSTE_SOLICITADO
   FECHADO
   PERDIDO
 }
@@ -86,6 +88,7 @@ enum AuditAction {
   EXPORT
   DELETE
   ANONYMIZE
+  VIEW
 }
 
 model User {
@@ -297,6 +300,10 @@ model Quote {
   consentMarketingAceito    Boolean   @default(false)
   consentMarketingVersion   String?
   consentMarketingDate      DateTime?
+  approvalToken String?      @unique @default(cuid())
+  feedbackNotes String?
+  viewCount     Int          @default(0)
+  lastViewedAt  DateTime?
   items       QuoteItem[]
   attachments Attachment[]
   createdAt   DateTime     @default(now())
