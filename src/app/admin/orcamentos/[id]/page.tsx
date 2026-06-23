@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SITE_URL } from "@/lib/site-config";
+import { QuoteItemsPricing } from "@/components/admin/quote-items-pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,14 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
     revalidatePath(`/admin/orcamentos/${id}`);
   }
 
-  const item = quote.items[0];
+  const pricingItems = quote.items.map((it) => ({
+    id: it.id,
+    productName: it.product.name,
+    quantidade: it.quantidade,
+    precoUnitario: it.precoUnitario,
+    cores: it.cores,
+    personalizacao: it.personalizacao,
+  }));
 
   return (
     <div className="max-w-3xl">
@@ -57,10 +65,7 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
         <div><p className="text-xs text-muted-foreground">E-mail</p><p className="font-medium">{quote.email}</p></div>
         <div><p className="text-xs text-muted-foreground">Telefone</p><p className="font-medium">{quote.telefone}</p></div>
         <div><p className="text-xs text-muted-foreground">Cidade</p><p className="font-medium">{quote.cidade || "—"}</p></div>
-        <div><p className="text-xs text-muted-foreground">Produto</p><p className="font-medium">{item?.product.name}</p></div>
-        <div><p className="text-xs text-muted-foreground">Quantidade</p><p className="font-medium">{item?.quantidade}</p></div>
-        <div><p className="text-xs text-muted-foreground">Cores</p><p className="font-medium">{item?.cores.join(", ")}</p></div>
-        <div><p className="text-xs text-muted-foreground">Personalização</p><p className="font-medium">{item?.personalizacao.join(", ")}</p></div>
+        <div><p className="text-xs text-muted-foreground">Itens</p><p className="font-medium">{quote.items.length} produto(s)</p></div>
         <div><p className="text-xs text-muted-foreground">Cupom</p><p className="font-medium">{quote.couponCode || "—"}</p></div>
         <div>
           <p className="text-xs text-muted-foreground">Visualização da proposta</p>
@@ -71,6 +76,8 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
           </p>
         </div>
       </div>
+
+      {pricingItems.length > 0 && <QuoteItemsPricing quoteId={quote.id} items={pricingItems} />}
 
       {quote.approvalToken && (
         <p className="mt-6 text-sm text-muted-foreground">

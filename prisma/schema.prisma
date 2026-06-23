@@ -387,6 +387,7 @@ model QuoteItem {
   productId      String
   product        Product               @relation(fields: [productId], references: [id])
   quantidade     Int
+  precoUnitario  Float?
   cores          String[]
   personalizacao String[]
   metodo         CustomizationMethod[]
