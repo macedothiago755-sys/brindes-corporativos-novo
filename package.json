@@ -15,7 +15,8 @@
     "db:studio": "prisma studio",
     "importar": "tsx scripts/import-supplier.ts",
     "fix:colors-materials": "tsx scripts/bulk-fix-colors-materials.ts",
-    "seed:kits": "tsx scripts/seed-kit-suggestions.ts"
+    "seed:kits": "tsx scripts/seed-kit-suggestions.ts",
+    "seed:quotes": "npx tsx src/scripts/seed-quotes-funnel.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
