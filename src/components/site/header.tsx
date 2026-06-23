@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { QuoteCartBadge } from "@/components/site/quote-cart-badge";
 
 const links = [
   { href: "/produtos", label: "Produtos" },
@@ -71,6 +72,7 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <QuoteCartBadge />
           <Button asChild variant="outline-accent">
             <Link href="/montar-kit">Montar meu kit</Link>
           </Button>
@@ -80,9 +82,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <Button asChild size="sm" variant="gradient">
-            <Link href="/montar-kit">Montar meu kit</Link>
-          </Button>
+          <QuoteCartBadge />
           <button className="p-1" onClick={() => setOpen(!open)} aria-label="Abrir menu">
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>

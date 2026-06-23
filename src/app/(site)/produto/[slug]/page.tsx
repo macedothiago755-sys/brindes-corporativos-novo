@@ -6,7 +6,7 @@ import { Palette, Users, Factory, Check, Clock, ShieldCheck } from "lucide-react
 import { prisma } from "@/lib/prisma";
 import { getProductBySlug, getRelatedProducts } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
-import { QuoteForm } from "@/components/site/quote-form";
+import { AddToQuoteCart } from "@/components/site/add-to-quote-cart";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductMockupViewer } from "@/components/products/ProductMockupViewer";
@@ -170,8 +170,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             ))}
           </ul>
 
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <QuoteForm productId={product.id} productName={product.name} colors={product.colors} unitPrice={product.price} />
+          <div className="mt-10 space-y-4">
+            <AddToQuoteCart
+              productId={product.id}
+              slug={product.slug}
+              name={product.name}
+              image={product.images[0] ?? "/products/placeholder-1.svg"}
+              unitPrice={product.price}
+              priceTier={product.priceTier}
+            />
             <WhatsappCta
               source="produto"
               productName={product.name}
