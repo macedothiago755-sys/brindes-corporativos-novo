@@ -1,4 +1,6 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { env } from "@/config/env";
+import { withExponentialBackoff } from "@/shared/services/ai.service";
 
 export interface StructuredJobRequirements {
   summary: string;
@@ -59,11 +61,31 @@ export async function analyzeResumeWithClaude(
   _resumeUrl: string,
   jobTitle: string,
 ): Promise<ResumeAnalysisResult> {
-  const mockedScore = Math.floor(60 + Math.random() * 40);
+  // Mesmo sendo um mock, a análise passa pela camada de resiliência
+  // (`withExponentialBackoff`) para que o comportamento sob Rate Limit (429)
+  // seja exercitado em testes de carga. Definindo SIMULATE_RATE_LIMIT_RATE
+  // (ex: "0.3"), uma fração das chamadas lança um 429 simulado antes de
+  // suceder em uma nova tentativa — demonstrando o backoff de ponta a ponta.
+  const simulatedRate = Number(process.env.SIMULATE_RATE_LIMIT_RATE ?? 0);
 
-  return {
-    aiScore: mockedScore,
-    aiSummary: `Candidato apresenta experiência compatível com a vaga de ${jobTitle}. Pontos fortes identificados: comunicação e histórico profissional consistente.`,
-    extractedSkills: ["Comunicação", "Organização", "Trabalho em equipe"],
-  };
+  return withExponentialBackoff(
+    async () => {
+      if (simulatedRate > 0 && Math.random() < simulatedRate) {
+        throw new Anthropic.RateLimitError(
+          429,
+          { type: "error", error: { type: "rate_limit_error", message: "simulated 429" } },
+          "rate_limit_error (simulado)",
+          new Headers(),
+        );
+      }
+
+      const mockedScore = Math.floor(60 + Math.random() * 40);
+      return {
+        aiScore: mockedScore,
+        aiSummary: `Candidato apresenta experiência compatível com a vaga de ${jobTitle}. Pontos fortes identificados: comunicação e histórico profissional consistente.`,
+        extractedSkills: ["Comunicação", "Organização", "Trabalho em equipe"],
+      };
+    },
+    { label: "RESUME_ANALYSIS" },
+  );
 }

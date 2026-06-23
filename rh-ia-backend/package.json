@@ -10,7 +10,9 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "stress:resumes": "tsx tests/stress/resume-upload.stress.ts",
+    "quota:check": "tsx src/shared/utils/quota-checker.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
@@ -31,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.10.5",
+    "axios": "^1.18.1",
     "prisma": "^6.19.3",
     "tsc-alias": "^1.8.10",
     "tsx": "^4.19.2",

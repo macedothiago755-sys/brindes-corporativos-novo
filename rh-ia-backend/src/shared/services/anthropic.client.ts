@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "@/config/env";
+import { withExponentialBackoff } from "@/shared/services/ai.service";
 
 let client: Anthropic | null = null;
 
@@ -41,12 +42,16 @@ export async function askClaudeWithContext(input: AskWithContextInput): Promise<
 
   const userMessage = `Contexto:\n${context}\n\nPergunta do funcionário: ${input.question}`;
 
-  const response = await getClient().messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1024,
-    system: RH_ASSISTANT_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
-  });
+  const response = await withExponentialBackoff(
+    () =>
+      getClient().messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 1024,
+        system: RH_ASSISTANT_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: userMessage }],
+      }),
+    { label: "KNOWLEDGE_ASK" },
+  );
 
   const textBlock = response.content.find((block) => block.type === "text");
   return textBlock && textBlock.type === "text" ? textBlock.text : "";
