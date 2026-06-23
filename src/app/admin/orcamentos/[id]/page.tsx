@@ -63,10 +63,35 @@ export default async function AdminQuoteDetailPage({ params }: { params: Promise
 
       {quote.attachments.length > 0 && (
         <div className="mt-6">
-          <p className="text-sm font-semibold">Arquivo enviado</p>
-          <a href={quote.attachments[0].url} target="_blank" className="text-sm text-accent underline">
-            {quote.attachments[0].filename}
-          </a>
+          <p className="text-sm font-semibold">Arquivos e mockups enviados</p>
+          <div className="mt-3 flex flex-wrap gap-4">
+            {quote.attachments.map((att) => {
+              const isImage = /\.(png|jpe?g|svg|webp|avif)(\?|$)/i.test(att.url);
+              const isMockup = att.filename.startsWith("mockup-") || att.filename.startsWith("logo-");
+              return (
+                <a
+                  key={att.id}
+                  href={att.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex w-32 flex-col gap-2 rounded-lg border border-border p-2 transition-colors hover:border-accent"
+                >
+                  {isImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={att.url} alt={att.filename} className="h-28 w-full rounded object-contain" />
+                  ) : (
+                    <span className="flex h-28 w-full items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                      Arquivo
+                    </span>
+                  )}
+                  <span className="truncate text-xs text-accent group-hover:underline" title={att.filename}>
+                    {isMockup ? "🎨 " : ""}
+                    {att.filename}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
         </div>
       )}
 

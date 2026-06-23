@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { QuoteForm } from "@/components/site/quote-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
+import { ProductMockupViewer } from "@/components/products/ProductMockupViewer";
 import { ProductCard } from "@/components/site/product-card";
 import { TrackView } from "@/components/site/track-view";
 import { WhatsappCta } from "@/components/site/whatsapp-cta";
@@ -193,6 +194,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </ul>
         </div>
       </div>
+
+      <ProductMockupViewer
+        productId={product.id}
+        productImage={product.images[0] ?? "/products/placeholder-1.svg"}
+        productName={product.name}
+        methods={product.customizationMethods}
+      />
     </div>
 
     {related.length > 0 && (

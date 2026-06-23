@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getStoredCoupon } from "@/lib/coupon-storage";
+import { getStoredMockup, clearStoredMockup, type StoredMockup } from "@/lib/mockup-storage";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 
@@ -43,6 +44,7 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
   const [couponCode, setCouponCode] = useState("");
   const [consentObrigatorio, setConsentObrigatorio] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
+  const [mockup, setMockup] = useState<StoredMockup | null>(null);
 
   useEffect(() => {
     setCouponCode(getStoredCoupon());
@@ -95,6 +97,8 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
     const payload = {
       productId,
       attachmentUrl,
+      mockupUrl: mockup?.url ?? null,
+      mockupFilename: mockup?.filename ?? null,
       quantidade: quantidade === "1000+" ? Number(customQty || 1000) : Number(quantidade),
       cores: [cor],
       personalizacao,
@@ -130,6 +134,8 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
         // Valor estimado do lead (somente quando o produto tem preço cadastrado).
         ...(unitPrice ? { value: Number((unitPrice * payload.quantidade).toFixed(2)), currency: "BRL" } : {}),
       });
+      clearStoredMockup();
+      setMockup(null);
       setOpen(false);
       router.push("/orcamento/sucesso");
     } catch (err) {
@@ -140,7 +146,14 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        // Lê o mockup salvo no simulador no momento da abertura (evita efeito).
+        if (o) setMockup(getStoredMockup(productId));
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="lg" className="w-full sm:w-auto">
           Montar orçamento
@@ -248,6 +261,20 @@ export function QuoteForm({ productId, productName, colors, unitPrice }: { produ
             <Label htmlFor="arquivo">Enviar logo/arte (opcional)</Label>
             <Input id="arquivo" name="arquivo" type="file" className="mt-2" accept="image/*,.pdf,.ai,.eps" />
           </div>
+
+          {mockup && (
+            <div className="flex items-center gap-3 rounded-md border border-accent/40 bg-accent/5 p-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mockup.url}
+                alt="Mockup personalizado"
+                className="h-12 w-12 shrink-0 rounded object-contain"
+              />
+              <p className="text-xs text-muted-foreground">
+                Sua personalização do simulador será anexada a este orçamento.
+              </p>
+            </div>
+          )}
 
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 

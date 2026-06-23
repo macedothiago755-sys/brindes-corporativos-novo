@@ -15,7 +15,9 @@ export type AnalyticsEvent =
   | "start_kit"
   | "generate_kit"
   | "newsletter_view"
-  | "generate_lead";
+  | "generate_lead"
+  | "mockup_logo_uploaded"
+  | "mockup_saved";
 
 export function trackEvent(event: AnalyticsEvent, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;

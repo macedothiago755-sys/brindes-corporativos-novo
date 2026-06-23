@@ -24,6 +24,14 @@ export async function POST(req: NextRequest) {
 
   const data = parsed.data;
   const attachmentUrl = typeof body.attachmentUrl === "string" ? body.attachmentUrl : null;
+  const mockupUrl = typeof body.mockupUrl === "string" ? body.mockupUrl : null;
+  const mockupFilename = typeof body.mockupFilename === "string" ? body.mockupFilename : null;
+
+  // Anexos: arquivo enviado no formulário + mockup gerado no simulador (se houver).
+  const attachmentsToCreate = [
+    ...(attachmentUrl ? [{ url: attachmentUrl, filename: attachmentUrl.split("/").pop() ?? "arquivo" }] : []),
+    ...(mockupUrl ? [{ url: mockupUrl, filename: mockupFilename ?? mockupUrl.split("/").pop() ?? "mockup" }] : []),
+  ];
 
   const product = await prisma.product.findUnique({ where: { id: data.productId } });
   if (!product) {
@@ -60,9 +68,7 @@ export async function POST(req: NextRequest) {
           },
         ],
       },
-      ...(attachmentUrl
-        ? { attachments: { create: [{ url: attachmentUrl, filename: attachmentUrl.split("/").pop() ?? "arquivo" }] } }
-        : {}),
+      ...(attachmentsToCreate.length > 0 ? { attachments: { create: attachmentsToCreate } } : {}),
     },
   });
 
