@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { ApiError } from "@/shared/utils/ApiError";
 import { jobsService } from "@/modules/jobs/jobs.service";
+import { logUsage } from "@/shared/services/usage.service";
 
 const createJobSchema = z.object({
   title: z.string().min(2, "Título da vaga é obrigatório"),
@@ -23,6 +24,8 @@ export const jobsController = {
       title: input.title,
       rawDescription: input.description,
     });
+
+    await logUsage(tenantId, "JOB_CREATION");
 
     res.status(201).json({ data: { job, aiStructuredRequirements: structured } });
   },
@@ -57,6 +60,8 @@ export const jobsController = {
       email: input.email,
       resumeUrl: mockedResumeUrl,
     });
+
+    await logUsage(tenantId, "RESUME_ANALYSIS");
 
     res.status(201).json({ data: { candidate, aiAnalysis: analysis } });
   },

@@ -4,7 +4,7 @@ import { tenantService } from "@/modules/tenants/tenant.service";
 
 const createTenantSchema = z.object({
   companyName: z.string().min(2, "Nome da empresa é obrigatório"),
-  plan: z.enum(["TRIAL", "STARTER", "PRO", "ENTERPRISE"]).optional(),
+  plan: z.enum(["STARTER", "GROWTH", "PRO"]).optional(),
 });
 
 export const tenantController = {

@@ -5,6 +5,7 @@ import { authRouter } from "@/modules/auth/auth.routes";
 import { tenantRouter } from "@/modules/tenants/tenant.routes";
 import { jobsRouter } from "@/modules/jobs/jobs.routes";
 import { knowledgeRouter } from "@/modules/knowledge/knowledge.routes";
+import { webhookRouter } from "@/modules/billing/webhook.routes";
 import { requireAuth } from "@/shared/middlewares/tenant.middleware";
 import { errorHandler, notFoundHandler } from "@/shared/middlewares/errorHandler";
 
@@ -23,6 +24,10 @@ export function createApp(): Express {
 
   // Rotas públicas: registro/login criam o tenant e emitem o JWT.
   v1.use("/auth", authRouter);
+
+  // Webhook público de pagamento (sem JWT — autenticidade viria da
+  // verificação de assinatura do provedor, fora do escopo deste MVP).
+  v1.use("/webhooks", webhookRouter);
 
   // Gerenciamento avulso de tenants (uso administrativo/interno).
   v1.use("/tenants", tenantRouter);

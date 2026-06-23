@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { knowledgeService } from "@/modules/knowledge/knowledge.service";
+import { logUsage } from "@/shared/services/usage.service";
 
 const askSchema = z.object({
   question: z.string().min(3, "A pergunta não pode estar vazia"),
@@ -21,6 +22,8 @@ export const knowledgeController = {
     const { question } = askSchema.parse(req.body);
 
     const result = await knowledgeService.ask({ tenantId, question });
+
+    await logUsage(tenantId, "KNOWLEDGE_ASK");
 
     res.status(200).json({ data: result });
   },
