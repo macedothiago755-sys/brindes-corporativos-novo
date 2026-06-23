@@ -12,6 +12,7 @@
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
     "@prisma/client": "^6.19.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

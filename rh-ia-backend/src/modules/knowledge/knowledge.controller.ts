@@ -6,6 +6,11 @@ const askSchema = z.object({
   question: z.string().min(3, "A pergunta não pode estar vazia"),
 });
 
+const uploadSchema = z.object({
+  content: z.string().min(20, "Conteúdo do documento é obrigatório"),
+  title: z.string().optional(),
+});
+
 const addChunkSchema = z.object({
   content: z.string().min(10, "Conteúdo do documento é obrigatório"),
 });
@@ -18,6 +23,23 @@ export const knowledgeController = {
     const result = await knowledgeService.ask({ tenantId, question });
 
     res.status(200).json({ data: result });
+  },
+
+  async upload(req: Request, res: Response): Promise<void> {
+    const tenantId = req.tenantId as string;
+    const input = uploadSchema.parse(req.body);
+
+    const chunks = await knowledgeService.ingestDocument({
+      tenantId,
+      content: input.content,
+    });
+
+    res.status(201).json({
+      data: {
+        chunksCreated: chunks.length,
+        chunks,
+      },
+    });
   },
 
   async addChunk(req: Request, res: Response): Promise<void> {

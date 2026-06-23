@@ -19,13 +19,19 @@ npm run dev
 - `POST /api/v1/jobs` — cria vaga (header `x-tenant-id` obrigatório; estrutura requisitos via IA — mockado)
 - `GET /api/v1/jobs` / `GET /api/v1/jobs/:id`
 - `POST /api/v1/jobs/:id/resumes` — upload de currículo PDF (multipart, campo `resume`) + análise IA mockada (`ai_score`, `ai_summary`)
-- `POST /api/v1/knowledge/chunks` — adiciona conteúdo à base de conhecimento do tenant
-- `POST /api/v1/knowledge/ask` — pergunta de funcionário, busca semântica mockada na base do tenant
+- `POST /api/v1/knowledge/upload` — recebe o texto de um documento institucional, quebra em chunks (~1000 chars, overlap 200) e persiste vinculado ao tenant
+- `POST /api/v1/knowledge/chunks` — adiciona um único chunk de conteúdo à base do tenant
+- `POST /api/v1/knowledge/ask` — pergunta do colaborador: rankeia os chunks do tenant por TF-IDF/cosseno, injeta os top-3 como contexto e chama o Claude 3.5 Sonnet com prompt de sistema restrito ao contexto fornecido
 
-Todas as rotas de `jobs` e `knowledge` exigem o header `x-tenant-id` (MVP — substituir por JWT autenticado em produção).
+Todas as rotas de `jobs` e `knowledge` exigem o header `x-tenant-id` (MVP — substituir por JWT autenticado em produção). O isolamento entre empresas é garantido filtrando `tenant_id` em toda query a `KnowledgeChunk`.
 
 ## O que é mock hoje
 
 - Chamada à API da Anthropic Claude para estruturar vagas e analisar currículos (`src/modules/jobs/ai/claude.helper.ts`)
 - Extração de texto do PDF do currículo
-- Geração de embeddings e busca por similaridade na base de conhecimento (`embedding_vector_placeholder` é um `Float[]` vazio)
+
+## O que já é real
+
+- Chunking de documentos e persistência por tenant (`knowledge.service.ts`)
+- Ranking de relevância por TF-IDF + similaridade de cosseno em memória (`shared/services/vector.service.ts`) — substitui embeddings, já que a Anthropic não expõe API de embeddings
+- Resposta do assistente de RH via Claude 3.5 Sonnet com contexto restrito (`shared/services/anthropic.client.ts`), exige `ANTHROPIC_API_KEY` válida em `.env`
