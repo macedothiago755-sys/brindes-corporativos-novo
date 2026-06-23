@@ -9,6 +9,8 @@ const nextConfig = {
   // Este app vive ao lado de outro projeto Node na raiz do monorepo;
   // fixamos o root de tracing para evitar a inferência por múltiplos lockfiles.
   outputFileTracingRoot: __dirname,
+  // Gera build "standalone" (server.js autocontido) para imagem Docker mínima.
+  output: "standalone",
 };
 
 export default nextConfig;
