@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantPlan {
+  TRIAL
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ATIVO
+  SUSPENSO
+  CANCELADO
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  RECRUITER
+  EMPLOYEE
+}
+
+enum JobStatus {
+  RASCUNHO
+  ABERTA
+  PAUSADA
+  ENCERRADA
+}
+
+model Tenant {
+  id          String       @id @default(uuid())
+  companyName String       @map("company_name")
+  plan        TenantPlan   @default(TRIAL)
+  status      TenantStatus @default(ATIVO)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  users      User[]
+  jobs       Job[]
+  knowledge  KnowledgeChunk[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  name      String
+  email     String   @unique
+  role      UserRole @default(EMPLOYEE)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  title       String
+  description String    @db.Text
+  status      JobStatus @default(RASCUNHO)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  candidates Candidate[]
+
+  @@index([tenantId])
+  @@map("jobs")
+}
+
+model Candidate {
+  id        String   @id @default(uuid())
+  jobId     String   @map("job_id")
+  name      String
+  email     String
+  resumeUrl String   @map("resume_url")
+  aiScore   Int?     @map("ai_score")
+  aiSummary String?  @db.Text @map("ai_summary")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("candidates")
+}
+
+model KnowledgeChunk {
+  id                     String   @id @default(uuid())
+  tenantId               String   @map("tenant_id")
+  content                String   @db.Text
+  embeddingVectorPlaceholder Float[] @map("embedding_vector_placeholder")
+  createdAt              DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("knowledge_chunks")
+}
