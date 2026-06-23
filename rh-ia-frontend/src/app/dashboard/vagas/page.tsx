@@ -8,6 +8,7 @@ import { api, ApiError } from "@/lib/api";
 import { parseJobRequirements, type Job, type StructuredJobRequirements } from "@/lib/types";
 import { Modal } from "@/components/Modal";
 import { AiLoader } from "@/components/AiLoader";
+import { TOUR_OPEN_JOB_MODAL_EVENT } from "@/lib/onboarding";
 
 export default function VagasPage() {
   const router = useRouter();
@@ -35,6 +36,14 @@ export default function VagasPage() {
   useEffect(() => {
     loadJobs();
   }, [loadJobs]);
+
+  useEffect(() => {
+    function openFromTour() {
+      setModalOpen(true);
+    }
+    window.addEventListener(TOUR_OPEN_JOB_MODAL_EVENT, openFromTour);
+    return () => window.removeEventListener(TOUR_OPEN_JOB_MODAL_EVENT, openFromTour);
+  }, []);
 
   return (
     <div>
@@ -183,7 +192,7 @@ function CreateJobModal({
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div data-tour="generate-job-button" className="space-y-4">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">Título da Vaga</span>
             <input

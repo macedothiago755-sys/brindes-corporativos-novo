@@ -192,6 +192,7 @@ function Dropzone({ onFiles }: { onFiles: (files: File[]) => void }) {
   return (
     <div
       {...getRootProps()}
+      data-tour="dropzone-area"
       className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
         isDragActive ? "border-indigo-500 bg-indigo-50" : "border-slate-300 hover:border-indigo-400"
       }`}
