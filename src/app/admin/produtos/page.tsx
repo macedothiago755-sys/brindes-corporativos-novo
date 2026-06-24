@@ -11,6 +11,7 @@ import { Pagination } from "@/components/admin/pagination";
 import { SelectionProvider, SelectAllCheckbox, RowCheckbox, BulkActionBar } from "@/components/admin/bulk-selection";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
+import { FeaturedToggle } from "@/components/admin/featured-toggle";
 import { deleteProduct, duplicateProduct, toggleProductStatus, bulkUpdateProducts } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -196,6 +197,19 @@ export default async function AdminProductsPage({
       header: "Status",
       sortable: true,
       render: (p) => <Badge variant={STATUS_VARIANTS[p.status]}>{STATUS_LABELS[p.status]}</Badge>,
+    },
+    {
+      key: "featured",
+      header: "Destaque",
+      className: "text-center",
+      render: (p) =>
+        canEdit ? (
+          <div className="flex justify-center">
+            <FeaturedToggle productId={p.id} initialFeatured={p.featured} productName={p.name} />
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">{p.featured ? "Sim" : "—"}</span>
+        ),
     },
     {
       key: "createdAt",
