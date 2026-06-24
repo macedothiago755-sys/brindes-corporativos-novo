@@ -41,7 +41,7 @@ export function Footer() {
           <p className="text-sm font-semibold">Empresa</p>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li><Link href="/sobre">Sobre a empresa</Link></li>
-            <li><Link href="/blog">Blog</Link></li>
+            <li><Link href="/inspiracoes">Inspirações</Link></li>
             <li><Link href="/#como-funciona">Como funciona</Link></li>
             <li><Link href="/admin/login">Acesso administrativo</Link></li>
           </ul>

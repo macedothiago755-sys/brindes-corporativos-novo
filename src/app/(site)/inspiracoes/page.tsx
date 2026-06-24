@@ -6,10 +6,10 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { isExternalImage } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Blog | Brindes Corporativos",
+  title: "Inspirações | Brindes Corporativos",
   description:
     "Conteúdos sobre brindes corporativos personalizados, tendências de marketing promocional e dicas para fortalecer sua marca.",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "/inspiracoes" },
 };
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,8 @@ export default async function BlogPage() {
 
   return (
     <div className="container-premium py-16">
-      <Breadcrumbs items={[{ name: "Início", href: "/" }, { name: "Blog", href: "/blog" }]} />
-      <h1 className="text-3xl font-semibold tracking-tight">Blog</h1>
+      <Breadcrumbs items={[{ name: "Início", href: "/" }, { name: "Inspirações", href: "/inspiracoes" }]} />
+      <h1 className="text-3xl font-semibold tracking-tight">Inspirações</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Conteúdos sobre brindes corporativos personalizados, tendências de marketing promocional e dicas para
         fortalecer a presença da sua marca.
@@ -30,7 +30,7 @@ export default async function BlogPage() {
         {posts.map((post) => (
           <Link
             key={post.slug}
-            href={`/blog/${post.slug}`}
+            href={`/inspiracoes/${post.slug}`}
             className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-accent"
           >
             <div className="relative aspect-[1014/535] overflow-hidden bg-muted">

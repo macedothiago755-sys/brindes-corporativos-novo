@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBlogPostBySlug, getBlogPosts } from "@/lib/cached-queries";
+import { getBlogPostBySlug, getBlogPosts, getSuggestedProductsForPost } from "@/lib/cached-queries";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 import { isExternalImage } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ProductCard } from "@/components/site/product-card";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: `/blog/${post.slug}` },
+    alternates: { canonical: `/inspiracoes/${post.slug}` },
     openGraph: {
       type: "article",
       title: post.title,
@@ -47,6 +48,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     )
     .slice(0, 3);
 
+  const suggestedProducts = await getSuggestedProductsForPost(post.slug);
+
+  const paragraphs = post.content.split("\n\n");
+  const firstHalf = paragraphs.slice(0, Math.ceil(paragraphs.length / 2));
+  const secondHalf = paragraphs.slice(Math.ceil(paragraphs.length / 2));
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -55,7 +62,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     image: [post.coverImage],
     datePublished: post.publishedAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/inspiracoes/${post.slug}` },
     author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     publisher: {
       "@type": "Organization",
@@ -72,8 +79,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <Breadcrumbs
         items={[
           { name: "Início", href: "/" },
-          { name: "Blog", href: "/blog" },
-          { name: post.title, href: `/blog/${post.slug}` },
+          { name: "Inspirações", href: "/inspiracoes" },
+          { name: post.title, href: `/inspiracoes/${post.slug}` },
         ]}
       />
 
@@ -97,12 +104,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           fill
           unoptimized={isExternalImage(post.coverImage)}
           className="object-cover"
-          preload
+          priority
         />
       </div>
 
       <div className="prose prose-neutral mt-10 max-w-2xl text-base leading-relaxed text-foreground/90">
-        {post.content.split("\n\n").map((paragraph, i) => (
+        {firstHalf.map((paragraph, i) => (
+          <p key={i} className="mb-6">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+
+      {suggestedProducts.length > 0 && (
+        <section className="mt-4 border-y border-border py-10">
+          <h2 className="text-xl font-semibold tracking-tight">Produtos Sugeridos para esta Ação</h2>
+          <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {suggestedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="prose prose-neutral mt-10 max-w-2xl text-base leading-relaxed text-foreground/90">
+        {secondHalf.map((paragraph, i) => (
           <p key={i} className="mb-6">
             {paragraph}
           </p>
@@ -128,7 +154,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {related.map((item) => (
               <Link
                 key={item.slug}
-                href={`/blog/${item.slug}`}
+                href={`/inspiracoes/${item.slug}`}
                 className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-accent"
               >
                 <div className="relative aspect-[1014/535] overflow-hidden bg-muted">

@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { POST_PRODUCT_MAPPING } from "@/lib/post-product-mapping";
 
 export const CACHE_TAGS = {
   products: "products",
@@ -89,6 +90,24 @@ export const getBlogPostBySlug = unstable_cache(
   async (slug: string) => safeQuery(() => prisma.post.findUnique({ where: { slug } }), null),
   ["blog-post-by-slug"],
   { revalidate: 300, tags: [CACHE_TAGS.posts] }
+);
+
+export const getSuggestedProductsForPost = unstable_cache(
+  async (slug: string) => {
+    const keywords = POST_PRODUCT_MAPPING[slug];
+    if (!keywords || keywords.length === 0) return [];
+    return safeQuery(
+      () =>
+        prisma.product.findMany({
+          where: { OR: keywords.map((k) => ({ name: { contains: k, mode: "insensitive" as const } })) },
+          include: { category: true },
+          take: 4,
+        }),
+      []
+    );
+  },
+  ["suggested-products-for-post"],
+  { revalidate: 300, tags: [CACHE_TAGS.products] }
 );
 
 export const getActiveCategories = unstable_cache(

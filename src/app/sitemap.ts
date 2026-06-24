@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/produtos`, lastModified: new Date(), priority: 0.9 },
     { url: `${base}/brindes-corporativos-sao-paulo`, lastModified: new Date(), priority: 0.9 },
     { url: `${base}/sobre`, lastModified: new Date(), priority: 0.7 },
-    { url: `${base}/blog`, lastModified: new Date(), priority: 0.8 },
+    { url: `${base}/inspiracoes`, lastModified: new Date(), priority: 0.8 },
     ...categories.map((c) => ({
       url: `${base}/categoria/${c.slug}`,
       lastModified: new Date(),
@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
     ...posts.map((p) => ({
-      url: `${base}/blog/${p.slug}`,
+      url: `${base}/inspiracoes/${p.slug}`,
       lastModified: p.updatedAt,
       priority: 0.6,
     })),

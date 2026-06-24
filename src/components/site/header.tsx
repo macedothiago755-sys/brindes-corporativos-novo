@@ -10,7 +10,7 @@ import { QuoteCartBadge } from "@/components/site/quote-cart-badge";
 const links = [
   { href: "/produtos", label: "Produtos" },
   { href: "/solucoes", label: "Soluções" },
-  { href: "/blog", label: "Inspirações" },
+  { href: "/inspiracoes", label: "Inspirações" },
   { href: "/sobre", label: "Sobre nós" },
   { href: "/#contato", label: "Contato" },
 ];

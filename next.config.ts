@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
     // estável; evita reprocessar a mesma imagem a cada acesso.
     minimumCacheTTL: 2678400,
   },
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/inspiracoes", permanent: true },
+      { source: "/blog/:slug", destination: "/inspiracoes/:slug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
