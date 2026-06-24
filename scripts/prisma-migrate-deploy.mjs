@@ -25,6 +25,21 @@ if (!process.env.DIRECT_URL && process.env.DATABASE_URL) {
   );
 }
 
+/**
+ * A primeira tentativa de deploy da migração abaixo falhou em produção (o SQL
+ * foi corrigido depois). Isso deixa essa migração marcada como "failed" na
+ * tabela _prisma_migrations, o que bloqueia QUALQUER `migrate deploy`
+ * seguinte com P3009 até ser resolvida manualmente. Como não há acesso direto
+ * ao banco de produção a partir deste ambiente, resolvemos isso aqui: marcamos
+ * a tentativa anterior como "rolled back" (idempotente — se ela nunca tiver
+ * falhado, o comando simplesmente falha e é ignorado) antes do deploy real.
+ */
+spawnSync(
+  "npx",
+  ["prisma", "migrate", "resolve", "--rolled-back", "20260624130001_customization_methods_cleanup"],
+  { stdio: "inherit", env: process.env, shell: true }
+);
+
 const result = spawnSync("npx", ["prisma", "migrate", "deploy"], {
   stdio: "inherit",
   env: process.env,
