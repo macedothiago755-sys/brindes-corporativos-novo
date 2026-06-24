@@ -58,6 +58,7 @@ export const CATALOG_COLUMNS = [
   "ID",
   "Nome",
   "SKU",
+  "Código do Fornecedor",
   "Categoria",
   "Marca",
   "Status",

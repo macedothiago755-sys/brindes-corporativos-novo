@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     p.id,
     p.name,
     p.sku ?? "",
+    p.supplierCode ?? "",
     p.category.name,
     p.brand ?? "",
     STATUS_LABELS[p.status] ?? p.status,

@@ -157,6 +157,7 @@ export const productImportRowSchema = z.object({
   id: optionalString,
   name: z.string().min(2, "Informe o nome do produto"),
   sku: optionalString,
+  supplierCode: optionalString,
   brand: optionalString,
   status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]).optional(),
   categoryName: optionalString,
