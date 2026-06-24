@@ -7,7 +7,10 @@ import { createProduct } from "../actions";
 export const dynamic = "force-dynamic";
 
 export default async function NewProductPage() {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const categories = await prisma.category.findMany({
+    select: { id: true, name: true, parentId: true },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <div>

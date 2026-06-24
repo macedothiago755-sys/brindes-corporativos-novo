@@ -13,6 +13,7 @@ import { ImageUploader } from "@/components/admin/image-uploader";
 interface CategoryOption {
   id: string;
   name: string;
+  parentId?: string | null;
 }
 
 interface AttributeRow {
@@ -78,6 +79,21 @@ function SubmitButton({ label }: { label: string }) {
 }
 
 export function ProductForm({ action, categories, defaultValues = {}, submitLabel }: ProductFormProps) {
+  // "Subcategoria" reaproveita a hierarquia de Category (parentId/children).
+  // O valor realmente persistido em categoryId é o da subcategoria, se houver;
+  // caso contrário, o da categoria-pai.
+  const parentCategories = categories.filter((c) => !c.parentId);
+  const childrenOf = (parentId: string) => categories.filter((c) => c.parentId === parentId);
+
+  const selectedCategory = categories.find((c) => c.id === defaultValues.categoryId);
+  const initialParentId = selectedCategory?.parentId ?? selectedCategory?.id ?? "";
+  const initialSubId = selectedCategory?.parentId ? selectedCategory.id : "";
+
+  const [parentId, setParentId] = useState(initialParentId);
+  const [subId, setSubId] = useState(initialSubId);
+  const subcategories = parentId ? childrenOf(parentId) : [];
+  const effectiveCategoryId = subId || parentId;
+
   const [attributes, setAttributes] = useState<AttributeRow[]>(
     defaultValues.attributes && defaultValues.attributes.length > 0
       ? defaultValues.attributes
@@ -120,24 +136,48 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
             <Input id="brand" name="brand" defaultValue={defaultValues.brand ?? ""} className="mt-2" />
           </div>
           <div>
-            <Label htmlFor="categoryId">Categoria</Label>
+            <Label htmlFor="parentCategory">Categoria</Label>
             <select
-              id="categoryId"
-              name="categoryId"
+              id="parentCategory"
+              value={parentId}
+              onChange={(e) => {
+                setParentId(e.target.value);
+                setSubId("");
+              }}
               required
-              defaultValue={defaultValues.categoryId ?? ""}
               className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
             >
               <option value="" disabled>
                 Selecione...
               </option>
-              {categories.map((c) => (
+              {parentCategories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
             </select>
           </div>
+          <div>
+            <Label htmlFor="subcategory">Subcategoria</Label>
+            <select
+              id="subcategory"
+              value={subId}
+              onChange={(e) => setSubId(e.target.value)}
+              disabled={subcategories.length === 0}
+              className="mt-2 h-11 w-full rounded-md border border-border bg-background px-3 text-sm disabled:opacity-50"
+            >
+              <option value="">
+                {subcategories.length === 0 ? "Nenhuma subcategoria" : "Nenhuma (usar categoria)"}
+              </option>
+              {subcategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Valor efetivo persistido: subcategoria se escolhida, senão a categoria-pai. */}
+          <input type="hidden" name="categoryId" value={effectiveCategoryId} />
           <div>
             <Label htmlFor="status">Status</Label>
             <select

@@ -141,3 +141,35 @@ export const productSchema = z.object({
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
+
+// ── Importação de catálogo via planilha (CSV/XLSX) ──────────────────────────
+// Schema tolerante para cada linha da planilha. Os enums já chegam convertidos
+// para os códigos do Prisma (o parser de rótulos roda antes da validação).
+const optionalString = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((v) => {
+    const s = String(v ?? "").trim();
+    return s === "" ? undefined : s;
+  });
+
+export const productImportRowSchema = z.object({
+  id: optionalString,
+  name: z.string().min(2, "Informe o nome do produto"),
+  sku: optionalString,
+  brand: optionalString,
+  status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]).optional(),
+  categoryName: optionalString,
+  price: optionalNumber,
+  minQty: z.coerce.number().int().min(1).optional(),
+  colors: z.preprocess(csvToArray, z.array(z.string())),
+  materials: z.preprocess(csvToArray, z.array(z.string())),
+  tags: z.preprocess(csvToArray, z.array(z.string())),
+  metaTitle: optionalString,
+  metaDescription: optionalString,
+  objectives: z.array(z.enum(["ONBOARDING", "EVENTO", "CLIENTE_VIP", "FEIRA", "PREMIACAO"])).default([]),
+  profile: z.enum(["ECONOMICO", "INTERMEDIARIO", "PREMIUM"]).optional(),
+  priceTier: z.enum(["ENTRADA", "MEDIO", "ALTO"]).optional(),
+});
+
+export type ProductImportRow = z.infer<typeof productImportRowSchema>;

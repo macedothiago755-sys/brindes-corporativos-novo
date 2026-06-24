@@ -12,6 +12,7 @@ import { SelectionProvider, SelectAllCheckbox, RowCheckbox, BulkActionBar } from
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { FeaturedToggle } from "@/components/admin/featured-toggle";
+import { CatalogImportButton } from "@/components/admin/catalog-import-button";
 import { deleteProduct, duplicateProduct, toggleProductStatus, bulkUpdateProducts } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -303,6 +304,7 @@ export default async function AdminProductsPage({
               <a href={`/api/admin/produtos/export?format=xlsx&${exportQuery}`}>
                 <Button variant="outline">Excel</Button>
               </a>
+              <CatalogImportButton />
               <Link href={`/admin/produtos/exportar?${exportQuery}`}>
                 <Button variant="outline">PDF</Button>
               </Link>

@@ -3,6 +3,13 @@ import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
+import {
+  CATALOG_COLUMNS,
+  OBJECTIVE_LABELS,
+  PROFILE_LABELS,
+  PRICE_TIER_LABELS,
+  STATUS_LABELS,
+} from "@/lib/catalog-spreadsheet";
 
 async function getFilteredProducts(searchParams: URLSearchParams) {
   const q = searchParams.get("q") || undefined;
@@ -46,16 +53,24 @@ export async function GET(request: Request) {
   const format = searchParams.get("format") || "csv";
   const products = await getFilteredProducts(searchParams);
 
-  const columns = ["Nome", "SKU", "Categoria", "Marca", "Status", "Preço", "Quantidade mínima", "Tags"];
+  const columns = [...CATALOG_COLUMNS];
   const rows = products.map((p) => [
+    p.id,
     p.name,
     p.sku ?? "",
     p.category.name,
     p.brand ?? "",
-    p.status,
+    STATUS_LABELS[p.status] ?? p.status,
     p.price ?? "",
     p.minQty,
+    p.colors.join(", "),
+    p.materials.join(", "),
     p.tags.join(", "),
+    p.metaTitle ?? "",
+    p.metaDescription ?? "",
+    p.objectives.map((o) => OBJECTIVE_LABELS[o] ?? o).join(", "),
+    p.profile ? PROFILE_LABELS[p.profile] ?? p.profile : "",
+    p.priceTier ? PRICE_TIER_LABELS[p.priceTier] ?? p.priceTier : "",
   ]);
 
   if (format === "xlsx") {
