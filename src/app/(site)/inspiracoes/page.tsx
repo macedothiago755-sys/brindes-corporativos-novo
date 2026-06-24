@@ -45,7 +45,7 @@ export default async function BlogPage() {
             </div>
             <div className="p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {post.publishedAt.toLocaleDateString("pt-BR")}
+                {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
               </p>
               <h2 className="mt-2 font-semibold leading-snug">{post.title}</h2>
               <p className="mt-2 text-sm text-muted-foreground">{post.excerpt}</p>

@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: post.title,
       description: post.excerpt,
       images: [post.coverImage],
-      publishedTime: post.publishedAt.toISOString(),
-      modifiedTime: post.updatedAt.toISOString(),
+      publishedTime: new Date(post.publishedAt).toISOString(),
+      modifiedTime: new Date(post.updatedAt).toISOString(),
     },
   };
 }
@@ -60,8 +60,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     headline: post.title,
     description: post.excerpt,
     image: [post.coverImage],
-    datePublished: post.publishedAt.toISOString(),
-    dateModified: post.updatedAt.toISOString(),
+    datePublished: new Date(post.publishedAt).toISOString(),
+    dateModified: new Date(post.updatedAt).toISOString(),
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/inspiracoes/${post.slug}` },
     author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     publisher: {
@@ -85,7 +85,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       />
 
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {post.publishedAt.toLocaleDateString("pt-BR")}
+        {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
       </p>
       <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">{post.title}</h1>
 
@@ -169,7 +169,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 </div>
                 <div className="p-5">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {item.publishedAt.toLocaleDateString("pt-BR")}
+                    {new Date(item.publishedAt).toLocaleDateString("pt-BR")}
                   </p>
                   <h3 className="mt-2 font-semibold leading-snug">{item.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{item.excerpt}</p>
