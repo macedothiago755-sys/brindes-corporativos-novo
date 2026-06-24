@@ -62,6 +62,7 @@ export default function QuoteCartPage() {
         customizationText: i.customizationText,
         logoUrl: i.logoUrl,
         logoFilename: i.logoFilename,
+        metodo: i.customizationMethod ? [i.customizationMethod] : [],
       })),
       cnpj: String(form.get("cnpj") || ""),
       empresa: String(form.get("empresa") || ""),
@@ -260,6 +261,12 @@ function CartLine({
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {item.priceTier && <Badge variant="outline">Faixa {tierLabels[item.priceTier]}</Badge>}
           <Badge variant="accent">{band.label}</Badge>
+          {item.customizationMethod && (
+            <Badge variant="outline">
+              {CUSTOMIZATION_METHOD_LABELS[item.customizationMethod as keyof typeof CUSTOMIZATION_METHOD_LABELS] ??
+                item.customizationMethod}
+            </Badge>
+          )}
         </div>
         {item.customizationText && (
           <p className="mt-1 truncate text-xs text-muted-foreground" title={item.customizationText}>

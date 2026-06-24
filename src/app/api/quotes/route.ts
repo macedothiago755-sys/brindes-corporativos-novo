@@ -5,6 +5,13 @@ import { quoteSchema, cartQuoteSchema } from "@/lib/validations";
 import { rateLimit } from "@/lib/rate-limit";
 import { resolveCouponCode } from "@/lib/coupons";
 import { notifyNewQuote } from "@/lib/notify";
+import { CUSTOMIZATION_METHODS, type CustomizationMethodValue } from "@/lib/customization-methods";
+
+function toCustomizationMethods(values: string[]): CustomizationMethodValue[] {
+  return values.filter((v): v is CustomizationMethodValue =>
+    (CUSTOMIZATION_METHODS as readonly string[]).includes(v)
+  );
+}
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -157,7 +164,7 @@ async function handleCartQuote(body: unknown) {
               quantidade: i.quantidade,
               cores: [],
               personalizacao: i.customizationText ? [i.customizationText] : [],
-              metodo: [],
+              metodo: toCustomizationMethods(i.metodo),
             })),
           },
           ...(attachmentsToCreate.length > 0 ? { attachments: { create: attachmentsToCreate } } : {}),
