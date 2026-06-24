@@ -5,17 +5,12 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categoryPath } from "@/lib/routes";
+import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 
 type Option = { label: string; value: string };
 export type CategoryOption = { name: string; slug: string; children: { name: string; slug: string }[] };
 
-const methods: Option[] = [
-  { label: "Gravação a laser", value: "GRAVACAO_LASER" },
-  { label: "Silk screen", value: "SILK_SCREEN" },
-  { label: "Bordado", value: "BORDADO" },
-  { label: "Impressão UV", value: "IMPRESSAO_UV" },
-  { label: "Transfer", value: "TRANSFER" },
-];
+const methods: Option[] = CUSTOMIZATION_METHOD_OPTIONS;
 
 const tags: Option[] = [
   { label: "Lançamento", value: "lançamento" },

@@ -15,6 +15,7 @@ import { TrackView } from "@/components/site/track-view";
 import { WhatsappCta } from "@/components/site/whatsapp-cta";
 import { SITE_URL } from "@/lib/site-config";
 import { categoryPath } from "@/lib/routes";
+import { CUSTOMIZATION_METHOD_LABELS } from "@/lib/customization-methods";
 
 const b2bHighlights = [
   { icon: Palette, label: "Personalização com sua marca" },
@@ -22,13 +23,7 @@ const b2bHighlights = [
   { icon: Factory, label: "Produção em alta escala" },
 ];
 
-const methodLabels: Record<string, string> = {
-  GRAVACAO_LASER: "Gravação a laser",
-  SILK_SCREEN: "Silk screen",
-  BORDADO: "Bordado",
-  IMPRESSAO_UV: "Impressão UV",
-  TRANSFER: "Transfer",
-};
+const methodLabels: Record<string, string> = CUSTOMIZATION_METHOD_LABELS;
 
 export const dynamic = "force-dynamic";
 

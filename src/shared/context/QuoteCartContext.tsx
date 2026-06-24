@@ -37,6 +37,8 @@ export interface QuoteCartItem {
   /** URL pública do logo já enviado para /api/upload (persistível). */
   logoUrl?: string;
   logoFilename?: string;
+  /** Método de personalização escolhido para este item (obrigatório ao adicionar). */
+  customizationMethod?: string;
 }
 
 interface QuoteCartState {

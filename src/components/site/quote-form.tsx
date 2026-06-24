@@ -14,6 +14,7 @@ import { getStoredCoupon } from "@/lib/coupon-storage";
 import { getStoredMockup, clearStoredMockup, type StoredMockup } from "@/lib/mockup-storage";
 import { trackEvent } from "@/lib/analytics";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
+import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 
 const quantities = ["50", "100", "250", "500", "1000+"];
 const personalizationOptions = [
@@ -23,9 +24,7 @@ const personalizationOptions = [
   { id: "arte", label: "Arte personalizada" },
 ];
 const methodOptions = [
-  { id: "GRAVACAO_LASER", label: "Laser" },
-  { id: "IMPRESSAO_UV", label: "Impressão" },
-  { id: "BORDADO", label: "Bordado" },
+  ...CUSTOMIZATION_METHOD_OPTIONS.map((opt) => ({ id: opt.value, label: opt.label })),
   { id: "OUTRO", label: "Outro" },
 ];
 

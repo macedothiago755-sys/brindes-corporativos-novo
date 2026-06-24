@@ -79,7 +79,7 @@ async function main() {
   const baseItem = {
     cores: ["Azul Marinho", "Branco"],
     personalizacao: ["Logo gravado"],
-    metodo: [CustomizationMethod.SILK_SCREEN, CustomizationMethod.IMPRESSAO_UV],
+    metodo: [CustomizationMethod.SILK_SCREEN, CustomizationMethod.DIGITAL_UV],
   };
 
   // ── COTAÇÃO A — PENDENTE (NOVO) ───────────────────────────────────────────

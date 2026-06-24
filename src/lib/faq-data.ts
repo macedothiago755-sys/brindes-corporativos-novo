@@ -23,6 +23,6 @@ export const brindesSaoPauloFaq: FaqItem[] = [
   {
     question: "Posso personalizar com minha logo?",
     answer:
-      "Sim. Personalizamos os brindes com a marca da sua empresa usando técnicas como gravação a laser, silk screen, bordado, impressão UV e transfer, de acordo com o material do produto.",
+      "Sim. Personalizamos os brindes com a marca da sua empresa usando técnicas como gravação a laser, silk screen, digital UV e transfer, de acordo com o material do produto.",
   },
 ];

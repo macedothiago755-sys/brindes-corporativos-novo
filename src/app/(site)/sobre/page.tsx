@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/site/faq-section";
 import type { FaqItem } from "@/components/site/faq-section";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 import {
   SITE_NAME,
   CONTACT_EMAIL,
@@ -44,13 +45,7 @@ const processo = [
   },
 ];
 
-const metodos = [
-  "Gravação a laser",
-  "Silk screen",
-  "Bordado",
-  "Impressão UV",
-  "Transfer",
-];
+const metodos = CUSTOMIZATION_METHOD_OPTIONS.map((m) => m.label);
 
 const segmentos = ["Indústria", "Varejo", "Saúde", "Educação", "Tecnologia", "Serviços", "Eventos", "Agências"];
 

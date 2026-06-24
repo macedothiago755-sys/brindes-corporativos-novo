@@ -10,17 +10,12 @@ import { Slider } from "@/components/ui/slider";
 import { cn, isExternalImage } from "@/lib/utils";
 import { setStoredMockup } from "@/lib/mockup-storage";
 import { trackEvent } from "@/lib/analytics";
+import { CUSTOMIZATION_METHOD_LABELS, MONOCHROME_CUSTOMIZATION_METHODS } from "@/lib/customization-methods";
 
-const methodLabels: Record<string, string> = {
-  GRAVACAO_LASER: "Gravação a laser",
-  SILK_SCREEN: "Silk screen",
-  BORDADO: "Bordado",
-  IMPRESSAO_UV: "Impressão UV",
-  TRANSFER: "Transfer",
-};
+const methodLabels: Record<string, string> = CUSTOMIZATION_METHOD_LABELS;
 
 // Métodos que simulam gravação monocromática (sem cor da arte original).
-const MONOCHROME_METHODS = new Set(["GRAVACAO_LASER", "BORDADO"]);
+const MONOCHROME_METHODS: ReadonlySet<string> = MONOCHROME_CUSTOMIZATION_METHODS;
 
 const ACCEPT = {
   "image/png": [".png"],
@@ -166,7 +161,7 @@ export function ProductMockupViewer({ productId, productImage, productName, meth
     const cy = h / 2 + (params.y / 100) * h;
 
     const isMono = MONOCHROME_METHODS.has(params.method);
-    // Laser/bordado: simula gravação monocromática e levemente translúcida.
+    // Laser: simula gravação monocromática e levemente translúcida.
     ctx.filter = isMono ? "grayscale(1) contrast(1.15) brightness(0.92)" : "none";
     ctx.globalAlpha = (params.opacity / 100) * (isMono ? 0.85 : 1);
     ctx.drawImage(logo, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
@@ -370,7 +365,7 @@ export function ProductMockupViewer({ productId, productImage, productName, meth
               </select>
               {MONOCHROME_METHODS.has(params.method) && (
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  Simulação monocromática — laser e bordado não reproduzem as cores da arte.
+                  Simulação monocromática — laser não reproduz as cores da arte.
                 </p>
               )}
             </div>

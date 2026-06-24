@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuoteCart, type QuoteCartItem } from "@/shared/context/QuoteCartContext";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import { trackEvent } from "@/lib/analytics";
+import { CUSTOMIZATION_METHOD_LABELS } from "@/lib/customization-methods";
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 

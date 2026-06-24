@@ -37,8 +37,7 @@ enum QuoteStatus {
 enum CustomizationMethod {
   GRAVACAO_LASER
   SILK_SCREEN
-  BORDADO
-  IMPRESSAO_UV
+  DIGITAL_UV
   TRANSFER
 }
 

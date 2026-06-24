@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQuoteCart } from "@/shared/context/QuoteCartContext";
 import { trackEvent } from "@/lib/analytics";
+import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 
 const MAX_LOGO_SIZE = 10 * 1024 * 1024; // 10MB, alinhado ao /api/upload
 
@@ -28,6 +29,7 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
 
   const [quantity, setQuantity] = useState(100);
   const [customizationText, setCustomizationText] = useState("");
+  const [customizationMethod, setCustomizationMethod] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -37,6 +39,12 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
 
   async function handleAdd() {
     setError(null);
+
+    if (!customizationMethod) {
+      setError("Selecione o método de personalização.");
+      return;
+    }
+
     setAdding(true);
 
     // Upload do logo (se houver) ANTES de adicionar ao carrinho: persistimos a
@@ -75,6 +83,7 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
       customizationText: customizationText.trim() || undefined,
       logoUrl,
       logoFilename,
+      customizationMethod,
     });
 
     trackEvent("start_quote", { product_name: name, quantity, lead_source: "cart" });
@@ -99,6 +108,25 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
             onChange={(e) => setQuantity(Number(e.target.value))}
             className="mt-2"
           />
+        </div>
+        <div>
+          <Label htmlFor="cart-method">Método de personalização</Label>
+          <select
+            id="cart-method"
+            value={customizationMethod}
+            onChange={(e) => setCustomizationMethod(e.target.value)}
+            required
+            className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
+            <option value="" disabled>
+              Selecione...
+            </option>
+            {CUSTOMIZATION_METHOD_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <Label htmlFor="cart-logo">Logo/arte (opcional)</Label>

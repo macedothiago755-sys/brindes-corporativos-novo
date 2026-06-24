@@ -76,6 +76,7 @@ const cartItemSchema = z.object({
   customizationText: z.string().max(500).optional(),
   logoUrl: z.string().optional(),
   logoFilename: z.string().optional(),
+  metodo: z.array(z.string()).min(1, "Selecione um método de personalização"),
 });
 
 export const cartQuoteSchema = z.object({

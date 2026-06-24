@@ -9,7 +9,7 @@ import { QuoteCartBadge } from "@/components/site/quote-cart-badge";
 
 const links = [
   { href: "/produtos", label: "Produtos" },
-  { href: "/vitrine/mais-vendidos", label: "Soluções" },
+  { href: "/solucoes", label: "Soluções" },
   { href: "/blog", label: "Inspirações" },
   { href: "/sobre", label: "Sobre nós" },
   { href: "/#contato", label: "Contato" },
@@ -58,7 +58,7 @@ export function Header() {
             width={52}
             height={52}
             className="h-[52px] w-[52px]"
-            preload
+            priority
           />
           <span className="hidden text-lg font-semibold tracking-tight sm:inline">Paint Colors</span>
         </Link>

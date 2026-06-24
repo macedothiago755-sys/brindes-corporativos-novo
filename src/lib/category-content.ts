@@ -77,7 +77,7 @@ export function getCategoryFaq(categoryName: string): FaqItem[] {
     {
       question: `Como funciona a personalização com a marca da minha empresa?`,
       answer:
-        "Trabalhamos com gravação a laser, silk screen, bordado, impressão UV e transfer, escolhidos conforme o material do produto. Você envia a sua arte, nós validamos e só produzimos após a sua aprovação.",
+        "Trabalhamos com gravação a laser, silk screen, digital UV e transfer, escolhidos conforme o material do produto. Você envia a sua arte, nós validamos e só produzimos após a sua aprovação.",
     },
     {
       question: `Vocês entregam em São Paulo e em todo o Brasil?`,
