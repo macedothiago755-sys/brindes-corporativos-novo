@@ -107,8 +107,14 @@ export default async function ImporterPage() {
       {isImporterDisabled && (
         <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
           A varredura automática de fornecedores está desativada neste ambiente, pois depende de um navegador
-          (Playwright) que não roda em funções serverless. Use o cadastro manual de produtos, ou rode o
-          importador localmente (<code>npm run dev</code>) e cadastre os resultados aqui depois.
+          (Playwright) que não roda em funções serverless. Rode o importador localmente (<code>npm run dev</code>)
+          e cadastre os resultados aqui depois — ou, para subir produtos em lote agora mesmo via CSV/Excel, use o
+          botão{" "}
+          <strong>&quot;Importar planilha (CSV/Excel)&quot;</strong> na{" "}
+          <Link href="/admin/produtos" className="font-semibold underline">
+            tela de Produtos
+          </Link>
+          .
         </div>
       )}
 

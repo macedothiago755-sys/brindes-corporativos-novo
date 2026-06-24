@@ -315,8 +315,8 @@ export default async function AdminProductsPage({
           )}
           {canImport && (
             <Link href="/admin/importador">
-              <Button variant="outline">
-                <Import className="h-4 w-4" /> Importar produtos
+              <Button variant="outline" title="Importador automático de catálogos de fornecedores (scraping)">
+                <Import className="h-4 w-4" /> Importador de fornecedores
               </Button>
             </Link>
           )}

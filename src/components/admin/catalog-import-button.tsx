@@ -50,7 +50,7 @@ export function CatalogImportButton() {
         }}
       />
       <Button variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
-        <Upload className="h-4 w-4" /> {uploading ? "Importando..." : "Importar planilha"}
+        <Upload className="h-4 w-4" /> {uploading ? "Importando..." : "Importar planilha (CSV/Excel)"}
       </Button>
 
       {(result || error) && (
