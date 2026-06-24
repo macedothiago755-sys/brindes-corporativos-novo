@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Search, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categoryPath } from "@/lib/routes";
 import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
@@ -66,6 +67,20 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
   const activeQuery = searchParams.get("q") ?? "";
 
   const [query, setQuery] = useState(activeQuery);
+  // Subcategorias expandem só sob demanda; a categoria ativa abre por padrão
+  // para não esconder o filtro já aplicado.
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(activeCategory ? [activeCategory] : [])
+  );
+
+  function toggleExpanded(slug: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
 
   function submitSearch(value: string) {
     const params = nonCategoryParams();
@@ -115,37 +130,66 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
       <div>
         <p className="text-sm font-semibold">Categoria</p>
         <div className="mt-3 flex max-h-[480px] flex-col gap-1 overflow-y-auto pr-2">
-          {categories.map((c) => (
-            <div key={c.slug}>
-              <button
-                onClick={() => toggleCategory(c.slug)}
-                aria-pressed={activeCategory === c.slug}
-                className={cn(
-                  "w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
-                  activeCategory === c.slug && "bg-foreground text-background"
-                )}
-              >
-                {c.name}
-              </button>
-              {c.children.length > 0 && (
-                <div className="ml-3 flex flex-col gap-1 border-l border-border pl-2">
-                  {c.children.map((child) => (
+          {categories.map((c) => {
+            const isExpanded = expanded.has(c.slug);
+            return (
+              <div key={c.slug}>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => toggleCategory(c.slug)}
+                    aria-pressed={activeCategory === c.slug}
+                    className={cn(
+                      "flex-1 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
+                      activeCategory === c.slug && "bg-foreground text-background"
+                    )}
+                  >
+                    {c.name}
+                  </button>
+                  {c.children.length > 0 && (
                     <button
-                      key={child.slug}
-                      onClick={() => toggleCategory(child.slug)}
-                      aria-pressed={activeCategory === child.slug}
-                      className={cn(
-                        "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
-                        activeCategory === child.slug && "bg-foreground text-background"
-                      )}
+                      type="button"
+                      onClick={() => toggleExpanded(c.slug)}
+                      aria-label={isExpanded ? `Recolher ${c.name}` : `Expandir ${c.name}`}
+                      aria-expanded={isExpanded}
+                      className="p-2 text-muted-foreground hover:text-foreground"
                     >
-                      {child.name}
+                      <ChevronDown
+                        className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")}
+                      />
                     </button>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                <AnimatePresence initial={false}>
+                  {c.children.length > 0 && isExpanded && (
+                    <motion.div
+                      key="children"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="ml-3 flex flex-col gap-1 border-l border-border pl-2 pt-1">
+                        {c.children.map((child) => (
+                          <button
+                            key={child.slug}
+                            onClick={() => toggleCategory(child.slug)}
+                            aria-pressed={activeCategory === child.slug}
+                            className={cn(
+                              "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
+                              activeCategory === child.slug && "bg-foreground text-background"
+                            )}
+                          >
+                            {child.name}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
 
