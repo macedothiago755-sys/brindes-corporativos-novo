@@ -39,6 +39,8 @@ export interface QuoteCartItem {
   logoFilename?: string;
   /** Método de personalização escolhido para este item (obrigatório ao adicionar). */
   customizationMethod?: string;
+  /** Cor escolhida pelo cliente, dentre as cores disponíveis do produto. */
+  color?: string;
 }
 
 interface QuoteCartState {

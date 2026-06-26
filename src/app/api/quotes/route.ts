@@ -162,7 +162,7 @@ async function handleCartQuote(body: unknown) {
             create: data.items.map((i) => ({
               productId: i.productId,
               quantidade: i.quantidade,
-              cores: [],
+              cores: i.cor ? [i.cor] : [],
               personalizacao: i.customizationText ? [i.customizationText] : [],
               metodo: toCustomizationMethods(i.metodo),
             })),

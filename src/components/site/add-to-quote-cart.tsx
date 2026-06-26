@@ -20,9 +20,10 @@ interface AddToQuoteCartProps {
   image: string;
   unitPrice?: number | null;
   priceTier?: "ENTRADA" | "MEDIO" | "ALTO" | null;
+  colors?: string[];
 }
 
-export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceTier }: AddToQuoteCartProps) {
+export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceTier, colors }: AddToQuoteCartProps) {
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const { addItem, hasItem, count } = useQuoteCart();
@@ -30,10 +31,13 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
   const [quantity, setQuantity] = useState(100);
   const [customizationText, setCustomizationText] = useState("");
   const [customizationMethod, setCustomizationMethod] = useState("");
+  const [color, setColor] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasColors = Boolean(colors && colors.length > 0);
 
   const inCart = hasItem(productId);
 
@@ -84,6 +88,7 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
       logoUrl,
       logoFilename,
       customizationMethod,
+      color: color || undefined,
     });
 
     trackEvent("start_quote", { product_name: name, quantity, lead_source: "cart" });
@@ -128,6 +133,24 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
             ))}
           </select>
         </div>
+        {hasColors && (
+          <div>
+            <Label htmlFor="cart-color">Cor desejada</Label>
+            <select
+              id="cart-color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            >
+              <option value="">Sem preferência</option>
+              {colors!.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <Label htmlFor="cart-logo">Logo/arte (opcional)</Label>
           <Input

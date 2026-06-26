@@ -173,6 +173,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               image={product.images[0] ?? "/products/placeholder-1.svg"}
               unitPrice={product.price}
               priceTier={product.priceTier}
+              colors={product.colors}
             />
             <WhatsappCta
               source="produto"

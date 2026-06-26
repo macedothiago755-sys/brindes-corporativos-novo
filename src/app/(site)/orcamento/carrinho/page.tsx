@@ -63,6 +63,7 @@ export default function QuoteCartPage() {
         logoUrl: i.logoUrl,
         logoFilename: i.logoFilename,
         metodo: i.customizationMethod ? [i.customizationMethod] : [],
+        cor: i.color,
       })),
       cnpj: String(form.get("cnpj") || ""),
       empresa: String(form.get("empresa") || ""),
@@ -267,6 +268,7 @@ function CartLine({
                 item.customizationMethod}
             </Badge>
           )}
+          {item.color && <Badge variant="outline">Cor: {item.color}</Badge>}
         </div>
         {item.customizationText && (
           <p className="mt-1 truncate text-xs text-muted-foreground" title={item.customizationText}>

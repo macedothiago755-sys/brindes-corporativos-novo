@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { put } from "@vercel/blob";
+import * as Sentry from "@sentry/nextjs";
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "application/pdf", "application/postscript"];
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -37,9 +38,24 @@ export async function POST(req: NextRequest) {
         contentType: file.type || undefined,
       });
       return NextResponse.json({ url: blob.url }, { status: 201 });
-    } catch {
-      return NextResponse.json({ error: "Falha ao salvar o arquivo." }, { status: 500 });
+    } catch (e) {
+      Sentry.captureException(e);
+      const msg = e instanceof Error ? e.message : "erro desconhecido";
+      return NextResponse.json({ error: `Falha ao salvar o arquivo (${msg}).` }, { status: 500 });
     }
+  }
+
+  // Sem token de Blob configurado: em produção (Vercel) o filesystem é
+  // efêmero/somente-leitura, então a escrita abaixo falharia silenciosamente.
+  // Avisamos com uma mensagem acionável em vez de deixar cair no erro genérico.
+  if (process.env.VERCEL) {
+    return NextResponse.json(
+      {
+        error:
+          "Upload de imagens não configurado em produção. Crie um Vercel Blob Store e defina BLOB_READ_WRITE_TOKEN nas variáveis de ambiente do projeto.",
+      },
+      { status: 500 }
+    );
   }
 
   try {
@@ -48,7 +64,9 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(uploadDir, filename), buffer);
     return NextResponse.json({ url: `/uploads/${filename}` }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "Falha ao salvar o arquivo." }, { status: 500 });
+  } catch (e) {
+    Sentry.captureException(e);
+    const msg = e instanceof Error ? e.message : "erro desconhecido";
+    return NextResponse.json({ error: `Falha ao salvar o arquivo (${msg}).` }, { status: 500 });
   }
 }
