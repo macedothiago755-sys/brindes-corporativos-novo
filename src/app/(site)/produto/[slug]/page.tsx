@@ -7,9 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { getProductBySlug, getRelatedProducts } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
 import { AddToQuoteCart } from "@/components/site/add-to-quote-cart";
-import { ColorSwatches } from "@/components/site/color-swatches";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
-import { ProductGallery } from "@/components/site/product-gallery";
+import { ProductGalleryWithColor } from "@/components/site/product-gallery";
+import { ProductColorProvider } from "@/shared/context/ProductColorContext";
 import { ProductMockupViewer } from "@/components/products/ProductMockupViewer";
 import { ProductCard } from "@/components/site/product-card";
 import { TrackView } from "@/components/site/track-view";
@@ -83,8 +83,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         ]}
       />
 
+      <ProductColorProvider>
       <div className="grid gap-12 lg:grid-cols-2">
-        <ProductGallery images={product.images} alt={product.name} />
+        <ProductGalleryWithColor
+          images={product.images}
+          alt={product.name}
+          colorImages={(product.colorImages as Record<string, string> | null) ?? {}}
+        />
 
         <div>
           <p className="text-sm uppercase tracking-wide text-muted-foreground">{product.category.name}</p>
@@ -143,14 +148,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <dt className="text-muted-foreground">Materiais</dt>
               <dd className="font-medium">{product.materials.join(", ")}</dd>
             </div>
-            {product.colors.length > 0 && (
-              <div className="col-span-2">
-                <dt className="text-muted-foreground">Cores disponíveis</dt>
-                <dd className="mt-2 font-medium">
-                  <ColorSwatches colors={product.colors} />
-                </dd>
-              </div>
-            )}
           </dl>
 
           <div className="mt-6">
@@ -202,6 +199,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </ul>
         </div>
       </div>
+      </ProductColorProvider>
 
       <ProductMockupViewer
         productId={product.id}

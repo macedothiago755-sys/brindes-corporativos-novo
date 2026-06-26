@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { ColorImageMapper } from "@/components/admin/color-image-mapper";
 
 interface CategoryOption {
   id: string;
@@ -34,6 +35,7 @@ export interface ProductFormValues {
   features?: string[];
   materials?: string[];
   colors?: string[];
+  colorImages?: Record<string, string>;
   tags?: string[];
   price?: number | null;
   promoPrice?: number | null;
@@ -93,6 +95,12 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
   const [subId, setSubId] = useState(initialSubId);
   const subcategories = parentId ? childrenOf(parentId) : [];
   const effectiveCategoryId = subId || parentId;
+
+  const [colorsText, setColorsText] = useState(defaultValues.colors?.join(", ") ?? "");
+  const colorList = colorsText
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
 
   const [attributes, setAttributes] = useState<AttributeRow[]>(
     defaultValues.attributes && defaultValues.attributes.length > 0
@@ -222,7 +230,13 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
             </div>
             <div>
               <Label htmlFor="colors">Cores (separadas por vírgula)</Label>
-              <Input id="colors" name="colors" defaultValue={defaultValues.colors?.join(", ") ?? ""} className="mt-2" />
+              <Input
+                id="colors"
+                name="colors"
+                value={colorsText}
+                onChange={(e) => setColorsText(e.target.value)}
+                className="mt-2"
+              />
             </div>
             <div>
               <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
@@ -360,6 +374,15 @@ export function ProductForm({ action, categories, defaultValues = {}, submitLabe
         </CardHeader>
         <CardContent>
           <ImageUploader name="images" defaultValue={defaultValues.images} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Imagens por cor</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ColorImageMapper name="colorImages" colors={colorList} defaultValue={defaultValues.colorImages} />
         </CardContent>
       </Card>
 

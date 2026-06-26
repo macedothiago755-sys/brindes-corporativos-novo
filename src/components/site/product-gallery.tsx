@@ -1,21 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ZoomIn, X, Maximize2 } from "lucide-react";
 import { cn, isExternalImage } from "@/lib/utils";
+import { useProductColor } from "@/shared/context/ProductColorContext";
 
 interface ProductGalleryProps {
   images: string[];
   alt: string;
+  /** Imagem da cor selecionada pelo cliente — quando definida, a galeria foca nela. */
+  colorImage?: string;
 }
 
-export function ProductGallery({ images, alt }: ProductGalleryProps) {
-  const gallery = images.length > 0 ? images : ["/products/placeholder-1.svg"];
+export function ProductGallery({ images, alt, colorImage }: ProductGalleryProps) {
+  const gallery = useMemo(() => {
+    const base = images.length > 0 ? images : ["/products/placeholder-1.svg"];
+    return colorImage && !base.includes(colorImage) ? [colorImage, ...base] : base;
+  }, [colorImage, images]);
   const [active, setActive] = useState(0);
   const [hoverZoom, setHoverZoom] = useState(false);
   const [origin, setOrigin] = useState("50% 50%");
   const [lightbox, setLightbox] = useState(false);
+
+  // Sincroniza a imagem ativa com a cor selecionada sem efeito (ajuste de
+  // estado durante a renderização, conforme padrão recomendado pelo React).
+  const [syncedColorImage, setSyncedColorImage] = useState(colorImage);
+  if (colorImage !== syncedColorImage) {
+    setSyncedColorImage(colorImage);
+    if (colorImage) {
+      const idx = gallery.indexOf(colorImage);
+      if (idx >= 0) setActive(idx);
+    }
+  }
 
   const count = gallery.length;
   const go = useCallback(
@@ -142,6 +159,19 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       )}
     </div>
   );
+}
+
+interface ProductGalleryWithColorProps {
+  images: string[];
+  alt: string;
+  colorImages: Record<string, string>;
+}
+
+/** Conecta a galeria à cor selecionada em "Cor desejada" (ProductColorContext). */
+export function ProductGalleryWithColor({ images, alt, colorImages }: ProductGalleryWithColorProps) {
+  const { color } = useProductColor();
+  const colorImage = color ? colorImages[color] : undefined;
+  return <ProductGallery images={images} alt={alt} colorImage={colorImage} />;
 }
 
 function Lightbox({

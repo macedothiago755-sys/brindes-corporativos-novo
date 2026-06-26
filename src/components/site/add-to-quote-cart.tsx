@@ -11,6 +11,7 @@ import { useQuoteCart } from "@/shared/context/QuoteCartContext";
 import { trackEvent } from "@/lib/analytics";
 import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 import { ColorSwatches } from "@/components/site/color-swatches";
+import { useProductColor } from "@/shared/context/ProductColorContext";
 
 const MAX_LOGO_SIZE = 10 * 1024 * 1024; // 10MB, alinhado ao /api/upload
 
@@ -28,6 +29,7 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const { addItem, hasItem, count } = useQuoteCart();
+  const { setColor: setGlobalColor } = useProductColor();
 
   const [quantity, setQuantity] = useState(100);
   const [customizationText, setCustomizationText] = useState("");
@@ -138,7 +140,14 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
           <div className="sm:col-span-2">
             <Label>Cor desejada {color && <span className="text-muted-foreground">— {color}</span>}</Label>
             <div className="mt-2">
-              <ColorSwatches colors={colors!} selected={color} onSelect={setColor} />
+              <ColorSwatches
+                colors={colors!}
+                selected={color}
+                onSelect={(c) => {
+                  setColor(c);
+                  setGlobalColor(c);
+                }}
+              />
             </div>
           </div>
         )}

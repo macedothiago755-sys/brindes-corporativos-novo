@@ -145,6 +145,8 @@ model Product {
   features             String[]
   materials            String[]
   colors               String[]
+  /// Mapa nome-da-cor -> URL da imagem específica daquela cor, ex.: {"Azul": "https://.../azul.jpg"}.
+  colorImages          Json                  @default("{}")
   tags                 String[]              @default([])
   idealFor             String[]
   customizationMethods CustomizationMethod[]
@@ -278,35 +280,35 @@ model ProductView {
 }
 
 model Quote {
-  id          String       @id @default(cuid())
-  clienteNome String
-  empresa     String
-  email       String
-  telefone    String
-  cidade      String?
-  observacoes String?
-  objetivo    String?
-  prazo       String?
-  status      QuoteStatus  @default(NOVO)
-  kitId       String?
-  kit         Kit?         @relation(fields: [kitId], references: [id])
-  quantidadePessoas   Int?
-  orcamentoPorPessoa  Float?
-  couponCode  String?
-  consentObrigatorioAceito  Boolean   @default(false)
+  id                        String       @id @default(cuid())
+  clienteNome               String
+  empresa                   String
+  email                     String
+  telefone                  String
+  cidade                    String?
+  observacoes               String?
+  objetivo                  String?
+  prazo                     String?
+  status                    QuoteStatus  @default(NOVO)
+  kitId                     String?
+  kit                       Kit?         @relation(fields: [kitId], references: [id])
+  quantidadePessoas         Int?
+  orcamentoPorPessoa        Float?
+  couponCode                String?
+  consentObrigatorioAceito  Boolean      @default(false)
   consentObrigatorioVersion String?
   consentObrigatorioDate    DateTime?
-  consentMarketingAceito    Boolean   @default(false)
+  consentMarketingAceito    Boolean      @default(false)
   consentMarketingVersion   String?
   consentMarketingDate      DateTime?
-  approvalToken String?      @unique @default(cuid())
-  feedbackNotes String?
-  viewCount     Int          @default(0)
-  lastViewedAt  DateTime?
-  items       QuoteItem[]
-  attachments Attachment[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  approvalToken             String?      @unique @default(cuid())
+  feedbackNotes             String?
+  viewCount                 Int          @default(0)
+  lastViewedAt              DateTime?
+  items                     QuoteItem[]
+  attachments               Attachment[]
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
 
   @@index([couponCode])
 }
@@ -320,20 +322,20 @@ model Coupon {
 }
 
 model Lead {
-  id          String   @id @default(cuid())
-  nome        String?
-  empresa     String?
-  email       String
-  telefone    String
-  couponCode  String?
+  id                        String    @id @default(cuid())
+  nome                      String?
+  empresa                   String?
+  email                     String
+  telefone                  String
+  couponCode                String?
   consentObrigatorioAceito  Boolean   @default(false)
   consentObrigatorioVersion String?
   consentObrigatorioDate    DateTime?
   consentMarketingAceito    Boolean   @default(false)
   consentMarketingVersion   String?
   consentMarketingDate      DateTime?
-  anonymizedAt DateTime?
-  createdAt   DateTime @default(now())
+  anonymizedAt              DateTime?
+  createdAt                 DateTime  @default(now())
 
   @@index([email])
 }
@@ -353,14 +355,14 @@ model CookieConsent {
 }
 
 model DataDeletionRequest {
-  id          String                 @id @default(cuid())
-  email       String
-  telefone    String?
-  mensagem    String?
-  status      DeletionRequestStatus  @default(ABERTO)
-  notasAdmin  String?
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
+  id         String                @id @default(cuid())
+  email      String
+  telefone   String?
+  mensagem   String?
+  status     DeletionRequestStatus @default(ABERTO)
+  notasAdmin String?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
 
   @@index([email])
   @@index([status])

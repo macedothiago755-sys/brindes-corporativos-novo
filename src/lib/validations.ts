@@ -107,6 +107,16 @@ const csvToArray = (value: unknown) =>
 
 const optionalNumber = z.coerce.number().nonnegative().optional().or(z.literal("").transform(() => undefined));
 
+const jsonStringRecord = (value: unknown) => {
+  if (typeof value !== "string" || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
 export const productSchema = z.object({
   name: z.string().min(2, "Informe o nome do produto"),
   sku: z.string().optional(),
@@ -120,6 +130,7 @@ export const productSchema = z.object({
   features: z.preprocess(csvToArray, z.array(z.string())),
   materials: z.preprocess(csvToArray, z.array(z.string())),
   colors: z.preprocess(csvToArray, z.array(z.string())),
+  colorImages: z.preprocess(jsonStringRecord, z.record(z.string(), z.string())).default({}),
   tags: z.preprocess(csvToArray, z.array(z.string())),
   price: optionalNumber,
   promoPrice: optionalNumber,
