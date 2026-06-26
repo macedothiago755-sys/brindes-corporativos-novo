@@ -5,7 +5,7 @@ import { can } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryRow } from "@/components/admin/category-row";
-import { createCategory, updateCategory, deleteCategory, toggleCategoryActive } from "./actions";
+import { createCategory, updateCategory, deleteCategory, toggleCategoryActive, seedSuggestedSubcategories } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +38,16 @@ export default async function AdminCategoriesPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Categorias</h1>
+        <form
+          action={async () => {
+            "use server";
+            await seedSuggestedSubcategories();
+          }}
+        >
+          <Button type="submit" variant="outline">
+            Criar subcategorias sugeridas
+          </Button>
+        </form>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
