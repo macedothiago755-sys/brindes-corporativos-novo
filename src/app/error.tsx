@@ -2,12 +2,14 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    // Log para observabilidade; em produção integra com o serviço de erros.
+    // Observabilidade: registra no console e reporta ao Sentry (no-op sem DSN).
     console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
