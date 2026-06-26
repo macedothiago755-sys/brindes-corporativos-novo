@@ -14,23 +14,61 @@ export function CatalogImportButton() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Limite de corpo de requisição da Vercel para funções serverless (~4,5 MB).
+  // Acima disso a plataforma rejeita antes de chegar na rota, devolvendo uma
+  // resposta que não é JSON. Barramos no cliente com uma mensagem clara.
+  const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
   async function handleFile(file: File) {
-    setUploading(true);
     setResult(null);
     setError(null);
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      const mb = (file.size / 1024 / 1024).toFixed(1);
+      setError(
+        `Arquivo muito grande (${mb} MB). O limite é 4 MB. Dica: salve a planilha sem imagens embutidas ou divida em lotes menores.`
+      );
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    setUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/admin/produtos/import", { method: "POST", body: formData });
-      const json = await res.json();
+
+      // A resposta pode não ser JSON (ex.: 413/504 da plataforma devolvem HTML).
+      // Lemos como texto e tentamos parsear para não quebrar no res.json().
+      const text = await res.text();
+      let json: Partial<ImportResult> & { error?: string } = {};
+      let parsed = true;
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {
+        parsed = false;
+      }
+
+      if (!parsed) {
+        // Resposta não-JSON: traduz o status HTTP para uma mensagem útil.
+        if (res.status === 413) {
+          setError("Arquivo muito grande para o servidor (limite ~4,5 MB). Divida em lotes menores.");
+        } else if (res.status === 504) {
+          setError("O servidor demorou demais para processar (timeout). Tente uma planilha menor.");
+        } else {
+          setError(`Falha ao importar (HTTP ${res.status}). Tente novamente em instantes.`);
+        }
+        return;
+      }
+
       if (!res.ok) {
-        setError(json.error ?? "Falha ao importar a planilha.");
+        setError(json.error ?? `Falha ao importar a planilha (HTTP ${res.status}).`);
       } else {
         setResult(json as ImportResult);
         router.refresh();
       }
     } catch {
-      setError("Erro de rede ao enviar a planilha.");
+      setError("Não foi possível enviar a planilha. Verifique sua conexão e tente novamente.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

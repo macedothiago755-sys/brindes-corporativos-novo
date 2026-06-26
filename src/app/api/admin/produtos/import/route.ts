@@ -8,6 +8,15 @@ import { CACHE_TAGS } from "@/lib/cached-queries";
 import { productImportRowSchema } from "@/lib/validations";
 import { parseObjective, parseProfile, parsePriceTier, parseStatus } from "@/lib/catalog-spreadsheet";
 
+// ExcelJS depende de APIs do Node (Buffer/streams) — força o runtime Node em
+// vez de Edge. Dá folga de tempo para planilhas grandes serem processadas.
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+// Acima do limite de corpo da Vercel (~4,5 MB) a plataforma rejeita antes de
+// chegar aqui; barramos um pouco antes para devolver JSON legível ao cliente.
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
+
 // Cabeçalhos aceitos na planilha → chave interna. Tolerante a acento/caixa.
 const HEADER_MAP: Record<string, string> = {
   id: "id",
@@ -137,6 +146,14 @@ export async function POST(request: Request) {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
+  }
+
+  if (file.size > MAX_FILE_BYTES) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    return NextResponse.json(
+      { error: `Arquivo muito grande (${mb} MB). O limite é 4 MB. Divida a planilha em lotes menores ou remova imagens embutidas.` },
+      { status: 413 }
+    );
   }
 
   let rawRows: RawRow[];
