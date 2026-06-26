@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 interface CategoryOption {
   id: string;
   name: string;
+  parentId?: string | null;
 }
 
 interface SelectionContextValue {
@@ -74,6 +75,16 @@ export function BulkActionBar({
 }) {
   const { selected, clear } = useSelection();
 
+  // Cascata Categoria → Subcategoria para a edição em massa, no mesmo padrão
+  // usado no formulário individual de produto (ver product-form.tsx).
+  const parentCategories = categories.filter((c) => !c.parentId);
+  const childrenOf = (parentId: string) => categories.filter((c) => c.parentId === parentId);
+  const [bulkParentId, setBulkParentId] = useState("");
+  const [bulkSubId, setBulkSubId] = useState("");
+  const bulkSubcategories = bulkParentId ? childrenOf(bulkParentId) : [];
+  // Vazio = "não alterar categoria" para os produtos selecionados.
+  const effectiveBulkCategoryId = bulkSubId || bulkParentId;
+
   if (selected.size === 0) return null;
 
   return (
@@ -81,6 +92,8 @@ export function BulkActionBar({
       action={async (formData) => {
         await bulkUpdateAction(formData);
         clear();
+        setBulkParentId("");
+        setBulkSubId("");
       }}
       className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted p-3"
     >
@@ -88,14 +101,35 @@ export function BulkActionBar({
         <input key={id} type="hidden" name="productId" value={id} />
       ))}
       <span className="text-sm font-medium">{selected.size} selecionado(s)</span>
-      <select name="categoryId" defaultValue="" className="h-9 rounded-md border border-border bg-background px-2 text-xs">
+      <select
+        value={bulkParentId}
+        onChange={(e) => {
+          setBulkParentId(e.target.value);
+          setBulkSubId("");
+        }}
+        className="h-9 rounded-md border border-border bg-background px-2 text-xs"
+      >
         <option value="">Alterar categoria...</option>
-        {categories.map((c) => (
+        {parentCategories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
           </option>
         ))}
       </select>
+      <select
+        value={bulkSubId}
+        onChange={(e) => setBulkSubId(e.target.value)}
+        disabled={bulkSubcategories.length === 0}
+        className="h-9 rounded-md border border-border bg-background px-2 text-xs disabled:opacity-50"
+      >
+        <option value="">{bulkSubcategories.length === 0 ? "Sem subcategoria" : "Alterar subcategoria..."}</option>
+        {bulkSubcategories.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+      <input type="hidden" name="categoryId" value={effectiveBulkCategoryId} />
       <input
         type="text"
         name="brand"

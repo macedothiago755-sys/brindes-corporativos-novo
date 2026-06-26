@@ -173,6 +173,7 @@ export const productImportRowSchema = z.object({
   brand: optionalString,
   status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]).optional(),
   categoryName: optionalString,
+  subcategoryName: optionalString,
   price: optionalNumber,
   minQty: z.coerce.number().int().min(1).optional(),
   colors: z.preprocess(csvToArray, z.array(z.string())),

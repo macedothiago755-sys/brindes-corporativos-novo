@@ -26,6 +26,7 @@ const HEADER_MAP: Record<string, string> = {
   "codigo do fornecedor": "supplierCode",
   "codigo fornecedor": "supplierCode",
   categoria: "categoryName",
+  subcategoria: "subcategoryName",
   marca: "brand",
   status: "status",
   preco: "price",
@@ -169,10 +170,14 @@ export async function POST(request: Request) {
   }
 
   try {
-  // Cache de categorias por nome para resolver "Categoria" → categoryId.
-  const categories = await prisma.category.findMany({ select: { id: true, name: true } });
-  const categoryByName = new Map(
-    categories.map((c) => [normalizeHeader(c.name), c.id])
+  // Cache de categorias para resolver "Categoria" (nível pai) e, opcionalmente,
+  // "Subcategoria" (filha daquela categoria) → categoryId efetivo do produto.
+  const categories = await prisma.category.findMany({ select: { id: true, name: true, parentId: true } });
+  const topCategoryByName = new Map(
+    categories.filter((c) => !c.parentId).map((c) => [normalizeHeader(c.name), c.id])
+  );
+  const subcategoryByParentAndName = new Map(
+    categories.filter((c) => c.parentId).map((c) => [`${c.parentId}::${normalizeHeader(c.name)}`, c.id])
   );
 
   const errors: string[] = [];
@@ -196,6 +201,7 @@ export async function POST(request: Request) {
       brand: raw.brand,
       status: raw.status ? parseStatus(raw.status) : undefined,
       categoryName: raw.categoryName,
+      subcategoryName: raw.subcategoryName,
       price: raw.price ?? "",
       minQty: raw.minQty || undefined,
       colors: raw.colors ?? "",
@@ -229,9 +235,24 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const categoryId = data.categoryName ? categoryByName.get(normalizeHeader(data.categoryName)) : undefined;
-    if (data.categoryName && !categoryId) {
+    // Resolve a categoria-pai pelo nome e, se houver "Subcategoria" na planilha,
+    // troca o categoryId efetivo pela subcategoria (desde que filha daquela
+    // categoria). Subcategoria vazia é válida — produto fica só na categoria pai.
+    const parentCategoryId = data.categoryName ? topCategoryByName.get(normalizeHeader(data.categoryName)) : undefined;
+    if (data.categoryName && !parentCategoryId) {
       errors.push(`Linha ${lineNo}: categoria "${data.categoryName}" não encontrada. Categoria não alterada.`);
+    }
+
+    let categoryId = parentCategoryId;
+    if (parentCategoryId && data.subcategoryName) {
+      const subcategoryId = subcategoryByParentAndName.get(`${parentCategoryId}::${normalizeHeader(data.subcategoryName)}`);
+      if (subcategoryId) {
+        categoryId = subcategoryId;
+      } else {
+        errors.push(
+          `Linha ${lineNo}: subcategoria "${data.subcategoryName}" não encontrada em "${data.categoryName}". Produto mantido apenas na categoria.`
+        );
+      }
     }
 
     // Protege cada linha: um erro de banco (ex.: SKU duplicado) vira erro

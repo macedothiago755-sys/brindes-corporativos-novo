@@ -37,7 +37,7 @@ async function getFilteredProducts(searchParams: URLSearchParams) {
       ...(status ? { status: status as "ATIVO" | "RASCUNHO" | "INDISPONIVEL" } : {}),
       ...issueWhere,
     },
-    include: { category: true },
+    include: { category: { include: { parent: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -59,7 +59,8 @@ export async function GET(request: Request) {
     p.name,
     p.sku ?? "",
     p.supplierCode ?? "",
-    p.category.name,
+    p.category.parentId ? p.category.parent!.name : p.category.name,
+    p.category.parentId ? p.category.name : "",
     p.brand ?? "",
     STATUS_LABELS[p.status] ?? p.status,
     p.price ?? "",
