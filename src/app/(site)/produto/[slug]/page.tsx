@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getProductBySlug, getRelatedProducts } from "@/lib/cached-queries";
 import { Badge } from "@/components/ui/badge";
 import { AddToQuoteCart } from "@/components/site/add-to-quote-cart";
+import { ColorSwatches } from "@/components/site/color-swatches";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductMockupViewer } from "@/components/products/ProductMockupViewer";
@@ -142,10 +143,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <dt className="text-muted-foreground">Materiais</dt>
               <dd className="font-medium">{product.materials.join(", ")}</dd>
             </div>
-            <div>
-              <dt className="text-muted-foreground">Cores disponíveis</dt>
-              <dd className="font-medium">{product.colors.join(", ")}</dd>
-            </div>
+            {product.colors.length > 0 && (
+              <div className="col-span-2">
+                <dt className="text-muted-foreground">Cores disponíveis</dt>
+                <dd className="mt-2 font-medium">
+                  <ColorSwatches colors={product.colors} />
+                </dd>
+              </div>
+            )}
           </dl>
 
           <div className="mt-6">

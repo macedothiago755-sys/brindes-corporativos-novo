@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useQuoteCart } from "@/shared/context/QuoteCartContext";
 import { trackEvent } from "@/lib/analytics";
 import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
+import { ColorSwatches } from "@/components/site/color-swatches";
 
 const MAX_LOGO_SIZE = 10 * 1024 * 1024; // 10MB, alinhado ao /api/upload
 
@@ -134,21 +135,11 @@ export function AddToQuoteCart({ productId, slug, name, image, unitPrice, priceT
           </select>
         </div>
         {hasColors && (
-          <div>
-            <Label htmlFor="cart-color">Cor desejada</Label>
-            <select
-              id="cart-color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-            >
-              <option value="">Sem preferência</option>
-              {colors!.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+          <div className="sm:col-span-2">
+            <Label>Cor desejada {color && <span className="text-muted-foreground">— {color}</span>}</Label>
+            <div className="mt-2">
+              <ColorSwatches colors={colors!} selected={color} onSelect={setColor} />
+            </div>
           </div>
         )}
         <div>
