@@ -13,7 +13,7 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  const header = "Cliente,Empresa,Email,Telefone,Produto,Quantidade,Status,Data\n";
+  const header = "Cliente,Empresa,Email,Telefone,Produto,Quantidade,Status,Cupom,Data\n";
   const rows = quotes
     .map((q) =>
       [
@@ -24,6 +24,7 @@ export async function GET() {
         q.items[0]?.product.name ?? "",
         q.items[0]?.quantidade ?? "",
         q.status,
+        q.couponCode ?? "",
         q.createdAt.toISOString(),
       ]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`)

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 const updateSchema = z.object({
-  status: z.enum(["NOVO", "EM_ANALISE", "RESPONDIDO", "FECHADO", "PERDIDO"]).optional(),
+  status: z.enum(["NOVO", "EM_ANALISE", "RESPONDIDO", "APROVADO", "AJUSTE_SOLICITADO", "FECHADO", "PERDIDO"]).optional(),
   observacoes: z.string().max(2000).optional(),
 });
 

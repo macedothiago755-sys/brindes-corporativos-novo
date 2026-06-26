@@ -116,10 +116,9 @@ const categoryTree: CategoryNode[] = [
 const methodsByPool: CustomizationMethod[][] = [
   ["GRAVACAO_LASER"],
   ["SILK_SCREEN"],
-  ["BORDADO"],
-  ["IMPRESSAO_UV"],
+  ["DIGITAL_UV"],
   ["TRANSFER"],
-  ["GRAVACAO_LASER", "IMPRESSAO_UV"],
+  ["GRAVACAO_LASER", "DIGITAL_UV"],
   ["SILK_SCREEN", "TRANSFER"],
 ];
 
@@ -152,7 +151,7 @@ const productNames: { name: string; categorySlug: string; premium?: boolean; sus
   { name: "Crachá Personalizado com Cordão", categorySlug: "eventos" },
   { name: "Sacola Personalizada para Eventos", categorySlug: "eventos" },
   { name: "Squeeze para Corrida e Eventos", categorySlug: "eventos" },
-  { name: "Boné Bordado Institucional", categorySlug: "eventos" },
+  { name: "Boné Institucional Premium", categorySlug: "eventos" },
   { name: "Camiseta Institucional Premium", categorySlug: "eventos" },
   { name: "Kit Boas-Vindas Corporativo", categorySlug: "kits-corporativos" },
   { name: "Kit Home Office Completo", categorySlug: "kits-corporativos" },
@@ -179,7 +178,7 @@ Em seguida, conheça o público. Brindes tecnológicos como carregadores portát
 
 Outro fator decisivo é a qualidade. Um brinde malfeito pode gerar o efeito contrário ao desejado, associando a marca a algo descartável. Por isso, prefira fornecedores que oferecem controle de qualidade rigoroso e materiais duráveis.
 
-Por fim, pense na personalização. Gravação a laser, bordado e impressão UV são técnicas que aumentam a percepção de valor do produto e garantem que a marca apareça de forma elegante, sem parecer exagerada.
+Por fim, pense na personalização. Gravação a laser e digital UV são técnicas que aumentam a percepção de valor do produto e garantem que a marca apareça de forma elegante, sem parecer exagerada.
 
 Na nossa loja você encontra brindes personalizados para todas essas necessidades, com orçamento sob medida para o volume e prazo do seu projeto.`,
   },
@@ -277,7 +276,7 @@ Veja nossa seleção de brindes para home office e tecnologia personalizados par
     tags: ["produção", "planejamento"],
     content: `Um dos erros mais comuns ao planejar uma campanha de brindes corporativos é subestimar o prazo de produção. Diferente de produtos de pronta entrega, brindes personalizados passam por etapas de aprovação de arte, produção e controle de qualidade antes do envio.
 
-Em geral, prazos variam entre 10 e 25 dias úteis, dependendo da complexidade da personalização e do volume solicitado. Técnicas como bordado e gravação a laser tendem a levar mais tempo do que silk screen ou transfer.
+Em geral, prazos variam entre 10 e 25 dias úteis, dependendo da complexidade da personalização e do volume solicitado. Técnicas como gravação a laser tendem a levar mais tempo do que silk screen ou transfer.
 
 As quantidades mínimas também variam por categoria de produto. Itens de papelaria costumam ter mínimos mais baixos, enquanto produtos eletrônicos personalizados exigem lotes maiores para viabilizar a produção.
 
@@ -406,6 +405,12 @@ async function main() {
       password: passwordHash,
       role: "ADMIN",
     },
+  });
+
+  await prisma.coupon.upsert({
+    where: { code: "BEMVINDO5" },
+    update: {},
+    create: { code: "BEMVINDO5", percent: 5, active: true },
   });
 
   console.log(`Seed concluído: ${categoryMap.size} categorias, ${counter} produtos, ${blogPosts.length} posts e usuário admin criados.`);

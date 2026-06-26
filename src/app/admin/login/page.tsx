@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
 
         <Button type="submit" className="mt-6 w-full" disabled={loading}>
           {loading ? "Entrando..." : "Entrar"}

@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-
-const WHATSAPP_NUMBER = "5511400000000";
-const DEFAULT_MESSAGE = "Olá, gostaria de receber ajuda para escolher brindes corporativos.";
+import { WHATSAPP_NUMBER, WHATSAPP_MESSAGE } from "@/lib/site-config";
 
 export function WhatsappButton() {
   const [open, setOpen] = useState(false);
 
   function openWhatsapp() {
     trackEvent("whatsapp_click", { source: "floating_button" });
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 

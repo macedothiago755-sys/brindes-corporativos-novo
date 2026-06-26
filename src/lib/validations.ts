@@ -14,6 +14,176 @@ export const quoteSchema = z.object({
   observacoes: z.string().max(2000).optional(),
   objetivo: z.string().optional(),
   prazo: z.string().optional(),
+  couponCode: z.string().optional(),
+  consentObrigatorio: z.literal(true, {
+    message: "É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento.",
+  }),
+  consentMarketing: z.boolean().default(false),
+  consentVersion: z.string().min(1),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
+
+export const leadSchema = z.object({
+  nome: z.string().min(2, "Informe seu nome"),
+  empresa: z.string().min(2, "Informe sua empresa"),
+  email: z.string().email("E-mail inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
+  consentObrigatorio: z.literal(true, {
+    message: "É necessário aceitar o Aviso de Privacidade para continuar.",
+  }),
+  consentMarketing: z.boolean().default(false),
+  consentVersion: z.string().min(1),
+});
+
+export type LeadInput = z.infer<typeof leadSchema>;
+
+const kitQuoteItemSchema = z.object({
+  productId: z.string().min(1),
+  quantidade: z.coerce.number().int().min(1).max(1_000_000),
+  cores: z.array(z.string()).default([]),
+  personalizacao: z.array(z.string()).default([]),
+  metodo: z.array(z.string()).default([]),
+});
+
+export const kitQuoteSchema = z.object({
+  kitId: z.string().optional(),
+  quantidadePessoas: z.coerce.number().int().min(1).optional(),
+  orcamentoPorPessoa: z.coerce.number().positive().optional(),
+  items: z.array(kitQuoteItemSchema).min(1, "Inclua ao menos um produto no kit"),
+  clienteNome: z.string().min(2, "Informe seu nome"),
+  empresa: z.string().min(2, "Informe sua empresa"),
+  email: z.string().email("E-mail inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
+  cidade: z.string().optional(),
+  observacoes: z.string().max(2000).optional(),
+  objetivo: z.string().optional(),
+  prazo: z.string().optional(),
+  couponCode: z.string().optional(),
+  consentObrigatorio: z.literal(true, {
+    message: "É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento.",
+  }),
+  consentMarketing: z.boolean().default(false),
+  consentVersion: z.string().min(1),
+});
+
+export type KitQuoteInput = z.infer<typeof kitQuoteSchema>;
+
+// ── Carrinho de Cotações Multi-Item ────────────────────────────────────────
+const cartItemSchema = z.object({
+  productId: z.string().min(1),
+  quantidade: z.coerce.number().int().min(1).max(1_000_000),
+  customizationText: z.string().max(500).optional(),
+  logoUrl: z.string().optional(),
+  logoFilename: z.string().optional(),
+  metodo: z.array(z.string()).min(1, "Selecione um método de personalização"),
+  cor: z.string().optional(),
+});
+
+export const cartQuoteSchema = z.object({
+  items: z.array(cartItemSchema).min(1, "Adicione ao menos um produto ao carrinho"),
+  cnpj: z.string().min(11, "Informe um CNPJ válido").max(20),
+  empresa: z.string().min(2, "Informe a razão social"),
+  clienteNome: z.string().min(2, "Informe o nome do comprador"),
+  email: z.string().email("E-mail inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
+  cidade: z.string().optional(),
+  observacoes: z.string().max(2000).optional(),
+  couponCode: z.string().optional(),
+  consentObrigatorio: z.literal(true, {
+    message: "É necessário aceitar o Aviso de Privacidade e os Termos de Uso para enviar o orçamento.",
+  }),
+  consentMarketing: z.boolean().default(false),
+  consentVersion: z.string().min(1),
+});
+
+export type CartQuoteInput = z.infer<typeof cartQuoteSchema>;
+
+const csvToArray = (value: unknown) =>
+  String(value ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+const optionalNumber = z.coerce.number().nonnegative().optional().or(z.literal("").transform(() => undefined));
+
+const jsonStringRecord = (value: unknown) => {
+  if (typeof value !== "string" || !value.trim()) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+export const productSchema = z.object({
+  name: z.string().min(2, "Informe o nome do produto"),
+  sku: z.string().optional(),
+  supplierCode: z.string().optional(),
+  brand: z.string().optional(),
+  status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]),
+  categoryId: z.string().min(1, "Selecione uma categoria"),
+  description: z.string().min(10, "A descrição completa é obrigatória"),
+  shortDescription: z.string().optional(),
+  benefits: z.preprocess(csvToArray, z.array(z.string())),
+  features: z.preprocess(csvToArray, z.array(z.string())),
+  materials: z.preprocess(csvToArray, z.array(z.string())),
+  colors: z.preprocess(csvToArray, z.array(z.string())),
+  colorImages: z.preprocess(jsonStringRecord, z.record(z.string(), z.string())).default({}),
+  tags: z.preprocess(csvToArray, z.array(z.string())),
+  price: optionalNumber,
+  promoPrice: optionalNumber,
+  saleUnit: z.string().optional(),
+  minQty: z.coerce.number().int().min(1).default(50),
+  leadTimeDays: z.coerce.number().int().min(0).default(15),
+  shippingDays: optionalNumber,
+  dimensions: z.string().optional(),
+  printArea: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  images: z.array(z.string()).default([]),
+  attributeNames: z.array(z.string()).default([]),
+  attributeValues: z.array(z.string()).default([]),
+  objectives: z.array(z.enum(["ONBOARDING", "EVENTO", "CLIENTE_VIP", "FEIRA", "PREMIACAO"])).default([]),
+  profile: z.enum(["ECONOMICO", "INTERMEDIARIO", "PREMIUM"]).optional(),
+  priceTier: z.enum(["ENTRADA", "MEDIO", "ALTO"]).optional(),
+  margin: optionalNumber,
+  popularityScore: z.coerce.number().int().min(0).default(0),
+});
+
+export type ProductInput = z.infer<typeof productSchema>;
+
+// ── Importação de catálogo via planilha (CSV/XLSX) ──────────────────────────
+// Schema tolerante para cada linha da planilha. Os enums já chegam convertidos
+// para os códigos do Prisma (o parser de rótulos roda antes da validação).
+const optionalString = z
+  .union([z.string(), z.number()])
+  .optional()
+  .transform((v) => {
+    const s = String(v ?? "").trim();
+    return s === "" ? undefined : s;
+  });
+
+export const productImportRowSchema = z.object({
+  id: optionalString,
+  name: z.string().min(2, "Informe o nome do produto"),
+  sku: optionalString,
+  supplierCode: optionalString,
+  brand: optionalString,
+  status: z.enum(["ATIVO", "RASCUNHO", "INDISPONIVEL"]).optional(),
+  categoryName: optionalString,
+  subcategoryName: optionalString,
+  price: optionalNumber,
+  minQty: z.coerce.number().int().min(1).optional(),
+  colors: z.preprocess(csvToArray, z.array(z.string())),
+  materials: z.preprocess(csvToArray, z.array(z.string())),
+  tags: z.preprocess(csvToArray, z.array(z.string())),
+  metaTitle: optionalString,
+  metaDescription: optionalString,
+  objectives: z.array(z.enum(["ONBOARDING", "EVENTO", "CLIENTE_VIP", "FEIRA", "PREMIACAO"])).default([]),
+  profile: z.enum(["ECONOMICO", "INTERMEDIARIO", "PREMIUM"]).optional(),
+  priceTier: z.enum(["ENTRADA", "MEDIO", "ALTO"]).optional(),
+});
+
+export type ProductImportRow = z.infer<typeof productImportRowSchema>;

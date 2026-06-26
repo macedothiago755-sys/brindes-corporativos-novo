@@ -1,71 +1,195 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { Search, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { categoryPath } from "@/lib/routes";
+import { CUSTOMIZATION_METHOD_OPTIONS } from "@/lib/customization-methods";
 
 type Option = { label: string; value: string };
 export type CategoryOption = { name: string; slug: string; children: { name: string; slug: string }[] };
 
-const methods: Option[] = [
-  { label: "Gravação a laser", value: "GRAVACAO_LASER" },
-  { label: "Silk screen", value: "SILK_SCREEN" },
-  { label: "Bordado", value: "BORDADO" },
-  { label: "Impressão UV", value: "IMPRESSAO_UV" },
-  { label: "Transfer", value: "TRANSFER" },
+const methods: Option[] = CUSTOMIZATION_METHOD_OPTIONS;
+
+const tags: Option[] = [
+  { label: "Lançamento", value: "lançamento" },
+  { label: "Promoção", value: "promoção" },
+  { label: "Mais vendido", value: "mais vendido" },
+  { label: "Brinde", value: "brinde" },
+  { label: "Corporativo", value: "corporativo" },
+  { label: "Personalizado", value: "personalizado" },
 ];
 
 export function FilterSidebar({ categories }: { categories: CategoryOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  function toggleParam(key: string, value: string) {
+  // A categoria agora vive no path (/categoria/[slug]); os demais filtros
+  // (método, tag, busca) seguem em query string sobre a base atual.
+  const onCategoryRoute = pathname.startsWith("/categoria/");
+  const activeCategory = onCategoryRoute
+    ? decodeURIComponent(pathname.split("/")[2] ?? "")
+    : searchParams.get("categoria");
+
+  function nonCategoryParams() {
     const params = new URLSearchParams(searchParams.toString());
-    const current = params.get(key);
-    if (current === value) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-    router.push(`/produtos?${params.toString()}`);
+    params.delete("categoria");
+    return params;
   }
 
-  const activeCategory = searchParams.get("categoria");
+  function withQuery(base: string, params: URLSearchParams) {
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  }
+
+  function toggleCategory(slug: string) {
+    const params = nonCategoryParams();
+    if (activeCategory === slug) {
+      router.push(withQuery("/produtos", params));
+    } else {
+      router.push(withQuery(categoryPath(slug), params));
+    }
+  }
+
+  function toggleParam(key: "metodo" | "tag", value: string) {
+    const params = nonCategoryParams();
+    if (params.get(key) === value) params.delete(key);
+    else params.set(key, value);
+    const base = onCategoryRoute ? pathname : "/produtos";
+    router.push(withQuery(base, params));
+  }
+
   const activeMethod = searchParams.get("metodo");
+  const activeTag = searchParams.get("tag");
+  const activeQuery = searchParams.get("q") ?? "";
+
+  const [query, setQuery] = useState(activeQuery);
+  // Subcategorias expandem só sob demanda; a categoria ativa abre por padrão
+  // para não esconder o filtro já aplicado.
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(activeCategory ? [activeCategory] : [])
+  );
+
+  function toggleExpanded(slug: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
+
+  function submitSearch(value: string) {
+    const params = nonCategoryParams();
+    const trimmed = value.trim();
+    if (trimmed) params.set("q", trimmed);
+    else params.delete("q");
+    const base = onCategoryRoute ? pathname : "/produtos";
+    router.push(withQuery(base, params));
+  }
 
   return (
     <aside className="space-y-8">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitSearch(query);
+        }}
+        role="search"
+      >
+        <p className="text-sm font-semibold">Buscar</p>
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-border bg-background px-3">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nome ou termo..."
+            aria-label="Buscar produtos"
+            className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {query && (
+            <button
+              type="button"
+              aria-label="Limpar busca"
+              onClick={() => {
+                setQuery("");
+                submitSearch("");
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </form>
+
       <div>
         <p className="text-sm font-semibold">Categoria</p>
         <div className="mt-3 flex max-h-[480px] flex-col gap-1 overflow-y-auto pr-2">
-          {categories.map((c) => (
-            <div key={c.slug}>
-              <button
-                onClick={() => toggleParam("categoria", c.slug)}
-                className={cn(
-                  "w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
-                  activeCategory === c.slug && "bg-foreground text-background"
-                )}
-              >
-                {c.name}
-              </button>
-              {c.children.length > 0 && (
-                <div className="ml-3 flex flex-col gap-1 border-l border-border pl-2">
-                  {c.children.map((child) => (
+          {categories.map((c) => {
+            const isExpanded = expanded.has(c.slug);
+            return (
+              <div key={c.slug}>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => toggleCategory(c.slug)}
+                    aria-pressed={activeCategory === c.slug}
+                    className={cn(
+                      "flex-1 rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-muted",
+                      activeCategory === c.slug && "bg-foreground text-background"
+                    )}
+                  >
+                    {c.name}
+                  </button>
+                  {c.children.length > 0 && (
                     <button
-                      key={child.slug}
-                      onClick={() => toggleParam("categoria", child.slug)}
-                      className={cn(
-                        "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
-                        activeCategory === child.slug && "bg-foreground text-background"
-                      )}
+                      type="button"
+                      onClick={() => toggleExpanded(c.slug)}
+                      aria-label={isExpanded ? `Recolher ${c.name}` : `Expandir ${c.name}`}
+                      aria-expanded={isExpanded}
+                      className="p-2 text-muted-foreground hover:text-foreground"
                     >
-                      {child.name}
+                      <ChevronDown
+                        className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")}
+                      />
                     </button>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                <AnimatePresence initial={false}>
+                  {c.children.length > 0 && isExpanded && (
+                    <motion.div
+                      key="children"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="ml-3 flex flex-col gap-1 border-l border-border pl-2 pt-1">
+                        {c.children.map((child) => (
+                          <button
+                            key={child.slug}
+                            onClick={() => toggleCategory(child.slug)}
+                            aria-pressed={activeCategory === child.slug}
+                            className={cn(
+                              "rounded-md px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted",
+                              activeCategory === child.slug && "bg-foreground text-background"
+                            )}
+                          >
+                            {child.name}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -76,6 +200,7 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
             <button
               key={m.value}
               onClick={() => toggleParam("metodo", m.value)}
+              aria-pressed={activeMethod === m.value}
               className={cn(
                 "rounded-md px-3 py-2 text-left text-sm hover:bg-muted",
                 activeMethod === m.value && "bg-foreground text-background"
@@ -87,8 +212,33 @@ export function FilterSidebar({ categories }: { categories: CategoryOption[] }) 
         </div>
       </div>
 
-      {(activeCategory || activeMethod) && (
-        <button onClick={() => router.push("/produtos")} className="text-sm text-accent underline">
+      <div>
+        <p className="text-sm font-semibold">Tags</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => toggleParam("tag", t.value)}
+              aria-pressed={activeTag === t.value}
+              className={cn(
+                "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted",
+                activeTag === t.value && "bg-foreground text-background"
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {(activeCategory || activeMethod || activeTag || activeQuery) && (
+        <button
+          onClick={() => {
+            setQuery("");
+            router.push("/produtos");
+          }}
+          className="text-sm text-accent underline"
+        >
           Limpar filtros
         </button>
       )}

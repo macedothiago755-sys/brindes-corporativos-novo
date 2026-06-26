@@ -3,19 +3,33 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Conexão direta (sem pooler) usada apenas por migrações/introspecção —
+  // evita o timeout de advisory lock (P1002) do pooler do Neon.
+  // IMPORTANTE: DIRECT_URL precisa estar definido onde comandos `prisma`
+  // rodam (local e Vercel). O client em runtime continua usando DATABASE_URL.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
   ADMIN
-  SALES
+  OPERADOR
+  VISUALIZADOR
+}
+
+enum ProductStatus {
+  ATIVO
+  RASCUNHO
+  INDISPONIVEL
 }
 
 enum QuoteStatus {
   NOVO
   EM_ANALISE
   RESPONDIDO
+  APROVADO
+  AJUSTE_SOLICITADO
   FECHADO
   PERDIDO
 }
@@ -23,83 +37,348 @@ enum QuoteStatus {
 enum CustomizationMethod {
   GRAVACAO_LASER
   SILK_SCREEN
-  BORDADO
-  IMPRESSAO_UV
+  DIGITAL_UV
   TRANSFER
 }
 
+enum ImportJobStatus {
+  PENDENTE
+  EM_EXECUCAO
+  CONCLUIDO
+  CONCLUIDO_COM_ERROS
+  FALHOU
+}
+
+enum ImportedProductStatus {
+  IMPORTADO
+  ERRO
+  PROMOVIDO
+  IGNORADO
+}
+
+enum ProductObjective {
+  ONBOARDING
+  EVENTO
+  CLIENTE_VIP
+  FEIRA
+  PREMIACAO
+}
+
+enum ProductProfile {
+  ECONOMICO
+  INTERMEDIARIO
+  PREMIUM
+}
+
+enum PriceTier {
+  ENTRADA
+  MEDIO
+  ALTO
+}
+
+enum DeletionRequestStatus {
+  ABERTO
+  EM_ANALISE
+  CONCLUIDO
+}
+
+enum AuditAction {
+  ACCESS
+  EXPORT
+  DELETE
+  ANONYMIZE
+  VIEW
+}
+
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
+  id         String      @id @default(cuid())
+  name       String
+  email      String      @unique
+  password   String
+  role       Role        @default(ADMIN)
+  createdAt  DateTime    @default(now())
+  importJobs ImportJob[]
+  auditLogs  AuditLog[]
 }
 
 model Category {
-  id       String     @id @default(cuid())
-  name     String
-  slug     String     @unique
-  parentId String?
-  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children Category[] @relation("CategoryHierarchy")
-  products Product[]
+  id              String     @id @default(cuid())
+  name            String
+  slug            String     @unique
+  parentId        String?
+  parent          Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children        Category[] @relation("CategoryHierarchy")
+  products        Product[]
+  active          Boolean    @default(true)
+  order           Int        @default(0)
+  description     String?
+  metaTitle       String?
+  metaDescription String?
+
+  @@index([active])
 }
 
 model Post {
-  id            String   @id @default(cuid())
-  title         String
-  slug          String   @unique
-  excerpt       String
-  content       String
-  coverImage    String
-  tags          String[]
-  publishedAt   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String
+  coverImage  String
+  tags        String[]
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Product {
-  id                     String                @id @default(cuid())
-  name                   String
-  slug                   String                @unique
-  description            String
-  features               String[]
-  materials              String[]
-  colors                 String[]
-  idealFor               String[]
-  customizationMethods   CustomizationMethod[]
-  images                  String[]
-  minQty                 Int                   @default(50)
-  leadTimeDays           Int                   @default(15)
-  dimensions             String?
-  printArea              String?
-  sustainable            Boolean               @default(false)
-  premium                Boolean               @default(false)
-  featured               Boolean               @default(false)
-  categoryId             String
-  category               Category              @relation(fields: [categoryId], references: [id])
-  quoteItems             QuoteItem[]
-  createdAt              DateTime              @default(now())
-  updatedAt              DateTime              @updatedAt
+  id                   String                @id @default(cuid())
+  name                 String
+  slug                 String                @unique
+  sku                  String?               @unique
+  supplierCode         String?
+  brand                String?
+  status               ProductStatus         @default(RASCUNHO)
+  description          String
+  shortDescription     String?
+  benefits             String[]
+  features             String[]
+  materials            String[]
+  colors               String[]
+  /// Mapa nome-da-cor -> URL da imagem específica daquela cor, ex.: {"Azul": "https://.../azul.jpg"}.
+  colorImages          Json                  @default("{}")
+  tags                 String[]              @default([])
+  idealFor             String[]
+  customizationMethods CustomizationMethod[]
+  images               String[]
+  price                Float?
+  promoPrice           Float?
+  saleUnit             String?               @default("unidade")
+  minQty               Int                   @default(50)
+  leadTimeDays         Int                   @default(15)
+  shippingDays         Int?
+  dimensions           String?
+  printArea            String?
+  metaTitle            String?
+  metaDescription      String?
+  sustainable          Boolean               @default(false)
+  premium              Boolean               @default(false)
+  featured             Boolean               @default(false)
+  objectives           ProductObjective[]    @default([])
+  profile              ProductProfile?
+  priceTier            PriceTier?
+  margin               Float?
+  popularityScore      Int                   @default(0)
+  categoryId           String
+  category             Category              @relation(fields: [categoryId], references: [id])
+  attributes           ProductAttribute[]
+  quoteItems           QuoteItem[]
+  views                ProductView[]
+  solutions            SolutionProduct[]
+  kitItems             KitItem[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([supplierCode])
+}
+
+model Solution {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  title       String
+  description String
+  image       String?
+  objective   ProductObjective?
+  ctaLabel    String?
+  order       Int               @default(0)
+  products    SolutionProduct[]
+  kits        Kit[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model SolutionProduct {
+  id         String   @id @default(cuid())
+  solutionId String
+  solution   Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([solutionId, productId])
+}
+
+model Kit {
+  id                      String            @id @default(cuid())
+  name                    String
+  slug                    String            @unique
+  description             String?
+  image                   String?
+  objective               ProductObjective?
+  solutionId              String?
+  solution                Solution?         @relation(fields: [solutionId], references: [id])
+  active                  Boolean           @default(true)
+  manual                  Boolean           @default(true)
+  estimatedPricePerPerson Float?
+  items                   KitItem[]
+  quotes                  Quote[]
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+}
+
+model KitItem {
+  id                String  @id @default(cuid())
+  kitId             String
+  kit               Kit     @relation(fields: [kitId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product @relation(fields: [productId], references: [id])
+  quantityPerPerson Int     @default(1)
+  order             Int     @default(0)
+
+  @@index([kitId])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  quote     String
+  name      String
+  company   String
+  avatar    String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ClientLogo {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ProductAttribute {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  value     String
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
 }
 
 model Quote {
-  id              String       @id @default(cuid())
-  clienteNome     String
-  empresa         String
-  email           String
-  telefone        String
-  cidade          String?
-  observacoes     String?
-  objetivo        String?
-  prazo           String?
-  status          QuoteStatus  @default(NOVO)
-  items           QuoteItem[]
-  attachments     Attachment[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id                        String       @id @default(cuid())
+  clienteNome               String
+  empresa                   String
+  email                     String
+  telefone                  String
+  cidade                    String?
+  observacoes               String?
+  objetivo                  String?
+  prazo                     String?
+  status                    QuoteStatus  @default(NOVO)
+  kitId                     String?
+  kit                       Kit?         @relation(fields: [kitId], references: [id])
+  quantidadePessoas         Int?
+  orcamentoPorPessoa        Float?
+  couponCode                String?
+  consentObrigatorioAceito  Boolean      @default(false)
+  consentObrigatorioVersion String?
+  consentObrigatorioDate    DateTime?
+  consentMarketingAceito    Boolean      @default(false)
+  consentMarketingVersion   String?
+  consentMarketingDate      DateTime?
+  approvalToken             String?      @unique @default(cuid())
+  feedbackNotes             String?
+  viewCount                 Int          @default(0)
+  lastViewedAt              DateTime?
+  items                     QuoteItem[]
+  attachments               Attachment[]
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+
+  @@index([couponCode])
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  percent   Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Lead {
+  id                        String    @id @default(cuid())
+  nome                      String?
+  empresa                   String?
+  email                     String
+  telefone                  String
+  couponCode                String?
+  consentObrigatorioAceito  Boolean   @default(false)
+  consentObrigatorioVersion String?
+  consentObrigatorioDate    DateTime?
+  consentMarketingAceito    Boolean   @default(false)
+  consentMarketingVersion   String?
+  consentMarketingDate      DateTime?
+  anonymizedAt              DateTime?
+  createdAt                 DateTime  @default(now())
+
+  @@index([email])
+}
+
+model CookieConsent {
+  id                 String   @id @default(cuid())
+  sessionId          String
+  userId             String?
+  ipHash             String?
+  consentStatus      String
+  acceptedCategories String[] @default([])
+  policyVersion      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([sessionId])
+}
+
+model DataDeletionRequest {
+  id         String                @id @default(cuid())
+  email      String
+  telefone   String?
+  mensagem   String?
+  status     DeletionRequestStatus @default(ABERTO)
+  notasAdmin String?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id])
+  action     AuditAction
+  targetType String
+  targetId   String?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId])
+  @@index([targetType])
 }
 
 model QuoteItem {
@@ -109,6 +388,7 @@ model QuoteItem {
   productId      String
   product        Product               @relation(fields: [productId], references: [id])
   quantidade     Int
+  precoUnitario  Float?
   cores          String[]
   personalizacao String[]
   metodo         CustomizationMethod[]
@@ -122,4 +402,68 @@ model Attachment {
   url       String
   filename  String
   createdAt DateTime @default(now())
+}
+
+model Supplier {
+  id         String      @id @default(cuid())
+  name       String
+  baseUrl    String
+  adapterKey String
+  importJobs ImportJob[]
+  createdAt  DateTime    @default(now())
+}
+
+model ImportJob {
+  id               String            @id @default(cuid())
+  supplierId       String
+  supplier         Supplier          @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  categoryUrl      String
+  status           ImportJobStatus   @default(PENDENTE)
+  productsFound    Int               @default(0)
+  productsImported Int               @default(0)
+  productsSkipped  Int               @default(0)
+  productsFailed   Int               @default(0)
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  requestedById    String?
+  requestedBy      User?             @relation(fields: [requestedById], references: [id])
+  products         ImportedProduct[]
+  errors           ImportError[]
+  createdAt        DateTime          @default(now())
+
+  @@index([requestedById])
+}
+
+model ImportedProduct {
+  id                String                @id @default(cuid())
+  importJobId       String
+  importJob         ImportJob             @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  sourceUrl         String
+  nome              String
+  codigo            String?
+  sku               String?
+  categoria         String?
+  marca             String?
+  descricaoCurta    String?
+  descricaoLonga    String?
+  descricaoIA       String?
+  preco             Float?
+  dadosTecnicos     Json                  @default("{}")
+  imagemPrincipal   String?
+  imagens           Json                  @default("[]")
+  status            ImportedProductStatus @default(IMPORTADO)
+  promotedProductId String?
+  createdAt         DateTime              @default(now())
+
+  @@index([codigo])
+}
+
+model ImportError {
+  id          String    @id @default(cuid())
+  importJobId String
+  importJob   ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  sourceUrl   String?
+  produto     String?
+  motivo      String
+  createdAt   DateTime  @default(now())
 }

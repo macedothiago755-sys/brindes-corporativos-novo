@@ -1,73 +1,45 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
-import { ProductCard } from "@/components/site/product-card";
-import { FilterSidebar } from "@/components/site/filter-sidebar";
-import type { CustomizationMethod } from "@prisma/client";
+import { permanentRedirect } from "next/navigation";
+import { CatalogView, resolveHeading } from "@/components/site/catalog-view";
+import { categoryPath } from "@/lib/routes";
 
-export const metadata: Metadata = {
-  title: "Catálogo de Brindes Corporativos",
-  description: "Explore nosso catálogo de brindes corporativos personalizados e solicite um orçamento sob medida.",
-};
+type ProductsSearchParams = { categoria?: string; metodo?: string; tag?: string; objetivo?: string; q?: string };
 
-export const dynamic = "force-dynamic";
+// Preserva os demais filtros ao redirecionar a URL antiga de categoria para a nova.
+function buildQuery(params: Record<string, string | undefined>) {
+  const sp = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) sp.set(key, value);
+  }
+  const qs = sp.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<ProductsSearchParams>;
+}): Promise<Metadata> {
+  const { categoria, objetivo } = await searchParams;
+  // URL de categoria migrou para /categoria/[slug]; aponta o canonical para lá.
+  if (categoria) return { alternates: { canonical: categoryPath(categoria) } };
+  const title = resolveHeading(null, objetivo);
+  const description = `${title}. Personalize com a marca da sua empresa e receba uma proposta sob medida.`;
+  return { title, description, alternates: { canonical: "/produtos" } };
+}
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string; metodo?: string }>;
+  searchParams: Promise<ProductsSearchParams>;
 }) {
-  const { categoria, metodo } = await searchParams;
+  const { categoria, metodo, tag, objetivo, q } = await searchParams;
 
-  let categoryIds: string[] | undefined;
+  // URLs antigas /produtos?categoria=X consolidam (308) na rota canônica limpa,
+  // preservando os demais filtros aplicados.
   if (categoria) {
-    const category = await prisma.category.findUnique({
-      where: { slug: categoria },
-      include: { children: true },
-    });
-    if (category) {
-      categoryIds = category.children.length
-        ? [category.id, ...category.children.map((c) => c.id)]
-        : [category.id];
-    }
+    permanentRedirect(`${categoryPath(categoria)}${buildQuery({ metodo, tag, objetivo, q })}`);
   }
 
-  const [products, topCategories] = await Promise.all([
-    prisma.product.findMany({
-      where: {
-        ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
-        ...(metodo ? { customizationMethods: { has: metodo as CustomizationMethod } } : {}),
-      },
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.category.findMany({
-      where: { parentId: null },
-      include: { children: { orderBy: { name: "asc" } } },
-      orderBy: { name: "asc" },
-    }),
-  ]);
-
-  return (
-    <div className="container-premium py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Catálogo de produtos</h1>
-      <p className="mt-2 text-muted-foreground">
-        Navegue pelos produtos, escolha o brinde ideal e solicite um orçamento personalizado.
-      </p>
-
-      <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <FilterSidebar categories={topCategories} />
-
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
-          {products.map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
-          {products.length === 0 && (
-            <p className="col-span-full text-sm text-muted-foreground">
-              Nenhum produto encontrado para os filtros selecionados.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return <CatalogView category={null} metodo={metodo} tag={tag} objetivo={objetivo} search={q?.trim()} />;
 }
