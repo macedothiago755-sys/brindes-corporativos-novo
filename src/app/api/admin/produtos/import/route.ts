@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import * as Sentry from "@sentry/nextjs";
 import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
@@ -167,6 +168,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A planilha está vazia ou sem cabeçalho válido." }, { status: 400 });
   }
 
+  try {
   // Cache de categorias por nome para resolver "Categoria" → categoryId.
   const categories = await prisma.category.findMany({ select: { id: true, name: true } });
   const categoryByName = new Map(
@@ -232,32 +234,56 @@ export async function POST(request: Request) {
       errors.push(`Linha ${lineNo}: categoria "${data.categoryName}" não encontrada. Categoria não alterada.`);
     }
 
-    await prisma.product.update({
-      where: { id: existing.id },
-      data: {
-        name: data.name,
-        ...(data.sku !== undefined ? { sku: data.sku } : {}),
-        ...(data.supplierCode !== undefined ? { supplierCode: data.supplierCode } : {}),
-        ...(data.brand !== undefined ? { brand: data.brand } : {}),
-        ...(data.status ? { status: data.status } : {}),
-        ...(categoryId ? { categoryId } : {}),
-        price: data.price ?? null,
-        ...(data.minQty ? { minQty: data.minQty } : {}),
-        colors: data.colors,
-        materials: data.materials,
-        tags: data.tags,
-        metaTitle: data.metaTitle ?? null,
-        metaDescription: data.metaDescription ?? null,
-        objectives: data.objectives,
-        profile: data.profile ?? null,
-        priceTier: data.priceTier ?? null,
-      },
-    });
-    updated++;
+    // Protege cada linha: um erro de banco (ex.: SKU duplicado) vira erro
+    // reportado e segue para a próxima, em vez de derrubar toda a importação.
+    try {
+      await prisma.product.update({
+        where: { id: existing.id },
+        data: {
+          name: data.name,
+          ...(data.sku !== undefined ? { sku: data.sku } : {}),
+          ...(data.supplierCode !== undefined ? { supplierCode: data.supplierCode } : {}),
+          ...(data.brand !== undefined ? { brand: data.brand } : {}),
+          ...(data.status ? { status: data.status } : {}),
+          ...(categoryId ? { categoryId } : {}),
+          price: data.price ?? null,
+          ...(data.minQty ? { minQty: data.minQty } : {}),
+          colors: data.colors,
+          materials: data.materials,
+          tags: data.tags,
+          metaTitle: data.metaTitle ?? null,
+          metaDescription: data.metaDescription ?? null,
+          objectives: data.objectives,
+          profile: data.profile ?? null,
+          priceTier: data.priceTier ?? null,
+        },
+      });
+      updated++;
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (code === "P2002") {
+        const target = (e as { meta?: { target?: string[] } }).meta?.target?.join(", ") ?? "campo único";
+        errors.push(`Linha ${lineNo}: valor duplicado em ${target} (já usado por outro produto). Linha ignorada.`);
+      } else {
+        const msg = e instanceof Error ? e.message : "erro desconhecido";
+        errors.push(`Linha ${lineNo}: falha ao salvar (${msg}). Linha ignorada.`);
+      }
+      skipped++;
+    }
   }
 
   revalidatePath("/admin/produtos");
   revalidateTag(CACHE_TAGS.products, "max");
 
   return NextResponse.json({ updated, skipped, errors });
+  } catch (e) {
+    // Erro inesperado durante o processamento: reporta ao Sentry e devolve
+    // JSON com a causa real, em vez de um 500 opaco.
+    Sentry.captureException(e);
+    const msg = e instanceof Error ? e.message : "erro desconhecido";
+    return NextResponse.json(
+      { error: `Falha ao processar a planilha: ${msg}` },
+      { status: 500 }
+    );
+  }
 }
